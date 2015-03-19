@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# -*- bash -*-
+#
+#
+action="$1"
+shift
+set -u -e -o pipefail
+
+case "$action" in
+
+  "help")
+    echo " ====================================================="
+    echo ""
+    echo " $ turu    watch"
+    echo ""
+    echo " ====================================================="
+    echo ""
+    exit 0
+    ;;
+
+  "watch")
+    echo "=== Watching: "
+    inotifywait -q --exclude .git/ -e close_write,close -m -r .  | while read CHANGE
+    do
+      dir=$(echo "$CHANGE" | cut -d' ' -f 1)
+      op=$(echo "$CHANGE" | cut -d' ' -f 2)
+      file=$(echo "$CHANGE" | cut -d' ' -f 3)
+      path="${dir}$file"
+
+      if [[ ( ! "$op" =~ "NOWRITE" ) && ( "$op" =~ "CLOSE" || "$op" =~ "WRITE" )  && ! -z "$file" ]]
+      then
+        echo ""
+        if [[ "$file" == *.js* ]]; then
+          echo ""
+          echo "=== Runninig jshint on $path: $CHANGE"
+          (jshint "$path" && echo "No errors.") || true
+        fi
+
+        if [[ "$path" == *bin/* ]]; then
+          echo ""
+          echo "=== Restarting:"
+          exec $path "watch"
+        fi
+      fi # === if file op
+
+    done
+    ;;
+
+  *)
+    echo "Unknown option: $action" 1>&2
+    exit 1
+    ;;
+
+esac # === $action
+
+
