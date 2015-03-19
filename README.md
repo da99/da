@@ -17,7 +17,17 @@ on('load', ['news', 'good'], {hasClass: 'append'}, function (data) {
 });
 
 on('load', ['news', 'bad'], function (data) {
-  return null || undefined; # ... to stop processing
+  return undefined;       // ... to stop processing
+});
+
+var is_empty_string = function (data) {
+  if (!_.isString(data))
+    return undefined;     // ... to skip this;
+  return _.isEmpty(data); // A boolean value has to be returned.
+};
+
+on(['news', 'bad'], is_empty_string, function (data) {
+    // ...do your data processing
 });
 
 ```
