@@ -12,6 +12,7 @@ describe('Tufu', function () {
   it('runs the code on a match', function () {
     var r = 0;
     on('something', function () { r = 5; return true; });
+
     post('something');
     expect(r).toEqual(5);
   }); // === it runs the code
@@ -19,16 +20,22 @@ describe('Tufu', function () {
   it('runs "not found" when no matcher is found', function () {
     var r = 0;
     on('not found', function () { r = 10; return true;  });
+
     post('something');
     expect(r).toEqual(10);
   }); // === it runs the code
 
-  it('matches objects', function () {
-    var r = false;
-    on({harry:'Sally', sam:'Diane'}, function () { r = 'found'; return true;});
-    post({harry:'Sally', sam:'Diane', scott:'Jean Grey'});
-    expect(r).toEqual('found');
-  });
+  it('runs funcs on any match', function () {
+    var r = [];
+    function add(i) {
+      return function () { r.push(i); }
+    }
+    on(['news'],          add(1));
+    on(['news', 'hello'], add(2));
+    on(['news', 'hello'], add(3));
+    post('news', 'hello');
+    expect(r).toEqual([2,3]);
+  }); // === it runs funcs on any match
 
   it('matches on String, Array, Object', function () {
     var r = false;
@@ -38,15 +45,25 @@ describe('Tufu', function () {
     });
 
     post('news', ['good','happy'], {read: 7, comments: 9, body: 'happy news'});
-
     expect(r).toEqual(true);
-
   }); // === it matches on String, Array, Object
 
 }); // === describe Tufu =================
 
+describe('Object matching:', function () {
 
-describe('Array matching', function () {
+  it('matches objects', function () {
+    var r = false;
+    on({harry:'Sally', sam:'Diane'}, function () { r = 'found'; return true;});
+    post({harry:'Sally', sam:'Diane', scott:'Jean Grey'});
+    expect(r).toEqual('found');
+  });
+
+}); // === describe Object matching =================
+
+describe('Array matching:', function () {
+
+  beforeEach(Turu.reset);
 
   it('matches on Array', function () {
     var r = false;
@@ -80,6 +97,8 @@ describe('Array matching', function () {
 
 
 describe('Custom Matchers', function () {
+
+  beforeEach(Turu.reset);
 
   it('matches when returns true', function () {
     var r = false;

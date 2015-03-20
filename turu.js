@@ -84,43 +84,24 @@ var Turu = {};
   }; // === func Turu.on
 
   Turu.post = function () {
-    var stack = [_.toArray(arguments)];
-    var data, act, result, act_i;
-    var act_found;
-    var limit = 1000;
-    var limit_count = 0;
+    var data      = _.toArray(arguments);
+    var act_found = false;
 
-    while (!_.isEmpty(stack)) {
-      limit_count = limit_count + 1;
-      if (limit_count >= limit)
-        throw new Error('WHILE loop ran too many times');
-      data   = stack.shift();
-      act_found = false;
-      act_i     = 0;
-      while (act_i < actions.length) {
-        act = actions[act_i];
-        if (is_action_for_data(act, data)) {
-          result = run_action_on_data(act, data);
+    _.each(actions, function (act) {
+      if (!is_action_for_data(act, _.clone(data)))
+        return;
 
-          if (result === null)
-            throw new Error("Invalid return value: " + inspect(result) + " from: " + inspect(act.matchers) + " data: " + inspect(data));
+      run_action_on_data(act, _.clone(data));
+      act_found = true;
+    }); // == each
 
-          if (result !== undefined)
-            act_found = true;
-
-          if (is_request(result))
-            stack.shift(result);
-        }
-        act_i = act_i + 1;
+    if (!act_found) {
+      if (_.isEqual(['not found', _.last(data)], data))
+        throw new Error('No Turu action found for: ' + inspect(data));
+      else {
+        Turu.post('not found', data);
       }
-
-      if (!act_found) {
-        if (_.isEqual(['not found', _.last(data)], data))
-          throw new Error('No Turu action found for: ' + inspect(_.rest(data)));
-        else
-          stack.unshift(['not found', data]);
-      }
-    } // === while !_.isEmpty(stack)
+    } // == if
 
     return Turu;
   }; // === func Turu.post
