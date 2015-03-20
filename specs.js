@@ -136,11 +136,17 @@ describe('inner on:', function () {
 
     var r = [];
 
-    on('news', function (data) {
+    function is(tag) {
+      return function (doc, meta) {
+        return doc.tags && doc.tags[meta.nested_ons] === tag;
+      };
+    }; // === func news
+
+    on('news', function () {
       r.push('news');
-      on('good', function () {
+      on(is('good'), function () {
         r.push('good');
-        on('very', function () { r.push('very'); });
+        on(is('very'), function () { r.push('very'); });
       });
     }); // === on
 

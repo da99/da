@@ -35,17 +35,15 @@ var Turu = {
   var is_running = false;
 
   function is_action_for_data(action) {
-    log(posts);
     var arr_of_data = _.last(posts).data;
     var result = every(action.matchers, function (m) {
       if (_.isString(m)){
-        return _.detect(arr_of_data, function (d) {
-          return _.isString(d) && d === m;
-        });
+        return _.includes(arr_of_data, m);
 
       } else if (_.isArray(m)) {
+        var sorted_m = m.sort();
         return _.detect(arr_of_data, function (data) {
-          return _.isArray(data) && _.isEqual(m.sort(), data.sort());
+          return _.isArray(data) && _.isEqual(sorted_m, data.sort());
         });
 
       } else if (_.isPlainObject(m)) {
@@ -54,7 +52,9 @@ var Turu = {
         });
 
       } else if (_.isFunction(m)) {
-        return _.detect(arr_of_data, m);
+        return _.detect(arr_of_data, function (d) {
+          return !_.isArray(d) && _.isObject(d) && m(d, _.last(posts));
+        });
       } else
         throw new Error("Unknown value for matching: " + typeof m);
     });
@@ -95,7 +95,9 @@ var Turu = {
 
     is_running = true;
     while (!_.isEmpty(posts)) {
+      _.last(posts).nested_ons += 1;
       run_post();
+      _.last(posts).nested_ons -= 1;
       posts.pop();
     }
     is_running = false;
@@ -121,11 +123,11 @@ var Turu = {
       return Turu;
     }
 
+    _.last(posts).nested_ons += 1;
     if (is_action_for_data(act)) {
-      _.last(posts).on_count += 1;
       run_action_on_data(act);
-      _.last(posts).on_count -= 1;
     }
+    _.last(posts).nested_ons -= 1;
 
     return Turu;
   }; // === func Turu.on ===
@@ -136,7 +138,7 @@ var Turu = {
       post      : true,
       actions   : actions,
       data      : _.toArray(arguments),
-      nested_on : -1,
+      nested_ons : -1,
     });
 
     run();
