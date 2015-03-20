@@ -1,22 +1,18 @@
 "use strict";
 /* jshint undef: true, unused: true */
-/* global _ */ 
+/* global _, log */ 
 /* exported is_numeric */ 
 
-var Turu = {};
+var Turu = {
+  posts: []
+};
 
 // === Start scope =======================================
 (function () {
 
-  function log() {
-    if (window.console)
-      console['log'].apply(console, arguments);
-  }
-
-  function is_numeric(val) {
-    return _.isNumber(val) && !_.isNaN(val);
-  }
-
+  // ==============================================================
+  // === Start of helper functions ================================
+  // ==============================================================
   function every(val, func) {
     if (!_.isArray(val))
       throw new Error("Value is not an array: " + typeof val);
@@ -27,23 +23,20 @@ var Turu = {};
     return _.every(val, func);
   }
 
-  function array_in_array(small, big) {
-    if (!_.isArray(small))
-      throw new Error("Invalid data type for small array: " + inspect(small));
-    if (!_.isArray(big))
-      throw new Error("Invalid data type for big array: " + inspect(big));
-    return every(small, function (v) { return _.includes(big, v); });
-  }
-
   function inspect(o) {
     return '(' + typeof(o) + ') "' + o + '"' ;
   }
+  // ==============================================================
+  // === End of helper functions ==================================
+  // ==============================================================
 
-  function is_request(o) {
-    return _.isString(o) || _.isPlainObject(o) || _.isArray(o);
-  }
+  var actions = [];
+  var posts   = [];
+  var is_running = false;
 
-  function is_action_for_data(action, arr_of_data) {
+  function is_action_for_data(action) {
+    log(posts);
+    var arr_of_data = _.last(posts).data;
     var result = every(action.matchers, function (m) {
       if (_.isString(m)){
         return _.detect(arr_of_data, function (d) {
@@ -69,47 +62,86 @@ var Turu = {};
     return result;
   }
 
-  function run_action_on_data(act, data) {
-    return act.func(data);
+  function run_action_on_data(act) {
+    var data = _.last(posts).data;
+    return act.func.apply(data, [data]);
   }
 
-  var actions = [];
+  function run() {
+    if (is_running) { return Turu; }
+
+
+    function run_post() {
+      var post      = _.last(posts);
+      var data      = post.data;
+      var act_found = false;
+
+      _.each(actions, function (act) {
+        if (!is_action_for_data(act, data))
+          return;
+
+        run_action_on_data(act, data);
+        act_found = true;
+      }); // == each
+
+      if (!act_found) {
+        if (_.isEqual(['not found', _.last(data)], data))
+          throw new Error('No Turu action found for: ' + inspect(data));
+        else {
+          Turu.post('not found', data);
+        }
+      } // == if
+    }
+
+    is_running = true;
+    while (!_.isEmpty(posts)) {
+      run_post();
+      posts.pop();
+    }
+    is_running = false;
+
+    return Turu;
+  }
+
+
+  Turu.reset = function () {
+    actions = [];
+    posts   = [];
+    return Turu;
+  }; // === func reset
+
 
   Turu.on = function () {
     var args = _.toArray(arguments);
     var func = args.pop();
-    actions.push({matchers: args, func: func});
+    var act  = {matchers: args, func: func};
+
+    if (_.isEmpty(posts)) {
+      actions.push(act);
+      return Turu;
+    }
+
+    if (is_action_for_data(act)) {
+      _.last(posts).on_count += 1;
+      run_action_on_data(act);
+      _.last(posts).on_count -= 1;
+    }
 
     return Turu;
-  }; // === func Turu.on
+  }; // === func Turu.on ===
+
 
   Turu.post = function () {
-    var data      = _.toArray(arguments);
-    var act_found = false;
+    posts.unshift({
+      post      : true,
+      actions   : actions,
+      data      : _.toArray(arguments),
+      nested_on : -1,
+    });
 
-    _.each(actions, function (act) {
-      if (!is_action_for_data(act, _.clone(data)))
-        return;
+    run();
+  }; // === func Turu.post ===
 
-      run_action_on_data(act, _.clone(data));
-      act_found = true;
-    }); // == each
-
-    if (!act_found) {
-      if (_.isEqual(['not found', _.last(data)], data))
-        throw new Error('No Turu action found for: ' + inspect(data));
-      else {
-        Turu.post('not found', data);
-      }
-    } // == if
-
-    return Turu;
-  }; // === func Turu.post
-
-  Turu.reset = function () {
-    actions = [];
-    return Turu;
-  }; // function
 
 })();
 // === End scope =========================================

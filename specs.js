@@ -128,3 +128,25 @@ describe('Custom Matchers', function () {
   }); // === it does not match when func returns false
 
 }); // === describe Custom Matchers =================
+
+
+describe('inner on:', function () {
+
+  it('runs :on defined in callbacks based on matches', function () {
+
+    var r = [];
+
+    on('news', function (data) {
+      r.push('news');
+      on('good', function () {
+        r.push('good');
+        on('very', function () { r.push('very'); });
+      });
+    }); // === on
+
+    post('news', {tags: ['news', 'good', 'very']});
+
+    expect(r).toEqual(['news', 'good', 'very']);
+  }); // === it runs :on defined in callbacks based on matches
+
+}); // === describe inner on =================
