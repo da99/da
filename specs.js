@@ -5,7 +5,7 @@
 var on   = Turu.on;
 var post = Turu.post;
 
-describe('Tufu', function () {
+describe('Tufu:', function () {
 
   beforeEach(Turu.reset);
 
@@ -19,23 +19,11 @@ describe('Tufu', function () {
 
   it('runs "not found" when no matcher is found', function () {
     var r = 0;
-    on('not found', function () { r = 10; return true;  });
+    on('not found', function (data) { r = data.origin; return true;  });
 
     post('something');
-    expect(r).toEqual(10);
+    expect(r).toEqual(['something']);
   }); // === it runs the code
-
-  it('runs funcs on any match', function () {
-    var r = [];
-    function add(i) {
-      return function () { r.push(i); }
-    }
-    on(['news'],          add(1));
-    on(['news', 'hello'], add(2));
-    on(['news', 'hello'], add(3));
-    post('news', 'hello');
-    expect(r).toEqual([2,3]);
-  }); // === it runs funcs on any match
 
   it('matches on String, Array, Object', function () {
     var r = false;
@@ -52,14 +40,52 @@ describe('Tufu', function () {
 
 describe('Object matching:', function () {
 
-  it('matches objects', function () {
+  beforeEach(Turu.reset);
+
+  it('throws Error if more than one Object', function () {
     var r = false;
     on({harry:'Sally', sam:'Diane'}, function () { r = 'found'; return true;});
-    post({harry:'Sally', sam:'Diane', scott:'Jean Grey'});
-    expect(r).toEqual('found');
+    expect(function () {
+      post({harry:'Sally', sam:'Diane', scott:'Jean Grey'}, {harry:'Sally', sam:'Diane', scott:'Jean Grey'});
+    }).toThrow(new Error('Only one plain object allowed to be POST-ed.'));
   });
 
+  it('passes object to custom matcher', function () {
+    var r = [];
+    function good(data) {
+      return _.includes(data.tags, 'good');
+    }
+    on('news', good, function () {
+      r.push("good news");
+    });
+
+    post('news', {headline:'Mets Loose', tags: ['good', 'great']});
+    expect(r).toEqual(['good news']);
+  }); // === it passes object to custom matcher
+
 }); // === describe Object matching =================
+
+describe('String matching:', function () {
+
+  beforeEach(Turu.reset);
+
+  it('matches if all the strings are also in the POST, but in a different order', function () {
+    var r = [];
+    on('movie', 'harry', 'sally', function () { r.push('When Harry Met Sally'); });
+    post('sally', 'movie', 'harry');
+
+    expect(r).toEqual(['When Harry Met Sally']);
+  }); // === it
+
+  it('does not match if POST-ed values contains unknown Strings', function () {
+    var r = [];
+    on('movie', '2001', function () { r.push('Dave'); });
+    expect(function () {
+      post('movie', '2001', '2010');
+    }).toThrow(new Error('No Turu action found for: (string) "movie", (string) "2001", (string) "2010"'));
+  }); // === it does not match if POST-ed values contains unknown Strings
+
+}); // === describe String matching =================
 
 describe('Array matching:', function () {
 
@@ -79,19 +105,22 @@ describe('Array matching:', function () {
 
   it('does not match if posted Array has extra values', function () {
     var r = [];
-    on(['good', 'happy'], function () {
-      r.push('one');
-      return r;
-    });
-    on(['good', 'happy', 'positive'], function () {
-      r.push('positive');
-      return r;
-    });
+    on(['good', 'happy'],             function () { r.push('one'); });
+    on(['good', 'happy', 'positive'], function () { r.push('positive'); });
 
     post(['good','happy', 'positive']);
 
     expect(r).toEqual(['positive']);
   }); // === it does not match if posted Array has extra values
+
+  it('does not match if POST-ed values include a mix of known, unknown Arrays', function () {
+    var r = [];
+    on(['good', 'happy'], function () { r.push('one'); });
+
+    expect(function () {
+      post(['good', 'happy'], ['one']);
+    }).toThrow(new Error("No Turu action found for: (object) \"good,happy\", (object) \"one\""));
+  }); // === it does not match if POST-ed values include a mix of known, unknown Arrays
 
 }); // === describe Array matching =================
 
@@ -140,7 +169,7 @@ describe('inner on:', function () {
       return function (doc, meta) {
         return doc.tags && doc.tags[meta.nested_ons] === tag;
       };
-    }; // === func news
+    } // === func news
 
     on('news', function () {
       r.push('news');

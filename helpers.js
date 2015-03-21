@@ -1,5 +1,14 @@
 "use strict";
 
+function every(val, func) {
+  if (!_.isArray(val))
+    throw new Error("Value is not an array: " + typeof val);
+
+  if (_.isEmpty(val))
+    return false;
+
+  return _.every(val, func);
+}
 
 function array_in_array(small, big) {
   if (!_.isArray(small))
