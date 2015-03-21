@@ -159,7 +159,9 @@ describe('Custom Matchers', function () {
 }); // === describe Custom Matchers =================
 
 
-describe('inner on:', function () {
+describe('nested on:', function () {
+
+  beforeEach(Turu.reset);
 
   it('runs :on defined in callbacks based on matches', function () {
 

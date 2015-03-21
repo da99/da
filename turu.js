@@ -51,7 +51,12 @@ var Turu = {
   function is_action_for_data(action) {
 
     var is_found    = true;
-    var posted      = _.last(posts).origin;
+    var meta        = _.last(posts);
+    var posted      = meta.origin;
+
+    if (meta.nested_ons > 0) {
+      posted = objects(posted);
+    }
 
     var strs        = strings(action.matchers);
     var posted_strs = strings(posted);
