@@ -1,0 +1,28 @@
+{
+  "name": "turu",
+  "main": "turu.js",
+  "version": "2.0.0",
+  "authors": [
+    "da99 <i-hate-spam-1234567@mailinator.com>"
+  ],
+  "description": "Client-side helper to run functions based on an Object.",
+  "moduleType": [
+    "globals"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/da99/turu",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "vendor/",
+    "test",
+    "tests"
+  ],
+  "devDependencies": {
+    "jasmine": "~2.3.4"
+  },
+  "dependencies": {
+    "lodash": "~3.10.0"
+  }
+}
