@@ -1,6 +1,9 @@
 # turu
 Run functions in the browser based on an Object (kv structure).
 
+Don't use this because you probably want async features, which
+is not included here.
+
 
 # Example:
 
@@ -9,7 +12,7 @@ Run functions in the browser based on an Object (kv structure).
 <script src="../path/to/turu.js"></script>
 
 Turu.push(function (data) {
-  if (data.not_like({action: "hello"}))
+  if (!_.isMatch(data, {action: "hello"}))
     return;
 
    # ... do some stuff
