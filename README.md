@@ -1,34 +1,29 @@
 # turu
-It let's you fly around the DOM. (In other words, you won't need it. But, I do.)
+Run functions in the browser based on an Object (kv structure).
 
-# NOTE:
-
-It's not ready yet.
 
 # Example:
 
 ```javascript
+
 <script src="../path/to/turu.js"></script>
 
-var on = Turu.on;
+Turu.push(function (data) {
+  if (data.not_like({action: "hello"}))
+    return;
 
-on('load', ['news', 'good'], {hasClass: 'append'}, function (data) {
-  return someValueForFurtherProcessing;
+   # ... do some stuff
+   data.new_val = 5;
+   data.old_val = undefined;
+   return data;
 });
 
-on('load', ['news', 'bad'], function (data) {
-  return undefined;       // ... to stop processing
-});
+Turu.push(function () {});
+Turu.push(function () {});
+Turu.push(function () {});
+Turu.push(function () {});
 
-var is_empty_string = function (data) {
-  if (!_.isString(data))
-    return undefined;     // ... to skip this;
-  return _.isEmpty(data); // A boolean value has to be returned.
-};
-
-on(['news', 'bad'], is_empty_string, function (data) {
-    // ...do your data processing
-});
+Turu.run({action: 'hello', old_val: 5});
 
 ```
 
