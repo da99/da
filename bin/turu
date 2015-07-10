@@ -20,7 +20,7 @@ case "$action" in
 
   "watch")
     echo "=== Watching: "
-    inotifywait -q --exclude .git/ -e close_write,close -m -r .  | while read CHANGE
+    inotifywait --quiet --exclude .git/ --event close_write --monitor -r .  | while read CHANGE
     do
       dir=$(echo "$CHANGE" | cut -d' ' -f 1)
       op=$(echo "$CHANGE" | cut -d' ' -f 2)
@@ -33,7 +33,7 @@ case "$action" in
         if [[ "$file" == *.js* ]]; then
           echo ""
           echo "=== Runninig jshint on $path: $CHANGE"
-          (jshint "$path" && echo "No errors.") || true
+          (node_modules/jshint/bin/jshint "$path" && echo "No errors.") || true
         fi
 
         if [[ "$path" == *bin/* ]]; then
