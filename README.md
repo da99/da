@@ -1,3 +1,6 @@
+# Obsolete
+Replaced by [dum\_dum\_boom\_boom](https://github.com/da99/dum_dum_boom_boom)
+
 # turu
 Run functions in the browser based on an Object (kv structure).
 
