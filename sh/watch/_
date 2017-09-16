@@ -1,0 +1,33 @@
+#!/usr/bin/env zsh
+#
+# === {{CMD}}
+#
+set -u -e -o pipefail
+
+local +x ORIGINAL_ARGS="$@"
+PATH="$PATH:$THIS_DIR/../process/bin"
+PATH="$PATH:$THIS_DIR/../sh_color/bin"
+
+case "$(echo $@)" in
+
+  "")
+    html.cr watch run
+    process watch "-r src -r specs" "html.cr watch run"
+    ;;
+
+  run)
+    sh_color ORANGE "=== {{Running}}..."
+    cd "$THIS_DIR"
+    mkdir -p tmp
+    my_crystal crystal build -o tmp/specs.cr specs/specs.cr
+    tmp/specs.cr
+    sh_color GREEN "=== {{DONE}} ==="
+    ;;
+
+  *)
+    echo "!!! Unknown arguments: $ORIGINAL_ARGS" >&2
+    exit 1
+    ;;
+
+esac
+
