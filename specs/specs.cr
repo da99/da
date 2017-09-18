@@ -14,3 +14,20 @@ io = HTML.to_io do
 end
 
 puts io
+
+
+
+
+# =============================================================================
+
+def it(*args)
+end
+def it(*args, &blok)
+end
+
+it "raises error if opening another tag during attribute write" do
+  HTML.to_io do
+    span
+    span
+  end
+end

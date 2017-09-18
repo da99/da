@@ -27,22 +27,22 @@ class HTML
 
   def initialize
     @content = IO::Memory.new
-    @has_open_tag = false
+    @attrs_being_written = false
   end # === def initialize
 
-  def open_tag?
-    @has_open_tag
-  end # === def open_tag?
+  def open_attrs?
+    @attrs_being_written
+  end # === def open_attrs?
 
-  def open_tag
-    raise Exception.new("Tag has not been closed.") if open_tag?
-    @has_open_tag = true
+  def open_tag(name : Symbol)
+    raise Exception.new("Opening tags during attrs being written.") if open_attrs?
+    @content << "\n<" << name.to_s
+    @attrs_being_written = true
     self
   end # === def open_tag
 
   def close_tag
-    raise Exception.new("Tag is already closed.") if !open_tag?
-    @has_open_tag = false
+    @attrs_being_written = false
     self
   end # === def close_tag
 

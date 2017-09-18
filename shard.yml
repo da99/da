@@ -2,9 +2,6 @@ name: html.cr
 version: 0.1.0
 version: 0.1.0
 dependencies:
-  exit_on_error:
-    github: da99/exit_on_error
-    branch: master
-  shell_out:
-    github: da99/shell_out
+  mu-clean:
+    github: da99/clean.cr
     branch: master

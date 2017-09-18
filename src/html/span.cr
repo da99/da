@@ -3,7 +3,6 @@ class HTML
   class SPAN
 
     include Element::Has_Content
-
     include Id_::Attr
     include Class_::Attr
 
@@ -12,9 +11,7 @@ class HTML
     end # === def tag_name
 
     def initialize(@doc : HTML)
-      @doc.open_tag
-      @doc << "\n<"
-      @doc << tag_name.to_s
+      @doc.open_tag(tag_name)
       @has_body = false
     end # === def initialize
 
