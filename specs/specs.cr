@@ -1,9 +1,16 @@
 
 require "../src/html.cr"
 
-puts(HTML.to_html do
-  span
-    .id_("main_msg")
-    .class_("loud")
-    .close("hello")
-end)
+class HTML
+  include SPAN::Markup
+end # === class HTML
+
+io = HTML.to_io do
+
+  span { "yo" }
+  span.class_("shy") { "" }
+  span.id_("main_msg").class_("loud") { "hello" }
+
+end
+
+puts io
