@@ -1,7 +1,7 @@
 
 require "../src/da_html"
-
 require "../src/da_html/tags/*"
+require "spec"
 
 class Test_HTML
   include DA_HTML::SPAN
@@ -20,33 +20,25 @@ class Test_HTML
   end
 end # === class HTML
 
-io = Test_HTML.render do
+# puts Test_HTML.render {
 
-  p { "hello" }
-  span {
-    p { "yo" }
-  }
-  span("shy") { "" }
+#   span {
+#     p { "yo" }
+#   }
+#   span("shy") { "" }
 
-  span("#main_msg loud") { "hello" }
+#   span("#main_msg loud") { "hello" }
 
-end
+# }
 
-puts io
+macro should_eq(actual, expected)
+  {{actual}}.should eq({{expected}})
+end # === macro should_eq
+
+it "renders p tag" do
+  actual = Test_HTML.render { p { "hello" } }
+  should_eq actual, "<p>hello</p>"
+end # === it "renders p tag"
 
 
 
-
-# =============================================================================
-
-def it(*args)
-end
-def it(*args, &blok)
-end
-
-it "raises error if opening another tag during attribute write" do
-  HTML.to_io do
-    span
-    span
-  end
-end

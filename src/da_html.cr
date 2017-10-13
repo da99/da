@@ -61,7 +61,7 @@ module DA_HTML
     def render_closed_tag!(tag_name : String, *attrs)
       close_attrs
 
-      @io << "\n<" << tag_name
+      @io << "<" << tag_name
       @attrs_open = true
 
       attrs.each { |pair|
@@ -73,7 +73,7 @@ module DA_HTML
 
     def render_tag!(tag_name : String, raw_content : String)
       close_attrs
-      @io << "\n<" << tag_name << ">"
+      @io << "<" << tag_name << ">"
       render_text!(raw_content)
       @io << "</" << tag_name << ">"
     end # === def render!
@@ -81,7 +81,7 @@ module DA_HTML
     def render_tag!(tag_name : String)
       close_attrs
 
-      @io << "\n<" << tag_name
+      @io << "<" << tag_name
       @attrs_open = true
 
       result = yield
@@ -92,8 +92,6 @@ module DA_HTML
 
       if @attrs_open
         close_attrs
-      else
-        @io << "\n"
       end
 
       @io << "</" << tag_name << ">"
@@ -102,7 +100,7 @@ module DA_HTML
     def render_tag!(klass, tag_name : String)
       close_attrs
 
-      @io << "\n<" << tag_name
+      @io << "<" << tag_name
       @attrs_open = true
 
       scope = klass.new(self)
@@ -114,8 +112,6 @@ module DA_HTML
 
       if @attrs_open
         close_attrs
-      else
-        @io << "\n"
       end
 
       @io << "</" << tag_name << ">"
