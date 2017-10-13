@@ -1,5 +1,5 @@
 
-require "html"
+require "da_html_escape"
 
 module DA_HTML
 
@@ -34,7 +34,7 @@ module DA_HTML
 
     def render_text!(s : String)
       close_attrs
-      @io << HTML.escape(s)
+      @io << DA_HTML_ESCAPE.escape(s)
     end # === def render_text!
 
     def close_attrs

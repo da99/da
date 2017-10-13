@@ -1,7 +1,7 @@
 
-require "../src/html"
+require "../src/da_html"
 
-require "../src/html/tags/*"
+require "../src/da_html/tags/*"
 
 class Test_HTML
   include DA_HTML::SPAN
