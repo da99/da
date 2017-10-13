@@ -1,15 +1,34 @@
 
-require "../src/html.cr"
+require "../src/html"
 
-class HTML
-  include SPAN::Markup
+require "../src/html/tags/*"
+
+class Test_HTML
+  include DA_HTML::SPAN
+  include DA_HTML::P
+
+  @io : DA_HTML::Page
+  getter :io
+  def initialize
+    @io = DA_HTML::Page.new
+  end # === def initalize
+
+  def self.render
+    h = new
+    with h yield
+    h.io.to_html
+  end
 end # === class HTML
 
-io = HTML.to_io do
+io = Test_HTML.render do
 
-  span { "yo" }
-  span.class_("shy") { "" }
-  span.id_("main_msg").class_("loud") { "hello" }
+  p { "hello" }
+  span {
+    p { "yo" }
+  }
+  span("shy") { "" }
+
+  span("#main_msg loud") { "hello" }
 
 end
 
