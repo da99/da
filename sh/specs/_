@@ -11,8 +11,8 @@ PATH="$PATH:$THIS_DIR/../sh_color/bin"
 case "$(echo $@)" in
 
   "")
-    html.cr specs run || :
-    process watch "-r sh -r src -r specs" "html.cr specs run"
+    da_html.cr specs run || :
+    process watch "-r sh -r src -r specs" "da_html.cr specs run"
     ;;
 
   run)
