@@ -6,7 +6,7 @@ module DA_HTML
     macro p(*args, **attrs, &blok)
       io.render_tag!("p") {
         {% unless args.empty? %}
-          p_id_class {{*args}}
+          io.id_class {{*args}}
         {% end %}
         {% for k,v in attrs %}
           p_{{k}}({{v}})

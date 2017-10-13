@@ -1,5 +1,6 @@
 
 require "da_html_escape"
+require "./da_html/attrs/id_class"
 
 module DA_HTML
 
@@ -27,6 +28,8 @@ module DA_HTML
   end
 
   class Page
+
+    include DA_HTML::ID_CLASS
 
     @attrs_open : Bool
 

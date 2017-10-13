@@ -85,4 +85,14 @@ it "renders doctype" do
   ))
 end # === it "renders doctype"
 
+{% for x in %w(div p span) %}
+  it "renders id and classes on {{x.id}}" do
+    actual = Test_HTML.render {
+      {{x.id}}("#pepper", "red", "hot") { "spicy" }
+    }
+
+    should_eq actual, %{<{{x.id}} id="pepper" class="red hot">spicy</{{x.id}}>}
+  end # === it "renders id and classes"
+{% end %}
+
 
