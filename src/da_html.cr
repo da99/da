@@ -3,6 +3,20 @@ require "da_html_escape"
 
 module DA_HTML
 
+  def self.pretty_html(str : String)
+    indent = 0
+    str.gsub( /\>\<([a-z\/])/ ) { |s, x|
+      case x[1]
+      when "/"
+        indent -= 1
+        ">\n#{" " * (indent)}</"
+      else
+        indent += 1
+        ">\n#{" " * indent}<#{x[1]}"
+      end
+    }
+  end # === def pretty_html
+
   struct Raw
     def initialize(@val : Symbol | String)
     end # === def initialize
