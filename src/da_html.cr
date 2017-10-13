@@ -3,7 +3,7 @@ require "da_html_escape"
 
 module DA_HTML
 
-  def self.pretty_html(str : String)
+  def self.prettify(str : String)
     indent = 0
     str.gsub( /\>\<([a-z\/])/ ) { |s, x|
       case x[1]
