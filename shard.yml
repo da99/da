@@ -2,6 +2,6 @@ name: da_html
 version: 0.1.0
 version: 0.1.0
 dependencies:
-  mu-clean:
-    github: da99/clean.cr
+  da_html_escape:
+    github: da99/da_html_escape.cr
     branch: master
