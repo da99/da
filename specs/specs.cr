@@ -15,6 +15,7 @@ class Basic_Spec_HTML
   include DA_HTML::TEMPLATE
 
   getter :io
+  @io : DA_HTML::INPUT_OUTPUT | DA_HTML::TEMPLATE::INPUT_OUTPUT
   def initialize
     @io = DA_HTML::INPUT_OUTPUT.new
   end # === def initalize

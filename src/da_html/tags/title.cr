@@ -4,7 +4,7 @@ module DA_HTML
   module TITLE
 
     def title(s : String)
-      io.render_tag!("title", s)
+      io.write_tag("title", s)
       self
     end
 

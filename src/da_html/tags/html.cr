@@ -4,8 +4,10 @@ module DA_HTML
   module HTML
 
     def html
-      io.render_tag!("html") {
-        yield
+      io.write_tag("html") {
+        io.write_content {
+          yield
+        }
       }
     end
 

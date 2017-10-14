@@ -4,8 +4,10 @@ module DA_HTML
   module BODY
 
     def body
-      io.render_tag!("body") {
-        yield
+      io.write_tag("body") {
+        io.write_content {
+          yield
+        }
       }
     end # === def body
 

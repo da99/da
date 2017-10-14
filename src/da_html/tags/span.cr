@@ -4,23 +4,19 @@ module DA_HTML
   module SPAN
 
     macro span(*args, **attrs, &blok)
-      io.render_tag!("span") {
+      io.write_tag("span") {
         {% unless args.empty? %}
-          io.render_id_class! {{*args}}
+          io.write_id_class {{*args}}
         {% end %}
         {% for k,v in attrs %}
           span_{{k}}({{v}})
         {% end %}
 
-        span_render {
+        io.write_content {
           {{blok.body}}
         }
       }
     end # === macro span
-
-    def span_render
-      yield
-    end # === def span_render
 
   end # === module SPAN
 

@@ -4,8 +4,10 @@ module DA_HTML
   module HEAD
 
     def head
-      io.render_tag!("head") {
-        yield
+      io.write_tag("head") {
+        io.write_content {
+          yield
+        }
       }
     end # === def head
 

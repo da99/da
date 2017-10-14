@@ -4,7 +4,7 @@ module DA_HTML
   module DOCTYPE
 
     def doctype!
-      @io << "<!DOCTYPE html>"
+      io.raw! "<!DOCTYPE html>"
     end # === def doctype
 
   end # === module DOCTYPE

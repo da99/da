@@ -5,23 +5,19 @@ module DA_HTML
   module DIV
 
     macro div(*args, **attrs, &blok)
-      io.render_tag!("div") {
+      io.write_tag("div") {
         {% unless args.empty? %}
-          io.render_id_class! {{*args}}
+          io.write_id_class {{*args}}
         {% end %}
         {% for k,v in attrs %}
           div_{{k}}({{v}})
         {% end %}
 
-        div_render {
+        io.write_content {
           {{blok.body}}
         }
       }
     end # === macro div
-
-    def div_render
-      yield
-    end # === def div_render
 
   end # === module DIV
 

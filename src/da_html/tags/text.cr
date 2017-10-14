@@ -4,7 +4,7 @@ module DA_HTML
   module Text
 
     def text(s : String)
-      io.render_text! s
+      io.write_text s
     end
 
     def text(r : DA_HTML::Raw)
