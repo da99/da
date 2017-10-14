@@ -14,7 +14,7 @@ module DA_HTML
       io.render_tag!("form") {
 
         {% unless id_class.empty? %}
-          form_id_class({{*id_class}})
+          io.render_id_class!({{*id_class}})
         {% end %}
 
         {% for k, v in args %}
@@ -26,10 +26,6 @@ module DA_HTML
         }
       }
     end
-
-    def form_id_class(s : String)
-      io.render_attr!("id_class", s)
-    end # === def form_id_class
 
     def form_action(s : String)
       io.render_attr!("action", s)

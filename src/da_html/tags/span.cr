@@ -6,7 +6,7 @@ module DA_HTML
     macro span(*args, **attrs, &blok)
       io.render_tag!("span") {
         {% unless args.empty? %}
-          io.id_class {{*args}}
+          io.render_id_class! {{*args}}
         {% end %}
         {% for k,v in attrs %}
           span_{{k}}({{v}})
@@ -17,10 +17,6 @@ module DA_HTML
         }
       }
     end # === macro span
-
-    def span_id_class(s)
-      io.render_attr!("id_class", s)
-    end # === def span_id_class
 
     def span_render
       yield

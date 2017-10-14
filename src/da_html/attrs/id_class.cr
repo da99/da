@@ -7,10 +7,10 @@ module DA_HTML
     # helps to allow id_class_(*args)
     # when the arguments tuple is empty.
     # Reduces the amount of conditions and boilerplate code.
-    def id_class
+    def render_id_class!
     end # === def id_class_
 
-    def id_class(*raw)
+    def render_id_class!(*raw)
       class_ = IO::Memory.new
       raw.each_with_index { |v, i|
         if i == 0 && v["#"]?

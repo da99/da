@@ -7,7 +7,7 @@ module DA_HTML
     macro div(*args, **attrs, &blok)
       io.render_tag!("div") {
         {% unless args.empty? %}
-          io.id_class {{*args}}
+          io.render_id_class! {{*args}}
         {% end %}
         {% for k,v in attrs %}
           div_{{k}}({{v}})
@@ -18,10 +18,6 @@ module DA_HTML
         }
       }
     end # === macro div
-
-    def div_id_class(s)
-      io.render_attr!("id_class", s)
-    end # === def div_id_class
 
     def div_render
       yield

@@ -13,7 +13,6 @@ class Test_HTML
   include DA_HTML::P
   include DA_HTML::DIV
 
-  @io : DA_HTML::Page
   getter :io
   def initialize
     @io = DA_HTML::Page.new
