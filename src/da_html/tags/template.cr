@@ -16,8 +16,10 @@ module DA_HTML
         io.write_tag("script") {
           io.write_id \{{str_id}}
           io.write_attr "type", "text/da-html-template"
-          template_render {
-            \{{blok.body}}
+          io.write_content{
+            template_render {
+              \{{blok.body}}
+            }
           }
         }
       end
