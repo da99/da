@@ -27,7 +27,7 @@ module DA_HTML
     end # === def initialize
 
     def write_attr(name : String, val : String)
-      raw!( " ", name, "=", val.inspect)
+      raw!( " ", name, "=", escape(val).inspect)
       self
     end # === def write_attr
 

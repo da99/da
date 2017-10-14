@@ -53,3 +53,4 @@ end
 
 require "./00.basics"
 require "./01.template"
+require "./02.attrs"
