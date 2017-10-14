@@ -10,11 +10,17 @@ module DA_HTML
     def render_id_class!
     end # === def id_class_
 
+    def render_id!(raw : String)
+      s = raw.gsub(/[^a-zA-Z0-9\_]+/, "")
+      return if s.empty?
+      render_attr!("id", s)
+    end # === def render_id!
+
     def render_id_class!(*raw)
       class_ = IO::Memory.new
       raw.each_with_index { |v, i|
         if i == 0 && v["#"]?
-          render_attr!("id", v.gsub(/[^a-zA-Z0-9\_]+/, ""))
+          render_id!(v)
           next
         end
 

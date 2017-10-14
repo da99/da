@@ -1,12 +1,16 @@
 
 module DA_HTML
 
-  module Template
+  module TEMPLATE
 
     macro included
-      macro template(*args, **attrs, &blok)
+      macro template(str_id, &blok)
         io.render_tag!("script") {
-          template_type
+          io.render_id! \{{str_id}}
+          io.render_attr! "type", "text/da-html-template"
+          template_render() {
+            \{{blok.body}}
+          }
         }
       end
 
@@ -16,14 +20,16 @@ module DA_HTML
 
     end # === macro included
 
-    def template_type
-      io.render_attr! "type", "text/da-html-template"
-    end # === def template_type!
-
     def template_render
-      yield
+      fragment = template_scope.new
+      with fragment yield
+      io.render_text! fragment.to_html
     end # === def template_render
 
-  end # === module Template
+    def template_scope
+      self.class
+    end # === def template_scope
+
+  end # === module TEMPLATE
 
 end # === module DA_HTML
