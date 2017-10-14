@@ -14,7 +14,7 @@ module DA_HTML
       io.write_tag("form") {
 
         {% unless id_class.empty? %}
-          io.write_id_class({{*id_class}})
+          io.write_attr_id_class({{*id_class}})
         {% end %}
 
         {% for k, v in args %}

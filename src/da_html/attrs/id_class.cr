@@ -7,20 +7,20 @@ module DA_HTML
     # helps to allow id_class_(*args)
     # when the arguments tuple is empty.
     # Reduces the amount of conditions and boilerplate code.
-    def write_id_class
+    def write_attr_id_class
     end # === def id_class_
 
-    def write_id(raw : String)
+    def write_attr_id(raw : String)
       s = raw.gsub(/[^a-zA-Z0-9\_]+/, "")
       return if s.empty?
       write_attr("id", s)
-    end # === def write_id
+    end # === def write_attr_id
 
-    def write_id_class(*raw)
+    def write_attr_id_class(*raw)
       class_ = IO::Memory.new
       raw.each_with_index { |v, i|
         if i == 0 && v["#"]?
-          write_id(v)
+          write_attr_id(v)
           next
         end
 

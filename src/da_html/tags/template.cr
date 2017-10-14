@@ -33,7 +33,7 @@ module DA_HTML
     macro included
       macro template(str_id, &blok)
         io.write_tag("script") {
-          io.write_id \{{str_id}}
+          io.write_attr_id \{{str_id}}
           io.write_attr "type", "text/da-html-template"
           io.write_content{
             template_render {

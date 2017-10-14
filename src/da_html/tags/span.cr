@@ -6,7 +6,7 @@ module DA_HTML
     macro span(*args, **attrs, &blok)
       io.write_tag("span") {
         {% unless args.empty? %}
-          io.write_id_class {{*args}}
+          io.write_attr_id_class {{*args}}
         {% end %}
 
         {% for k,v in attrs %}
