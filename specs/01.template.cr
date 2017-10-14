@@ -64,4 +64,25 @@ describe ":template" do
     )
   end # === it "does not escape a var each"
 
+  it "renders an inverted section" do
+    actual = render {
+      template("#row") {
+        var_not("members") {
+          p { "no members" }
+        }
+      }
+    }
+
+    should_eq actual, strip_each_line(
+      %(
+        <script id="row" type="text/da-html-template">
+          {{^members}}
+            &#x3c;p&#x3e;no members&#x3c;/p&#x3e;
+          {{/members}}
+        </script>
+      )
+    )
+  end # === it "renders an inverted section"
+
 end # === desc ":template"
+

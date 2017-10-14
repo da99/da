@@ -70,6 +70,12 @@ module DA_HTML
       io.write_text(DA_HTML::TEMPLATE::VAR.new(name, "/"))
     end # === def var_each
 
+    def var_not(s : String)
+      io.write_text(DA_HTML::TEMPLATE::VAR.new(s, "^"))
+      yield
+      io.write_text(DA_HTML::TEMPLATE::VAR.new(s, "/"))
+    end # === def var_not
+
     def template_render
       origin_io = io
       @io = DA_HTML::TEMPLATE::INPUT_OUTPUT.new
