@@ -1,11 +1,6 @@
 
 
 class Attrs_Spec_HTML
-  include DA_HTML::DOCTYPE
-  include DA_HTML::HTML
-  include DA_HTML::HEAD
-  include DA_HTML::TITLE
-  include DA_HTML::BODY
   include DA_HTML::SPAN
   include DA_HTML::P
   include DA_HTML::DIV
