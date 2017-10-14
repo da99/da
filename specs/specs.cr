@@ -47,5 +47,9 @@ macro render(&blok)
   }
 end
 
+macro strip_each_line(str)
+  {{str}}.split("\n").map { |x| x.strip }.join
+end
+
 require "./00.basics"
 require "./01.template"

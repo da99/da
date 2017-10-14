@@ -45,16 +45,30 @@ module DA_HTML
     end # === macro included
 
     struct VAR
-      def initialize(@value : String)
+      @prefix : String
+      @value  : String
+
+      def initialize(@value, @prefix )
       end # === def initialize
+
+      def initialize(@value)
+        @prefix = ""
+      end # === def initialize
+
       def to_s
-        "{{#{@value}}}"
+        "{{#{@prefix}#{@value}}}"
       end
     end # === struct VAR
 
-    def var(name)
+    def var(name : String)
       DA_HTML::TEMPLATE::VAR.new(name)
     end # === def var!
+
+    def var_each(name : String)
+      io.write_text(DA_HTML::TEMPLATE::VAR.new(name, "#"))
+      yield
+      io.write_text(DA_HTML::TEMPLATE::VAR.new(name, "/"))
+    end # === def var_each
 
     def template_render
       origin_io = io
