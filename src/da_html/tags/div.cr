@@ -10,7 +10,7 @@ module DA_HTML
           io.write_id_class {{*args}}
         {% end %}
         {% for k,v in attrs %}
-          div_{{k}}({{v}})
+          io.write_attr "{{k.id}}", div_{{k}}({{v}})
         {% end %}
 
         io.write_content {

@@ -8,8 +8,9 @@ module DA_HTML
         {% unless args.empty? %}
           io.write_id_class {{*args}}
         {% end %}
+
         {% for k,v in attrs %}
-          span_{{k}}({{v}})
+          io.write_attr "{{k.id}}", span_{{k}}({{v}})
         {% end %}
 
         io.write_content {

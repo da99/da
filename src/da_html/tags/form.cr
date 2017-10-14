@@ -18,7 +18,7 @@ module DA_HTML
         {% end %}
 
         {% for k, v in args %}
-          form_{{k}}({{v}})
+          io.write_attr "{{k.id}}", form_{{k}}({{v}})
         {% end %}
 
         io.write_content {
@@ -28,11 +28,16 @@ module DA_HTML
     end
 
     def form_action(s : String)
-      io.write_attr("action", s)
+      s
     end # === def form_action(
 
     def form_method(s : String)
-      io.write_attr("method", s)
+      case s
+      when "get", "post"
+        s
+      else
+        raise Exception.new("Invalid form method: #{s.inspect}")
+      end
     end # === def form_method
 
   end # === module FORM
