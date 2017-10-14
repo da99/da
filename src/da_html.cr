@@ -27,7 +27,7 @@ module DA_HTML
     end # === def value
   end
 
-  class Page
+  class Io
 
     include DA_HTML::ID_CLASS
 

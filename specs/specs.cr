@@ -15,7 +15,7 @@ class Test_HTML
 
   getter :io
   def initialize
-    @io = DA_HTML::Page.new
+    @io = DA_HTML::Io.new
   end # === def initalize
 
   def self.render
