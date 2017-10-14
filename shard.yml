@@ -1,6 +1,6 @@
 name: da_html
-version: 1.0.1
+version: 1.0.2
 dependencies:
   da_html_escape:
-    github: da99/da_html.cr
+    github: da99/da_html_escape.cr
     branch: master
