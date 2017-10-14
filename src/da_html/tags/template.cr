@@ -6,9 +6,28 @@ module DA_HTML
     class INPUT_OUTPUT
       include DA_HTML::INPUT_OUTPUT_BASE
 
-      def write_content_result(x : DA_HTML::TEMPLATE::VAR)
-        raw! x.to_s
+      def write_text(v : DA_HTML::TEMPLATE::VAR)
+        raw! v.to_s
+      end # === def text
+
+      def write_content_result(v : DA_HTML::TEMPLATE::VAR)
+        raw! v.to_s
       end # === def write_content_result
+
+      def escape(x : String)
+        cleaned = super(x)
+        return "" unless cleaned
+        cleaned.gsub(/\{|\}/) { |x|
+          case x
+          when "{"
+            "&#123;"
+          when "}"
+            "&#125;"
+          else
+            x
+          end
+        }
+      end
     end # === class INPUT_OUTPUT
 
     macro included

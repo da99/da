@@ -1,19 +1,11 @@
 
 module DA_HTML
 
-  module Text
-
-    def text(s : String)
-      io.write_text s
-    end
-
-    def text(r : DA_HTML::Raw)
-      io.raw! r
-    end # === def text
+  module TEXT
 
     def text(*args)
       args.each { |x|
-        text x
+        io.write_text x
       }
     end
 

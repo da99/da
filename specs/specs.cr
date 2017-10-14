@@ -13,6 +13,7 @@ class Basic_Spec_HTML
   include DA_HTML::P
   include DA_HTML::DIV
   include DA_HTML::TEMPLATE
+  include DA_HTML::TEXT
 
   getter :io
   @io : DA_HTML::INPUT_OUTPUT | DA_HTML::TEMPLATE::INPUT_OUTPUT

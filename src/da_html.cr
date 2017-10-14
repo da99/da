@@ -31,8 +31,16 @@ module DA_HTML
       self
     end # === def write_attr
 
+    def escape(s)
+      DA_HTML_ESCAPE.escape(s)
+    end # === def escape
+
     def write_text(s : String)
-      raw! DA_HTML_ESCAPE.escape(s)
+      raw! escape(s)
+    end # === def write_text
+
+    def write_text(x)
+      raise Exception.new("Invalid value for write_text: #{x.inspect}")
     end # === def write_text
 
     def write_content_result(s : String)
