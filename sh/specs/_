@@ -12,7 +12,7 @@ case "$(echo $@)" in
 
   "")
     da_html.cr specs run || :
-    process watch "-r sh -r src -r specs" "da_html.cr specs run"
+    process watch "-r examples -r sh -r src -r specs" "da_html.cr specs run"
     ;;
 
   run)

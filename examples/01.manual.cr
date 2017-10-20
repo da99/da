@@ -1,5 +1,5 @@
 
-class Basic_Spec_HTML
+class Example_01_Manual
   include DA_HTML::DOCTYPE
   include DA_HTML::HTML
   include DA_HTML::HEAD
@@ -28,3 +28,15 @@ class Basic_Spec_HTML
   end # === def to_html
 
 end # === class HTML
+
+
+describe "Example_01_Manual" do
+  it "renders html" do
+    actual = Example_01_Manual.render {
+      p { "manual, not auto" }
+    }
+    should_eq actual, %(
+      <p>manual, not auto</p>
+    )
+  end # === it "renders html"
+end # === desc "Example_01_Manual"

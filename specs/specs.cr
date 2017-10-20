@@ -34,7 +34,7 @@ end # === class HTML
 
 
 macro should_eq(actual, expected)
-  {{actual}}.should eq({{expected}})
+  {{actual}}.should eq(strip( {{expected}} ))
 end # === macro should_eq
 
 macro strip(str)
@@ -51,5 +51,6 @@ macro strip_each_line(str)
   {{str}}.split("\n").map { |x| x.strip }.join
 end
 
+require "../examples/*"
 require "./specs/*"
 

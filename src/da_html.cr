@@ -18,6 +18,26 @@ module DA_HTML
     }
   end # === def pretty_html
 
+  macro included
+
+    {% for name in system("find ./src/da_html/tags -type f").stringify.split %}
+       include DA_HTML::{{name.split("/").last.upcase.gsub(/.CR$/, "").id}}
+    {% end %}
+
+    getter :io
+    @io : DA_HTML::INPUT_OUTPUT | DA_HTML::TEMPLATE::INPUT_OUTPUT
+    def initialize
+      @io = DA_HTML::INPUT_OUTPUT.new
+    end # === def initalize
+
+    def self.to_html
+      h = new
+      with h yield
+      h.io.to_html
+    end
+
+  end # === macro included
+
   module INPUT_OUTPUT_BASE
 
     include DA_HTML::ID_CLASS
@@ -71,7 +91,7 @@ module DA_HTML
       raw! "<", tag_name, ">"
       write_text raw_content
       raw! "</", tag_name, ">"
-    end # === def render!
+    end # === def write_tag
 
     def write_tag(tag_name : String)
       raw! "<", tag_name
