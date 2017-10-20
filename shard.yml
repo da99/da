@@ -1,5 +1,5 @@
 name: da_html
-version: 1.1.0
+version: 1.2.0
 dependencies:
   da_html_escape:
     github: da99/da_html_escape.cr
