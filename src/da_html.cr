@@ -36,6 +36,10 @@ module DA_HTML
       h.io.to_html
     end
 
+    def to_html
+      io.to_html
+    end # === def to_html
+
   end # === macro included
 
   module INPUT_OUTPUT_BASE
