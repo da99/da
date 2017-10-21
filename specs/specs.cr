@@ -1,7 +1,6 @@
 
 require "spec"
 require "../src/da_html"
-require "../src/da_html/tags/*"
 
 class Basic_Spec_HTML
   include DA_HTML::DOCTYPE

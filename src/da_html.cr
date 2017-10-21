@@ -1,6 +1,6 @@
 
 require "da_html_escape"
-require "./da_html/attrs/id_class"
+require "./da_html/attrs/*"
 
 module DA_HTML
 
@@ -127,4 +127,5 @@ module DA_HTML
 
 end # === module DA_HTML
 
+require "./da_html/tags/*"
 
