@@ -20,7 +20,7 @@ module DA_HTML
 
   macro included
 
-    {% for name in system("find ./src/da_html/tags -maxdepth 1 -type f").split %}
+    {% for name in system("find #{__DIR__}/da_html/tags -maxdepth 1 -type f").split %}
        include DA_HTML::{{name.split("/").last.upcase.gsub(/.CR$/, "").id}}
     {% end %}
 
