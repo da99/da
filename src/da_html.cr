@@ -24,11 +24,7 @@ module DA_HTML
        include DA_HTML::{{name.split("/").last.upcase.gsub(/.CR$/, "").id}}
     {% end %}
 
-    getter :io
-    @io : DA_HTML::INPUT_OUTPUT | DA_HTML::TEMPLATE::INPUT_OUTPUT
-    def initialize
-      @io = DA_HTML::INPUT_OUTPUT.new
-    end # === def initalize
+    getter io : DA_HTML::INPUT_OUTPUT | DA_HTML::TEMPLATE::INPUT_OUTPUT = DA_HTML::INPUT_OUTPUT.new
 
     def self.to_html
       h = new
