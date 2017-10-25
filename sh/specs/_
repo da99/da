@@ -16,10 +16,12 @@ case "$(echo $@)" in
     ;;
 
   run)
-    sh_color ORANGE "=== {{Running}}..."
+    reset
     cd "$THIS_DIR"
     mkdir -p tmp
+    sh_color ORANGE "=== {{Compiling}} specs..."
     my_crystal crystal build -o tmp/specs.cr specs/specs.cr
+    sh_color ORANGE "=== {{Running}} specs..."
     tmp/specs.cr
     sh_color GREEN "=== {{DONE}} ==="
     ;;

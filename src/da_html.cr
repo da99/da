@@ -42,9 +42,7 @@ module DA_HTML
 
     include DA_HTML::ID_CLASS
 
-    def initialize
-      @io__ = IO::Memory.new
-    end # === def initialize
+    @io__ = IO::Memory.new
 
     def write_attr(name : String, val : String)
       raw!( " ", name, "=", escape(val).inspect)

@@ -14,20 +14,20 @@ module DA_HTML
         raw! v.to_s
       end # === def write_content_result
 
-      def escape(x : String)
-        cleaned = super(x)
-        return "" unless cleaned
-        cleaned.gsub(/\{|\}/) { |x|
-          case x
-          when "{"
-            "&#123;"
-          when "}"
-            "&#125;"
-          else
-            x
-          end
-        }
-      end
+      # def escape(x : String)
+      #   cleaned = super(x)
+      #   return "" unless cleaned
+      #   cleaned.gsub(/\{|\}/) { |x|
+      #     case x
+      #     when "{"
+      #       "&#123;"
+      #     when "}"
+      #       "&#125;"
+      #     else
+      #       x
+      #     end
+      #   }
+      # end
     end # === class INPUT_OUTPUT
 
     macro included
@@ -80,7 +80,18 @@ module DA_HTML
       origin_io = io
       @io = DA_HTML::TEMPLATE::INPUT_OUTPUT.new
       io.write_content_result(yield)
-      origin_io.write_text @io.to_html
+      origin_io.raw! @io.to_html.gsub(/[<>&]/) { |s|
+        case s
+        when "<"
+          "&#x3c;"
+        when ">"
+          "&#x3e;"
+        when "&"
+          "&#x26;"
+        else
+          raise Exception.new("Not handled: #{s.inspect}")
+        end
+      }
       @io = origin_io
     end # === def template_render
 

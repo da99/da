@@ -38,7 +38,7 @@ describe ":template" do
     should_eq actual, strip_each_line(
       %(
         <script id="row" type="text/da-html-template">
-          &#x3c;p&#x3e;&#x26;#123;&#x26;#123;hello1&#x26;#125;&#x26;#125;{{hello2}}&#x3c;/p&#x3e;
+          &#x3c;p&#x3e;&#x26;#x7b;&#x26;#x7b;hello1&#x26;#x7d;&#x26;#x7d;{{hello2}}&#x3c;/p&#x3e;
         </script>
       )
     )
@@ -83,6 +83,38 @@ describe ":template" do
       )
     )
   end # === it "renders an inverted section"
+
+  it "renders double quotation marks" do
+    actual = render {
+      template("#row") {
+        p("#main") { "no members" }
+      }
+    }
+
+    should_eq actual, strip_each_line(
+      %(
+        <script id="row" type="text/da-html-template">
+            &#x3c;p id="main"&#x3e;no members&#x3c;/p&#x3e;
+        </script>
+      )
+    )
+  end # === it "renders double quotation marks"
+
+  it "double escapes ampersands" do
+    actual = render {
+      template("#row") {
+        p { "& & &" }
+      }
+    }
+
+    should_eq actual, strip_each_line(
+      %(
+        <script id="row" type="text/da-html-template">
+            &#x3c;p&#x3e;&#x26;#x26; &#x26;#x26; &#x26;#x26;&#x3c;/p&#x3e;
+        </script>
+      )
+    )
+  end # === it "double escapes ampersands"
 
 end # === desc ":template"
 

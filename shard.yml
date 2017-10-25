@@ -4,7 +4,6 @@ version: 1.2.3
 dependencies:
   da_html_escape:
     github: da99/da_html_escape.cr
-    branch: master
   da_uri:
     github: da99/da_uri.cr
     branch: master
