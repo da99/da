@@ -44,6 +44,11 @@ module DA_HTML
 
     @io__ = IO::Memory.new
 
+    def write_attr(val : String)
+      raw!( " ", val)
+      self
+    end # === def write_attr
+
     def write_attr(name : String, val : String)
       raw!( " ", name, "=", escape(val).inspect)
       self
@@ -78,10 +83,9 @@ module DA_HTML
     def write_closed_tag(tag_name : String, *attrs)
       raw! "<", tag_name
 
-      attrs.each { |pair|
-        write_attr(pair.first, pair.last)
+      attrs.each { |a|
+        write_attr(*a)
       }
-
       raw! ">"
     end # === def write_closed_tag
 

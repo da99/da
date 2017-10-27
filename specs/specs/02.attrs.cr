@@ -44,5 +44,12 @@ describe "io.write_attr" do
     }
     should_eq actual, "<my_tag hello=\"&#x3c;joe&#x3e;\"></my_tag>"
   end # === it "escapes values of attributes"
+
+  it "allows single attributes: <input required ...>" do
+    actual = Attrs_Spec_HTML.render {
+      io.write_closed_tag("input", {"required"})
+    }
+    should_eq actual, "<input required>"
+  end # === it "allows single attributes: <input required ...>"
 end # === desc ":attrs"
 
