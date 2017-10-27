@@ -84,8 +84,17 @@ module DA_HTML
       raw! "<", tag_name
 
       attrs.each { |a|
-        write_attr(*a)
+        len = a.size
+        case len
+        when 1
+          write_attr(a.first)
+        when 2
+          write_attr(a.first, a.last)
+        else
+          raise Exception.new("Invalid attribute: #{a.inspect}")
+        end
       }
+
       raw! ">"
     end # === def write_closed_tag
 

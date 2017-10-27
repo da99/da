@@ -47,9 +47,9 @@ describe "io.write_attr" do
 
   it "allows single attributes: <input required ...>" do
     actual = Attrs_Spec_HTML.render {
-      io.write_closed_tag("input", {"required"})
+      io.write_closed_tag("input", {"maxlength", "10"}, {"required"})
     }
-    should_eq actual, "<input required>"
+    should_eq actual, %(<input maxlength="10" required>)
   end # === it "allows single attributes: <input required ...>"
 end # === desc ":attrs"
 
