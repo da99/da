@@ -2,6 +2,7 @@
 require "da_html_escape"
 require "./da_html/attrs/*"
 
+
 module DA_HTML
 
   def self.prettify(str : String)

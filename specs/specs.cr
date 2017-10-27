@@ -37,7 +37,7 @@ macro should_eq(actual, expected)
 end # === macro should_eq
 
 macro strip(str)
-  {{str}}.strip.gsub("\n", "").gsub(/>\s+</, "><")
+  ({{str}} || "").strip.gsub("\n", "").gsub(/>\s+</, "><")
 end
 
 macro render(&blok)
@@ -50,6 +50,11 @@ macro strip_each_line(str)
   {{str}}.split("\n").map { |x| x.strip }.join
 end
 
-require "../examples/*"
-require "./specs/*"
+{% if !env("DA_HTML_PARSER") %}
+  require "../examples/*"
+  require "./specs/*"
+{% end %}
+{% if !env("DA_HTML") %}
+  require "./parser/specs"
+{% end %}
 
