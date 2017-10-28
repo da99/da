@@ -11,3 +11,13 @@ class IT_WORKS
     return false
   end
 end # === class Spec_Parser
+
+describe DA_HTML::Parser do
+  input_file = "#{__DIR__}/input.html"
+  expected   = File.read("#{__DIR__}/expected.html")
+
+  it "works" do
+    actual = IT_WORKS.new(input_file).to_html
+    should_eq strip(actual), strip(expected)
+  end # === it "#{x.gsub(".", " ")}"
+end # === describe
