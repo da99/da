@@ -2,6 +2,9 @@
 class SPEC_02_ATTRS
   include DA_HTML::Parser
   def_tags :html , :head , :title , :body , :p
+  def_attr :p, :id
+  def_attr :p, :class
+
   def_tag :css do |node|
     @io << %(<link href="/main.css" rel="stylesheet">)
     return false

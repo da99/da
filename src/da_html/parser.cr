@@ -43,30 +43,48 @@ module DA_HTML
     end # === macro def_tag
 
     macro def_attr(tag_name, name, &blok)
-      def {{tag_name.id}}_{{name.id}}({{blok.args.join(", ").id}} : NODE)
-        {% if blok %}
+      {% `bash -c  "echo #{tag_name.id} #{name.id} >> tmp/da_html.tmp.attrs"` %}
+      {% if blok %}
+        def {{tag_name.id}}_{{name.id}}({{blok.args.join(" : XML::Node, ").id}} : XML::Node)
           {{blok.body}}
-        {% else %}
-          node
-        {% end %}
-      end
+        end
+      {% else %}
+        def {{tag_name.id}}_{{name.id}}(node : XML::Node, attr : XML::Node)
+          attr.content = DA_HTML_ESCAPE.escape(attr.content)
+          attr
+        end
+      {% end %}
     end # === macro attr
 
     macro def_to_html!
       def render_element_node(node : XML::Node)
         name = node.name
-        {% begin %}
-          case name
-            {% for x in system("cat tmp/da_html.tmp.tags").split("\n").reject { |x| x.empty? } %}
-            when "{{x.id}}"
-              {{x.id}}(node)
-            {% end %}
-          else
-            raise Exception.new("Element not allowed: #{node.name.inspect}")
-          end # === node.name
-        {% end %}
-        {% `bash -c "rm -f tmp/da_html.tmp.*"` %}
+        case name
+          {% for x in system("cat tmp/da_html.tmp.tags").split("\n").reject { |x| x.empty? } %}
+          when "{{x.id}}"
+            {{x.id}}(node)
+          {% end %}
+        else
+          raise Exception.new("Element not allowed: #{node.name.inspect}")
+        end # === node.name
       end # === def render_element_node
+
+        def render_element_attribute(node : XML::Node, attr : XML::Node)
+          tag_name = node.name
+          name     = attr.name
+          {% if !`bash -c "cat tmp/da_html.tmp.attrs || :"`.strip.empty? %}
+            case
+              {% for x in system("cat tmp/da_html.tmp.attrs").split("\n").reject { |x| x.empty? } %}
+              {% tag_name = x.split.first %}
+              {% name     = x.split.last %}
+              when tag_name == "{{tag_name.id}}" && name == "{{name.id}}"
+                return {{tag_name.id}}_{{name.id}}(node, attr)
+              {% end %}
+            end # === node.name
+          {% end %}
+          raise Exception.new("Attribute not allowed: #{node.name.inspect} #{attr.name.inspect}")
+        end
+      {% `bash -c "rm -f tmp/da_html.tmp.*"` %}
     end # === macro render(node)
 
     def to_html
@@ -95,7 +113,19 @@ module DA_HTML
 
         io << "\n"
         io.spaces
-        io << "<#{node.name}>"
+        attrs = node.attributes
+        if attrs.empty?
+          io << "<#{node.name}>"
+        else
+          io << "<#{node.name}"
+          attrs.each { |a|
+            new_a = render_element_attribute(node, a)
+            if new_a.is_a?(XML::Node)
+              io << " " << new_a.name << "=" << new_a.content.inspect
+            end
+          }
+          io << ">"
+        end
         io.indent
         node.children.each { |x|
           p = self.class.new(io, x)
