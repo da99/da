@@ -2,16 +2,9 @@
 require "xml"
 {% `mkdir -p tmp` %}
 {% `rm -f tmp/da_html.tmp.tags` %}
-{% `touch tmp/da_html.tmp.tags` %}
 module DA_HTML
 
   module Parser
-
-    macro included
-      def render_element_node(node : XML::Node)
-        render_element_node!
-      end # === def render_element_node
-    end # === macro included
 
     @origin : String
     @root : XML::Node
@@ -59,19 +52,21 @@ module DA_HTML
       end
     end # === macro attr
 
-    macro render_element_node!
-      name = node.name
-      {% begin %}
-        case name
-          {% for x in system("cat tmp/da_html.tmp.tags").split("\n").reject { |x| x.empty? } %}
-          when "{{x.id}}"
-            {{x.id}}(node)
-          {% end %}
-        else
-          raise Exception.new("Element not allowed: #{node.name.inspect}")
-        end # === node.name
-      {% end %}
-      {% `bash -c "rm -f tmp/da_html.tmp.*"` %}
+    macro def_to_html!
+      def render_element_node(node : XML::Node)
+        name = node.name
+        {% begin %}
+          case name
+            {% for x in system("cat tmp/da_html.tmp.tags").split("\n").reject { |x| x.empty? } %}
+            when "{{x.id}}"
+              {{x.id}}(node)
+            {% end %}
+          else
+            raise Exception.new("Element not allowed: #{node.name.inspect}")
+          end # === node.name
+        {% end %}
+        {% `bash -c "rm -f tmp/da_html.tmp.*"` %}
+      end # === def render_element_node
     end # === macro render(node)
 
     def to_html
