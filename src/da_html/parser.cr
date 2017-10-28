@@ -30,29 +30,32 @@ module DA_HTML
       @root = XML.parse_html(@origin, XML::HTMLParserOptions::NOBLANKS | XML::HTMLParserOptions::PEDANTIC)
     end # === def initialize
 
-    macro def_tag(name, &blok)
-      {% `bash -c "echo #{name.id} > tmp/da_html.tmp.current"` %}
-      {% `bash -c  "echo #{name.id} >> tmp/da_html.tmp.tags"` %}
-      {% if blok %}
-        {{blok.body}}
-      {% else %}
-        render do |node|
-          node
-        end
+    macro def_tags(*args, &blok)
+      {% for name in *args %}
+        def_tag({{name}}) {{blok}}
       {% end %}
+    end # === macro def_tags
+
+    macro def_tag(name, &blok)
+      {% `bash -c  "echo #{name.id} >> tmp/da_html.tmp.tags"` %}
+        {% if blok %}
+          def {{name.id}}({{blok.args.join(", ").id}} : XML::Node)
+            {{blok.body}}
+          end
+        {% else %}
+          def {{name.id}}(node : XML::Node)
+            node
+          end
+        {% end %}
     end # === macro def_tag
 
-    macro render(&blok)
-      {% tag_name = system("cat tmp/da_html.tmp.current").strip %}
-      def {{tag_name.id}}({{blok.args.join(", ").id}} : XML::Node)
-        {{blok.body}}
-      end
-    end # === macro render
-
-    macro attr(name, &blok)
-      {% tag_name = system("cat tmp/da_html.tmp.current").strip %}
+    macro def_attr(tag_name, name, &blok)
       def {{tag_name.id}}_{{name.id}}({{blok.args.join(", ").id}} : NODE)
-        {{blok.body}}
+        {% if blok %}
+          {{blok.body}}
+        {% else %}
+          node
+        {% end %}
       end
     end # === macro attr
 

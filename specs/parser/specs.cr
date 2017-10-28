@@ -8,17 +8,13 @@ class Spec_Parser
   def_tag :title
   def_tag :body
   def_tag :p
-  def_tag :css do
-    render do |node|
-      @io << %(<link href="/main.css" rel="stylesheet">)
-      return false
-    end
+  def_tag :css do |node|
+    @io << %(<link href="/main.css" rel="stylesheet">)
+    return false
   end
-  def_tag :js do
-    render do |node|
-      @io << %(<script src="/main.js" type="application/javascript"></script>)
-      return false
-    end
+  def_tag :js do |node|
+    @io << %(<script src="/main.js" type="application/javascript"></script>)
+    return false
   end
 end # === class Spec_Parser
 
