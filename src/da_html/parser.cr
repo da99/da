@@ -31,7 +31,7 @@ module DA_HTML
     end # === def initialize
 
     macro def_tags(*args, &blok)
-      {% for name in *args %}
+      {% for name in args %}
         def_tag({{name}}) {{blok}}
       {% end %}
     end # === macro def_tags
