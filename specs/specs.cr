@@ -22,16 +22,7 @@ macro strip_each_line(str)
 end
 
 # === Parser
-require "../src/da_html/parser"
-{% begin %}
-  {% files = system("find specs/parser -mindepth 2 -type f -name specs.cr").split("\n").reject { |x| x.strip.empty? } %}
-  {% if files.empty? %}
-    {% raise "No specs found in specs/parser" %}
-  {% end %}
-  {% for x in files %}
-    require "../{{x.id}}"
-  {% end %}
-{% end %}
+require "./parser/specs"
 
 
 # === DSL

@@ -63,20 +63,21 @@ module DA_HTML
     macro finish_def_html!
       def render_element_node(node : XML::Node)
         name = node.name
+        {% if !`bash -c "cat tmp/da_html.tmp.tags 2>/dev/null || :"`.strip.empty? %}
         case name
-          {% for x in system("cat tmp/da_html.tmp.tags").split("\n").reject { |x| x.empty? } %}
+          {% for x in system("bash -c \"cat tmp/da_html.tmp.tags\"").split("\n").reject { |x| x.empty? } %}
           when "{{x.id}}"
-            {{x.id}}(node)
+            return {{x.id}}(node)
           {% end %}
-        else
-          raise Exception.new("Element not allowed: #{node.name.inspect}")
         end # === node.name
+        {% end %}
+        raise Exception.new("Element not allowed: #{node.name.inspect}")
       end # === def render_element_node
 
       def render_element_attribute(node : XML::Node, attr : XML::Node)
         tag_name = node.name
         name     = attr.name
-        {% if !`bash -c "cat tmp/da_html.tmp.attrs"`.strip.empty? %}
+        {% if !`bash -c "cat tmp/da_html.tmp.attrs 2>/dev/null || :"`.strip.empty? %}
           case
             {% for x in system("cat tmp/da_html.tmp.attrs").split("\n").reject { |x| x.empty? } %}
             {% tag_name = x.split.first %}
@@ -88,7 +89,7 @@ module DA_HTML
         {% end %}
         raise Exception.new("Attribute not allowed: #{node.name.inspect} #{attr.name.inspect}")
       end
-      {% `bash -c "rm -f tmp/da_html.tmp.attrs"` %}
+      {% `bash -c "rm -f tmp/da_html.tmp.*"` %}
     end # === macro render(node)
 
     def to_html
