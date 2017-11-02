@@ -1,23 +1,24 @@
 
 require "spec"
 require "../src/da_html"
+require "../src/da_html/dsl"
 
 class Basic_Spec_HTML
-  include DA_HTML::DOCTYPE
-  include DA_HTML::HTML
-  include DA_HTML::HEAD
-  include DA_HTML::TITLE
-  include DA_HTML::BODY
-  include DA_HTML::SPAN
-  include DA_HTML::P
-  include DA_HTML::DIV
-  include DA_HTML::TEMPLATE
-  include DA_HTML::TEXT
+  include DA_HTML::DSL::DOCTYPE
+  include DA_HTML::DSL::HTML
+  include DA_HTML::DSL::HEAD
+  include DA_HTML::DSL::TITLE
+  include DA_HTML::DSL::BODY
+  include DA_HTML::DSL::SPAN
+  include DA_HTML::DSL::P
+  include DA_HTML::DSL::DIV
+  include DA_HTML::DSL::TEMPLATE
+  include DA_HTML::DSL::TEXT
 
   getter :io
-  @io : DA_HTML::INPUT_OUTPUT | DA_HTML::TEMPLATE::INPUT_OUTPUT
+  @io : DA_HTML::DSL::INPUT_OUTPUT | DA_HTML::DSL::TEMPLATE::INPUT_OUTPUT
   def initialize
-    @io = DA_HTML::INPUT_OUTPUT.new
+    @io = DA_HTML::DSL::INPUT_OUTPUT.new
   end # === def initalize
 
   def self.render
@@ -52,7 +53,7 @@ end
 
 {% if !env("DA_HTML_PARSER") %}
   require "../examples/*"
-  require "./specs/*"
+  require "./dsl/*"
 {% end %}
 {% if !env("DA_HTML") %}
   require "./parser/specs"

@@ -1,6 +1,6 @@
 
 class Example_00_Quick
-  include DA_HTML
+  include DA_HTML::DSL
 
   def do_this
     with self yield

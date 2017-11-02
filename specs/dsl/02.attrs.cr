@@ -1,14 +1,14 @@
 
 
 class Attrs_Spec_HTML
-  include DA_HTML::SPAN
-  include DA_HTML::P
-  include DA_HTML::DIV
-  include DA_HTML::TEXT
+  include DA_HTML::DSL::SPAN
+  include DA_HTML::DSL::P
+  include DA_HTML::DSL::DIV
+  include DA_HTML::DSL::TEXT
 
   getter :io
   def initialize
-    @io = DA_HTML::INPUT_OUTPUT.new
+    @io = DA_HTML::DSL::INPUT_OUTPUT.new
   end # === def initalize
 
   def self.render

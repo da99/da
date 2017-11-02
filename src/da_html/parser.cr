@@ -1,7 +1,11 @@
 
 require "xml"
+
 {% `mkdir -p tmp` %}
-{% `rm -f tmp/da_html.tmp.tags` %}
+{% `rm -f tmp/da_html.tmp.*` %}
+{% `touch tmp/da_html.tmp.tags` %}
+{% `touch tmp/da_html.tmp.attrs` %}
+
 module DA_HTML
 
   module Parser
@@ -72,7 +76,7 @@ module DA_HTML
         def render_element_attribute(node : XML::Node, attr : XML::Node)
           tag_name = node.name
           name     = attr.name
-          {% if !`bash -c "cat tmp/da_html.tmp.attrs || :"`.strip.empty? %}
+          {% if !`bash -c "cat tmp/da_html.tmp.attrs"`.strip.empty? %}
             case
               {% for x in system("cat tmp/da_html.tmp.attrs").split("\n").reject { |x| x.empty? } %}
               {% tag_name = x.split.first %}

@@ -1,12 +1,12 @@
 
 class A_Spec_HTML
 
-  include DA_HTML::SPAN
-  include DA_HTML::A
+  include DA_HTML::DSL::SPAN
+  include DA_HTML::DSL::A
 
   getter :io
   def initialize
-    @io = DA_HTML::INPUT_OUTPUT.new
+    @io = DA_HTML::DSL::INPUT_OUTPUT.new
   end # === def initialize
 
   def render
