@@ -17,7 +17,20 @@ module DA_HTML
     }
   end # === def pretty_html
 
+  macro file_read!(dir, file)
+    File.read(
+       File.expand_path(
+         File.join( {{dir}}, {{file}}.gsub(/\.+/, ".") )
+       )
+    )
+  end # === macro file_read!
 
 end # === module DA_HTML
 
+
+{% if env("IS_DEV_BUILD") %}
+  macro inspect!(*args)
+    puts \{{*args}}
+  end
+{% end %}
 

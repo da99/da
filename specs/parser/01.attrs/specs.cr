@@ -1,8 +1,12 @@
 
-class IT_WORKS
+class SPEC_02_ATTRS
+
   include DA_HTML::Parser
 
   def_tags :html , :head , :title , :body , :p
+  def_attr :p, :id
+  def_attr :p, :class
+
   def_tag :css do |node|
     @io << %(<link href="/main.css" rel="stylesheet">)
     return false
@@ -13,15 +17,15 @@ class IT_WORKS
     return false
   end
 
-  def_to_html!
+  finish_def_html!
 end # === class Spec_Parser
 
 describe DA_HTML::Parser do
-  input_file = "#{__DIR__}/input.html"
+  input_file = "/input.html"
   expected   = File.read("#{__DIR__}/expected.html")
 
   it "works" do
-    actual = IT_WORKS.new(input_file).to_html
+    actual = SPEC_02_ATTRS.new(input_file, __DIR__).to_html
     should_eq strip(actual), strip(expected)
   end # === it "#{x.gsub(".", " ")}"
 end # === describe

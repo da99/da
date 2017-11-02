@@ -8,9 +8,16 @@ local +x ORIGINAL_ARGS="$@"
 PATH="$PATH:$THIS_DIR/../process/bin"
 PATH="$PATH:$THIS_DIR/../sh_color/bin"
 
-case "$(echo $@)" in
+if [[ -z "$@" ]]; then
+  local +x ACTION=watch
+else
+  local +x ACTION="$1"; shift
+fi
 
-  "")
+export IS_DEV_BUILD=yes
+case "$ACTION" in
+
+  watch)
     da_html.cr specs run || :
     process watch "-r examples -r sh -r src -r specs" "da_html.cr specs run"
     ;;
@@ -18,11 +25,11 @@ case "$(echo $@)" in
   run)
     reset
     cd "$THIS_DIR"
-    mkdir -p tmp
+    mkdir -p tmp/out
     sh_color ORANGE "=== {{Compiling}} specs..."
     my_crystal crystal build -o tmp/specs.cr specs/specs.cr
     sh_color ORANGE "=== {{Running}} specs..."
-    tmp/specs.cr
+    tmp/specs.cr $(test -f tmp/out/args && cat tmp/out/args || :) $@
     sh_color GREEN "=== {{DONE}} ==="
     ;;
 

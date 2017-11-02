@@ -10,21 +10,21 @@ module DA_HTML
 
   module Parser
 
-    @origin : String
-    @root : XML::Node
-    getter io : IO::Memory = IO::Memory.new
+    @origin : String = ""
+    @root   : XML::Node
 
-    def initialize(@root)
-      @origin = ""
+    getter file_dir : String
+    getter io       : IO::Memory = IO::Memory.new
+
+    def initialize(@root, @file_dir)
     end # === def initialize
 
-    def initialize(@io, @root)
-      @origin = ""
+    def initialize(@root, @io, @file_dir)
     end # === def initialize
 
-    def initialize(file : String)
-      @origin = File.read(file)
-      @root = XML.parse_html(@origin, XML::HTMLParserOptions::NOBLANKS | XML::HTMLParserOptions::PEDANTIC)
+    def initialize(file : String, @file_dir)
+      @origin = DA_HTML.file_read!(@file_dir, file)
+      @root   = XML.parse_html(@origin, XML::HTMLParserOptions::NOBLANKS | XML::HTMLParserOptions::PEDANTIC)
     end # === def initialize
 
     macro def_tags(*args, &blok)
@@ -60,7 +60,7 @@ module DA_HTML
       {% end %}
     end # === macro attr
 
-    macro def_to_html!
+    macro finish_def_html!
       def render_element_node(node : XML::Node)
         name = node.name
         case name
@@ -73,22 +73,22 @@ module DA_HTML
         end # === node.name
       end # === def render_element_node
 
-        def render_element_attribute(node : XML::Node, attr : XML::Node)
-          tag_name = node.name
-          name     = attr.name
-          {% if !`bash -c "cat tmp/da_html.tmp.attrs"`.strip.empty? %}
-            case
-              {% for x in system("cat tmp/da_html.tmp.attrs").split("\n").reject { |x| x.empty? } %}
-              {% tag_name = x.split.first %}
-              {% name     = x.split.last %}
-              when tag_name == "{{tag_name.id}}" && name == "{{name.id}}"
-                return {{tag_name.id}}_{{name.id}}(node, attr)
-              {% end %}
-            end # === node.name
-          {% end %}
-          raise Exception.new("Attribute not allowed: #{node.name.inspect} #{attr.name.inspect}")
-        end
-      {% `bash -c "rm -f tmp/da_html.tmp.*"` %}
+      def render_element_attribute(node : XML::Node, attr : XML::Node)
+        tag_name = node.name
+        name     = attr.name
+        {% if !`bash -c "cat tmp/da_html.tmp.attrs"`.strip.empty? %}
+          case
+            {% for x in system("cat tmp/da_html.tmp.attrs").split("\n").reject { |x| x.empty? } %}
+            {% tag_name = x.split.first %}
+            {% name     = x.split.last %}
+            when tag_name == "{{tag_name.id}}" && name == "{{name.id}}"
+              return {{tag_name.id}}_{{name.id}}(node, attr)
+            {% end %}
+          end # === node.name
+        {% end %}
+        raise Exception.new("Attribute not allowed: #{node.name.inspect} #{attr.name.inspect}")
+      end
+      {% `bash -c "rm -f tmp/da_html.tmp.attrs"` %}
     end # === macro render(node)
 
     def to_html
@@ -132,7 +132,7 @@ module DA_HTML
         end
         io.indent
         node.children.each { |x|
-          p = self.class.new(io, x)
+          p = self.class.new(x, io, file_dir)
           p.to_html
           if node.children.size == 1
             last_was_text = p.last_was_text?
@@ -150,7 +150,7 @@ module DA_HTML
         end
 
       when XML::Type::ATTRIBUTE_NODE
-        raise Exception.new("Not ready: #{node.type.inspect}")
+        raise Exception.new("Needs to be implemented: #{node.type.inspect}")
 
       when XML::Type::TEXT_NODE
         new_txt = node.to_s.strip
@@ -160,65 +160,64 @@ module DA_HTML
       when XML::Type::CDATA_SECTION_NODE
         content = node.content.strip
         return if content.empty?
-        raise Exception.new("Not ready: #{node.type.inspect} #{node.content.inspect}")
+        raise Exception.new("Needs to be implemented: #{node.type.inspect} #{node.content.inspect}")
 
       when XML::Type::ENTITY_REF_NODE
-        raise Exception.new("Not ready: #{node.type.inspect}")
+        raise Exception.new("Needs to be implemented: #{node.type.inspect}")
 
       when XML::Type::ENTITY_NODE
-        raise Exception.new("Not ready: #{node.type.inspect}")
+        raise Exception.new("Needs to be implemented: #{node.type.inspect}")
 
       when XML::Type::PI_NODE
-        raise Exception.new("Not ready: #{node.type.inspect}")
+        raise Exception.new("Needs to be implemented: #{node.type.inspect}")
 
       when XML::Type::COMMENT_NODE
-        raise Exception.new("Not ready: #{node.type.inspect}")
+        raise Exception.new("Needs to be implemented: #{node.type.inspect}")
 
       when XML::Type::DOCUMENT_NODE
-        raise Exception.new("Not ready: #{node.type.inspect}")
+        raise Exception.new("Needs to be implemented: #{node.type.inspect}")
 
       when XML::Type::DOCUMENT_TYPE_NODE
-        raise Exception.new("Not ready: #{node.type.inspect}")
+        raise Exception.new("Needs to be implemented: #{node.type.inspect}")
 
       when XML::Type::DOCUMENT_FRAG_NODE
-        raise Exception.new("Not ready: #{node.type.inspect}")
+        raise Exception.new("Needs to be implemented: #{node.type.inspect}")
 
       when XML::Type::NOTATION_NODE
-        raise Exception.new("Not ready: #{node.type.inspect}")
+        raise Exception.new("Needs to be implemented: #{node.type.inspect}")
 
       when XML::Type::HTML_DOCUMENT_NODE
         # top most root element of a doc.
         node.children.each { |x|
-          self.class.new(@io, x).to_html
+          self.class.new(x, io, file_dir).to_html
         }
 
-
       when XML::Type::DTD_NODE
-        raise Exception.new("Not ready: #{node.type.inspect}")
+        raise Exception.new("Needs to be implemented: #{node.type.inspect}")
 
       when XML::Type::ELEMENT_DECL
-        raise Exception.new("Not ready: #{node.type.inspect}")
+        raise Exception.new("Needs to be implemented: #{node.type.inspect}")
 
       when XML::Type::ATTRIBUTE_DECL
-        raise Exception.new("Not ready: #{node.type.inspect}")
+        raise Exception.new("Needs to be implemented: #{node.type.inspect}")
 
       when XML::Type::ENTITY_DECL
-        raise Exception.new("Not ready: #{node.type.inspect}")
+        raise Exception.new("Needs to be implemented: #{node.type.inspect}")
 
       when XML::Type::NAMESPACE_DECL
-        raise Exception.new("Not ready: #{node.type.inspect}")
+        raise Exception.new("Needs to be implemented: #{node.type.inspect}")
 
       when XML::Type::XINCLUDE_START
-        raise Exception.new("Not ready: #{node.type.inspect}")
+        raise Exception.new("Needs to be implemented: #{node.type.inspect}")
 
       when XML::Type::XINCLUDE_END
-        raise Exception.new("Not ready: #{node.type.inspect}")
+        raise Exception.new("Needs to be implemented: #{node.type.inspect}")
 
       when XML::Type::DOCB_DOCUMENT_NODE
-        raise Exception.new("Not ready: #{node.type.inspect}")
+        raise Exception.new("Needs to be implemented: #{node.type.inspect}")
 
       else
-        raise Exception.new("Not ready: #{node.type.inspect}")
+        raise Exception.new("Needs to be implemented: #{node.type.inspect}")
 
       end # === case node.type
 

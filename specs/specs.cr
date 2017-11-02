@@ -1,6 +1,40 @@
 
 require "spec"
 require "../src/da_html"
+
+
+macro should_eq(actual, expected)
+  {{actual}}.should eq(strip( {{expected}} ))
+end # === macro should_eq
+
+macro strip(str)
+  ({{str}} || "").strip.gsub("\n", "").gsub(/>\s+</, "><")
+end
+
+macro render(&blok)
+  Basic_Spec_HTML.render {
+    {{blok.body}}
+  }
+end
+
+macro strip_each_line(str)
+  {{str}}.split("\n").map { |x| x.strip }.join
+end
+
+# === Parser
+require "../src/da_html/parser"
+{% begin %}
+  {% files = system("find specs/parser -mindepth 2 -type f -name specs.cr").split("\n").reject { |x| x.strip.empty? } %}
+  {% if files.empty? %}
+    {% raise "No specs found in specs/parser" %}
+  {% end %}
+  {% for x in files %}
+    require "../{{x.id}}"
+  {% end %}
+{% end %}
+
+
+# === DSL
 require "../src/da_html/dsl"
 
 class Basic_Spec_HTML
@@ -31,31 +65,6 @@ class Basic_Spec_HTML
     @io.to_html
   end # === def to_html
 end # === class HTML
-
-
-macro should_eq(actual, expected)
-  {{actual}}.should eq(strip( {{expected}} ))
-end # === macro should_eq
-
-macro strip(str)
-  ({{str}} || "").strip.gsub("\n", "").gsub(/>\s+</, "><")
-end
-
-macro render(&blok)
-  Basic_Spec_HTML.render {
-    {{blok.body}}
-  }
-end
-
-macro strip_each_line(str)
-  {{str}}.split("\n").map { |x| x.strip }.join
-end
-
-{% if !env("DA_HTML_PARSER") %}
-  require "../examples/*"
-  require "./dsl/*"
-{% end %}
-{% if !env("DA_HTML") %}
-  require "./parser/specs"
-{% end %}
+require "../examples/*"
+require "./dsl/*"
 
