@@ -14,7 +14,8 @@ require "../../src/da_html/parser"
 class SPECS_PARSER
   include DA_HTML::Parser
 
-  def_tags :html , :head , :title , :body , :p
+  def_tags :html , :head , :title , :body , :p, :div, :link
+  def_attr :link, :href
   finish_def_html!
 end # === class SPECS_PARSER
 
@@ -28,7 +29,6 @@ describe "Parser" do
     next unless File.exists?(expect)
     next unless File.exists?(input)
     next if File.exists?(specs)
-    puts input
     it "#{name}" do
       actual = SPECS_PARSER.new("input.html", x).to_html
       should_eq strip(actual), strip(File.read(expect))

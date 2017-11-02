@@ -56,6 +56,7 @@ class Basic_Spec_HTML
     @io.to_html
   end # === def to_html
 end # === class HTML
+
 require "../examples/*"
 require "./dsl/*"
 

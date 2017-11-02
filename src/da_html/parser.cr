@@ -6,9 +6,15 @@ require "xml"
 {% `touch tmp/da_html.tmp.tags` %}
 {% `touch tmp/da_html.tmp.attrs` %}
 
+require "./parser/exception"
+
 module DA_HTML
 
   module Parser
+
+    SEGMENT_ATTR_ID    = /([a-z0-9\_\-]{1,15})/
+    SEGMENT_ATTR_CLASS = /[a-z0-9\ \_\-]{1,50}/
+    SEGMENT_ATTR_HREF  = /[a-z0-9\ \_\-\/\.]{1,50}/
 
     @origin : String = ""
     @root   : XML::Node
@@ -46,6 +52,24 @@ module DA_HTML
         {% end %}
     end # === macro def_tag
 
+    macro def_attr(tag_name, name, pattern)
+      {% pattern_name = "PATTERN_ATTR_#{tag_name.id.upcase.gsub(/[^0-9A-Z\_]/, "_")}_#{name.id.upcase.gsub(/[^A-Z0-9]/, "_")}".id %}
+      {{pattern_name}} = /^(#{{{pattern}}})$/
+
+      {% `bash -c  "echo #{tag_name.id} #{name.id} >> tmp/da_html.tmp.attrs"` %}
+      def {{tag_name.id}}_{{name.id}}(node : XML::Node, attr : XML::Node)
+        content = attr.content
+        case
+        when content.is_a?(String) && content =~ {{pattern_name}}
+          attr.content = DA_HTML_ESCAPE.escape(attr.content)
+        else
+          raise Invalid_Attr_Value.new("{{tag_name.id}} {{name.id}}:  #{content.inspect}")
+        end
+
+        attr
+      end
+    end # === macro attr
+
     macro def_attr(tag_name, name, &blok)
       {% `bash -c  "echo #{tag_name.id} #{name.id} >> tmp/da_html.tmp.attrs"` %}
       {% if blok %}
@@ -53,10 +77,7 @@ module DA_HTML
           {{blok.body}}
         end
       {% else %}
-        def {{tag_name.id}}_{{name.id}}(node : XML::Node, attr : XML::Node)
-          attr.content = DA_HTML_ESCAPE.escape(attr.content)
-          attr
-        end
+        def_attr({{tag_name}}, {{name}}, SEGMENT_ATTR_{{name.id.upcase.gsub(/[^A-Z0-9]/, "_")}})
       {% end %}
     end # === macro attr
 

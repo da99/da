@@ -19,17 +19,28 @@ case "$ACTION" in
 
   watch)
     da_html.cr specs run || :
-    process watch "-r examples -r sh -r src -r specs" "da_html.cr specs run"
+    process watch "-r tmp/out -r examples -r sh -r src -r specs" "da_html.cr specs run"
     ;;
 
   run)
     reset
     cd "$THIS_DIR"
     mkdir -p tmp/out
-    sh_color ORANGE "=== {{Compiling}} specs..."
-    my_crystal crystal build -o tmp/specs.cr specs/specs.cr
+    case "${CHANGED_FILE:-}" in
+      *.cr)
+        sh_color ORANGE "=== {{Compiling}} specs..."
+        my_crystal crystal build -o tmp/specs.cr specs/specs.cr
+        ;;
+      */tmp/out/args) : ;;
+      */tmp/out*) return 0 ;;
+    esac
+
     sh_color ORANGE "=== {{Running}} specs..."
-    tmp/specs.cr $(test -f tmp/out/args && cat tmp/out/args || :) $@
+    if [[ -s "tmp/out/args" ]]; then
+      tmp/specs.cr -e "$(cat tmp/out/args)" $@
+    else
+      tmp/specs.cr $@
+    fi
     sh_color GREEN "=== {{DONE}} ==="
     ;;
 
