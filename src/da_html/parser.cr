@@ -16,15 +16,15 @@ module DA_HTML
     getter file_dir : String
     getter io       : IO::Memory = IO::Memory.new
 
+    def initialize(file : String, @file_dir)
+      @origin = DA_HTML.file_read!(@file_dir, file)
+      @root   = XML.parse_html(@origin, XML::HTMLParserOptions::NOBLANKS | XML::HTMLParserOptions::PEDANTIC)
+    end # === def initialize
+
     def initialize(@root, @file_dir)
     end # === def initialize
 
     def initialize(@root, @io, @file_dir)
-    end # === def initialize
-
-    def initialize(file : String, @file_dir)
-      @origin = DA_HTML.file_read!(@file_dir, file)
-      @root   = XML.parse_html(@origin, XML::HTMLParserOptions::NOBLANKS | XML::HTMLParserOptions::PEDANTIC)
     end # === def initialize
 
     macro def_tags(*args, &blok)

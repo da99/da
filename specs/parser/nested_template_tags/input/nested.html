@@ -1,0 +1,14 @@
+
+<!DOCTYPE html>
+<html>
+  <head><title>Nested Templates</title></head>
+  <body>
+    <template data-if="template something replace">
+      <div>\{{is_happy}}</div>
+      <template data-if="template another replace">
+        <div>\{{is_happy}}</div>
+      </template>
+    </template>
+  </body>
+</html>
+

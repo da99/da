@@ -1,0 +1,45 @@
+<run src="_.layout.html">
+  <local name="THE_TITLE">{{SITE_NAME}} - My Page</local>
+</run>
+
+
+<bottom>
+  <!-- This is the bottom -->
+</bottom>
+
+<bottom>
+  <!-- This is the very bottom -->
+  <run>
+	  hide;
+	  show;
+  </run>
+</bottom>
+
+<bottom to="my_list">
+  This is the bottom.
+</bottom>
+
+
+<head>
+	  <link rel="stylesheet" media="all" href="{{styles_css}}">
+</head>
+
+<body>
+  This is the body.
+  <div>
+    <local name="my_ignored_local">yo</local>
+    <global name="my_ignored_global">yo</global>
+  </div>
+  <run src="footer/_.footer.html" />
+</body>
+
+<top>
+  <!-- This is the top -->
+</top>
+
+
+
+<top to="my_list">
+  This is the top.
+</top>
+

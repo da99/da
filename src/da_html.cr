@@ -17,11 +17,11 @@ module DA_HTML
     }
   end # === def pretty_html
 
-  macro file_read!(dir, file)
+  macro file_read!(dir, raw)
     File.read(
-       File.expand_path(
-         File.join( {{dir}}, {{file}}.gsub(/\.+/, ".") )
-       )
+      File.expand_path(
+        File.join({{dir}}, {{raw}}.gsub(/\.+/, ".").gsub(/[^a-z0-9\/\_\-\.]+/, "_"))
+      )
     )
   end # === macro file_read!
 

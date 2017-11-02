@@ -1,0 +1,14 @@
+
+<!DOCTYPE html>
+<html>
+  <head><title>Nested Templates</title></head>
+  <body>
+    <script data-if="template something replace" type="application/template">
+      &#x3C;div&#x3E;&#123;&#123;is_happy&#125;&#125;&#x3C;/div&#x3E;
+      &#x3C;script data-if=&#x22;template another replace&#x22; type=&#x22;application/template&#x22;&#x3E;
+        &#x26;#x3C;div&#x26;#x3E;&#x26;#123;&#x26;#123;is_happy&#x26;#125;&#x26;#125;&#x26;#x3C;/div&#x26;#x3E;
+      &#x3C;/script&#x3E;
+    </script>
+  </body>
+</html>
+
