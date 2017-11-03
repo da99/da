@@ -11,14 +11,14 @@ require "./parser/template"
 
 module DA_HTML
 
+  # === It's meant to be used within a Struct.
   module Parser
 
     SEGMENT_ATTR_ID    = /([a-z0-9\_\-]{1,15})/
     SEGMENT_ATTR_CLASS = /[a-z0-9\ \_\-]{1,50}/
     SEGMENT_ATTR_HREF  = /[a-z0-9\ \_\-\/\.]{1,50}/
 
-    @is_fin = false
-    @origin : String = ""
+    @origin = ""
     @root   : XML::Node
 
     getter file_dir : String
@@ -256,12 +256,11 @@ module DA_HTML
 
       end # === case node.type
 
-      @is_fin = true
       self
     end # === def to_html
 
     def to_html
-      run unless @is_fin
+      run
       io.to_s
     end # === def to_html
 

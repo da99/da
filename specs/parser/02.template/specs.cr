@@ -1,5 +1,5 @@
 
-class SPECS_TEMPLATE
+struct SPECS_TEMPLATE
 
   include DA_HTML::Parser
   include DA_HTML::Parser::Template

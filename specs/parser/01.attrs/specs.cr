@@ -1,5 +1,5 @@
 
-class SPEC_02_ATTRS
+struct SPEC_ATTRS
 
   include DA_HTML::Parser
 
@@ -25,7 +25,7 @@ describe DA_HTML::Parser do
   expected   = File.read("#{__DIR__}/expected.html")
 
   it "works" do
-    actual = SPEC_02_ATTRS.new(input_file, __DIR__).to_html
+    actual = SPEC_ATTRS.new(input_file, __DIR__).to_html
     should_eq strip(actual), strip(expected)
   end # === it "#{x.gsub(".", " ")}"
 end # === describe

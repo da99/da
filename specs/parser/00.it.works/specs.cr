@@ -1,5 +1,5 @@
 
-class IT_WORKS
+class SPEC_IT_WORKS
   include DA_HTML::Parser
 
   def_tags :html , :head , :title , :body , :p
@@ -21,7 +21,7 @@ describe DA_HTML::Parser do
   expected   = File.read("#{__DIR__}/expected.html")
 
   it "works" do
-    actual = IT_WORKS.new(input_file, __DIR__).to_html
+    actual = SPEC_IT_WORKS.new(input_file, __DIR__).to_html
     should_eq strip(actual), strip(expected)
   end # === it "#{x.gsub(".", " ")}"
 end # === describe

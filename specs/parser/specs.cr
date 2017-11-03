@@ -11,7 +11,7 @@ require "../../src/da_html/parser"
   {% end %}
 {% end %}
 
-class SPECS_PARSER
+struct SPECS_PARSER
   include DA_HTML::Parser
 
   def_tags :html , :head , :title , :body , :p, :div, :link
