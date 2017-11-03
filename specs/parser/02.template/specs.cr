@@ -19,4 +19,12 @@ describe "Parser template tag" do
     should_eq strip(actual), strip(File.read(expect))
   end
 
+  it "multi-escapes nested templates" do
+    x = __DIR__ + "/nested_template_tags"
+    expect = File.join(x, "expect.html")
+    input  = File.join(x, "input.html")
+    actual = SPECS_TEMPLATE.new("input.html", x).to_html
+    should_eq strip(actual), strip(File.read(expect))
+  end # === it "multi-escapes nested templates"
+
 end # === desc "parser"
