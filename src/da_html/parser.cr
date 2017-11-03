@@ -7,6 +7,7 @@ require "xml"
 {% `touch tmp/da_html.tmp.attrs` %}
 
 require "./parser/exception"
+require "./parser/template"
 
 module DA_HTML
 
@@ -16,6 +17,7 @@ module DA_HTML
     SEGMENT_ATTR_CLASS = /[a-z0-9\ \_\-]{1,50}/
     SEGMENT_ATTR_HREF  = /[a-z0-9\ \_\-\/\.]{1,50}/
 
+    @is_fin = false
     @origin : String = ""
     @root   : XML::Node
 
@@ -42,7 +44,7 @@ module DA_HTML
     macro def_tag(name, &blok)
       {% `bash -c  "echo #{name.id} >> tmp/da_html.tmp.tags"` %}
         {% if blok %}
-          def {{name.id}}({{blok.args.join(", ").id}} : XML::Node)
+          def {{name.id}}({{blok.args.first}} : XML::Node)
             {{blok.body}}
           end
         {% else %}
@@ -73,7 +75,11 @@ module DA_HTML
     macro def_attr(tag_name, name, &blok)
       {% `bash -c  "echo #{tag_name.id} #{name.id} >> tmp/da_html.tmp.attrs"` %}
       {% if blok %}
-        def {{tag_name.id}}_{{name.id}}({{blok.args.join(" : XML::Node, ").id}} : XML::Node)
+        def {{tag_name.id}}_{{name.id}}(
+          {% if !blok.args.empty? %}
+            {{blok.args.first}} : XML::NODE, {{blok.args.last}} : XML::NODE
+          {% end %}
+        )
           {{blok.body}}
         end
       {% else %}
@@ -125,7 +131,7 @@ module DA_HTML
       @last_was_text
     end # === def last_was_text?
 
-    def to_html
+    def run
       node = @root
       last_was_text = false
 
@@ -135,41 +141,48 @@ module DA_HTML
 
       when XML::Type::ELEMENT_NODE
         node = render_element_node(node)
-        return if !node.is_a?(XML::Node)
+        case node
+        when String
+          io << node
 
-        io << "\n"
-        io.spaces
-        attrs = node.attributes
-        if attrs.empty?
-          io << "<#{node.name}>"
-        else
-          io << "<#{node.name}"
-          attrs.each { |a|
-            new_a = render_element_attribute(node, a)
-            if new_a.is_a?(XML::Node)
-              io << " " << new_a.name << "=" << new_a.content.inspect
+        when XML::Node
+          io << "\n"
+          io.spaces
+          attrs = node.attributes
+          if attrs.empty?
+            io << "<#{node.name}>"
+          else
+            io << "<#{node.name}"
+            attrs.each { |a|
+              new_a = render_element_attribute(node, a)
+              if new_a.is_a?(XML::Node)
+                io << " " << new_a.name << "=" << new_a.content.inspect
+              end
+            }
+            io << ">"
+          end
+          io.indent
+          node.children.each { |x|
+            p = self.class.new(x, io, file_dir)
+            p.to_html
+            if node.children.size == 1
+              last_was_text = p.last_was_text?
             end
           }
-          io << ">"
-        end
-        io.indent
-        node.children.each { |x|
-          p = self.class.new(x, io, file_dir)
-          p.to_html
-          if node.children.size == 1
-            last_was_text = p.last_was_text?
-          end
-        }
 
-        if last_was_text || node.children.empty?
-          io.de_indent
-          io << "</#{node.name}>"
+          if last_was_text || node.children.empty?
+            io.de_indent
+            io << "</#{node.name}>"
+          else
+            io << "\n"
+            io.de_indent
+            io.spaces
+            io << "</#{node.name}>"
+          end
+
         else
-          io << "\n"
-          io.de_indent
-          io.spaces
-          io << "</#{node.name}>"
-        end
+          return
+        end # === case node
 
       when XML::Type::ATTRIBUTE_NODE
         raise Exception.new("Needs to be implemented: #{node.type.inspect}")
@@ -243,8 +256,23 @@ module DA_HTML
 
       end # === case node.type
 
+      @is_fin = true
+      self
+    end # === def to_html
+
+    def to_html
+      run unless @is_fin
       io.to_s
     end # === def to_html
+
+    def in_tree!(name)
+      target = @root.parent
+      while target
+        return target if target.name == name
+        target = target.parent
+      end
+      raise Exception.new("Must be inside a #{name.inspect}")
+    end
 
   end # === module Parser
 
