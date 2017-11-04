@@ -27,4 +27,20 @@ describe "Parser template tag" do
     should_eq strip(actual), strip(File.read(expect))
   end # === it "multi-escapes nested templates"
 
+  it "renders custom attributes" do
+    x = __DIR__ + "/uses_custom_template_attrs"
+    expect = File.join(x, "expect.html")
+    input  = File.join(x, "input.html")
+    actual = SPECS_TEMPLATE.new("input.html", x).to_html
+    should_eq strip(actual), strip(File.read(expect))
+  end # === it "renders custom attributes"
+
+  it "does not override template attrs" do
+    x = __DIR__ + "/no_override_template_attrs"
+    expect = File.join(x, "expect.html")
+    input  = File.join(x, "input.html")
+    actual = SPECS_TEMPLATE.new("input.html", x).to_html
+    should_eq strip(actual), strip(File.read(expect))
+  end # === it "does not override template attrs"
+
 end # === desc "parser"
