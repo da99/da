@@ -44,11 +44,11 @@ module DA_HTML
     macro def_tag(name, &blok)
       {% `bash -c  "echo #{name.id} >> tmp/da_html.tmp.tags"` %}
         {% if blok %}
-          def {{name.id}}({{blok.args.first}} : XML::Node)
+          def tag_{{name.id}}({{blok.args.first}} : XML::Node)
             {{blok.body}}
           end
         {% else %}
-          def {{name.id}}(node : XML::Node)
+          def tag_{{name.id}}(node : XML::Node)
             node
           end
         {% end %}
@@ -59,7 +59,7 @@ module DA_HTML
       {{pattern_name}} = /^(#{{{pattern}}})$/
 
       {% `bash -c  "echo #{tag_name.id} #{name.id} >> tmp/da_html.tmp.attrs"` %}
-      def {{tag_name.id}}_{{name.id}}(node : XML::Node, attr : XML::Node)
+      def tag_{{tag_name.id}}_attr_{{name.id}}(node : XML::Node, attr : XML::Node)
         content = attr.content
         case
         when content.is_a?(String) && content =~ {{pattern_name}}
@@ -75,7 +75,7 @@ module DA_HTML
     macro def_attr(tag_name, name, &blok)
       {% `bash -c  "echo #{tag_name.id} #{name.id} >> tmp/da_html.tmp.attrs"` %}
       {% if blok %}
-        def {{tag_name.id}}_{{name.id}}(
+        def tag_{{tag_name.id}}_attr_{{name.id}}(
           {% if !blok.args.empty? %}
             {{blok.args.first}} : XML::NODE, {{blok.args.last}} : XML::NODE
           {% end %}
@@ -94,7 +94,7 @@ module DA_HTML
         case name
           {% for x in system("bash -c \"cat tmp/da_html.tmp.tags\"").split("\n").reject { |x| x.empty? } %}
           when "{{x.id}}"
-            return {{x.id}}(node)
+            return tag_{{x.id}}(node)
           {% end %}
         end # === node.name
         {% end %}
@@ -110,7 +110,7 @@ module DA_HTML
             {% tag_name = x.split.first %}
             {% name     = x.split.last %}
             when tag_name == "{{tag_name.id}}" && name == "{{name.id}}"
-              return {{tag_name.id}}_{{name.id}}(node, attr)
+              return tag_{{tag_name.id}}_attr_{{name.id}}(node, attr)
             {% end %}
           end # === node.name
         {% end %}
