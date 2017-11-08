@@ -23,7 +23,6 @@ case "$ACTION" in
     ;;
 
   run)
-    reset
     cd "$THIS_DIR"
     mkdir -p tmp/out
     case "${CHANGED_FILE:-}" in
@@ -35,6 +34,7 @@ case "$ACTION" in
       */tmp/out*) return 0 ;;
     esac
 
+    reset
     sh_color ORANGE "=== {{Running}} specs..."
     if [[ -s "tmp/out/args" ]]; then
       tmp/specs.cr -e "$(cat tmp/out/args)" $@

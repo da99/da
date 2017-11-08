@@ -2,17 +2,27 @@
 struct SPECS_TEMPLATE
 
   include DA_HTML::Parser
-  include DA_HTML::Parser::Template
 
-  def_tags :html , :head , :title , :body , :p, :div, :link
-  finish_def_html!
+  def self.parse_tag(name : String | Symbol, node : XML::Node)
+    case name
+    when :doctype!
+      allow_tag(node)
+    when "html", "head", "title", "body", "link"
+      allow_tag(node)
+    when "template", "var", "loop"
+      allow_tag(node)
+    when "p", "div"
+      allow_tag_with_attributes(node, "id", "class")
+    end
+  end # === def parse
 
   macro spec(name)
     x = __DIR__ + "{{name.id}}"
+
     expect = File.join(x, "expect.html")
     input  = File.join(x, "input.html")
-    actual = SPECS_TEMPLATE.new("input.html", x).to_html
-    should_eq strip(actual), strip(File.read(expect))
+    actual = SPECS_TEMPLATE.new_from_file("input.html", x).to_html
+    should_eq actual, File.read expect
   end # === macro spec
 
 end # === class SPECS_TEMPLATE

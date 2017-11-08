@@ -2,18 +2,35 @@
 class SPEC_IT_WORKS
   include DA_HTML::Parser
 
-  def_tags :html , :head , :title , :body , :p
-  def_tag :css do |node|
-    @io << %(<link href="/main.css" rel="stylesheet">)
-    return false
-  end
+  def self.parse_tag(name : String | Symbol, node : XML::Node)
+    case name
+    when :doctype!
+      allow_tag(node)
+    when "html", "head", "title", "body"
+      allow_tag(node)
+    when "p"
+      allow_tag(node)
+    when "css", "js"
+      allow_tag(node)
+      :done
 
-  def_tag :js do |node|
-    @io << %(<script src="/main.js" type="application/javascript"></script>)
-    return false
-  end
+    when "js"
+      allow_tag(node)
+      :done
+    end
+  end # === def parse_tag
 
-  finish_def_html!
+  def render_tag(tag_name)
+    case tag_name
+    when "css"
+      @io << %(<link href="/main.css" rel="stylesheet">)
+    when "js"
+      @io << %(<script src="/main.js" type="application/javascript"></script>)
+    else
+      super
+    end
+  end # === def render_tag
+
 end # === class Spec_Parser
 
 describe DA_HTML::Parser do
@@ -21,7 +38,7 @@ describe DA_HTML::Parser do
   expected   = File.read("#{__DIR__}/expected.html")
 
   it "works" do
-    actual = SPEC_IT_WORKS.new(input_file, __DIR__).to_html
+    actual = SPEC_IT_WORKS.new_from_file(input_file, __DIR__).to_html
     should_eq strip(actual), strip(expected)
   end # === it "#{x.gsub(".", " ")}"
 end # === describe

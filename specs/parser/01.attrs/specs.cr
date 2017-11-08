@@ -3,21 +3,28 @@ struct SPEC_ATTRS
 
   include DA_HTML::Parser
 
-  def_tags :html , :head , :title , :body , :p
-  def_attr :p, :id
-  def_attr :p, :class
+  def self.parse_tag(name : String | Symbol, node : XML::Node)
+    case name
+    when :doctype!
+      allow_tag(node)
+    when "html", "head", "title", "body"
+      allow_tag(node)
+    when "p", "div"
+      allow_tag_with_attributes(node, "id", "class")
+    end
+  end # === def self.parse_tag
 
-  def_tag :css do |node|
-    @io << %(<link href="/main.css" rel="stylesheet">)
-    return false
-  end
+  def render(tag_name)
+    case tag_name
+    when "css"
+      @io << %(<link href="/main.css" rel="stylesheet">)
+    when "js"
+      @io << %(<script src="/main.js" type="application/javascript"></script>)
+    else
+      super
+    end
+  end # === def render
 
-  def_tag :js do |node|
-    @io << %(<script src="/main.js" type="application/javascript"></script>)
-    return false
-  end
-
-  finish_def_html!
 end # === class Spec_Parser
 
 describe DA_HTML::Parser do
@@ -25,7 +32,7 @@ describe DA_HTML::Parser do
   expected   = File.read("#{__DIR__}/expected.html")
 
   it "works" do
-    actual = SPEC_ATTRS.new(input_file, __DIR__).to_html
+    actual = SPEC_ATTRS.new_from_file(input_file, __DIR__).to_html
     should_eq strip(actual), strip(expected)
   end # === it "#{x.gsub(".", " ")}"
 end # === describe

@@ -4,7 +4,7 @@ require "../src/da_html"
 
 
 macro should_eq(actual, expected)
-  {{actual}}.should eq(strip( {{expected}} ))
+  strip({{actual}}).should eq(strip( {{expected}} ))
 end # === macro should_eq
 
 macro strip(str)
