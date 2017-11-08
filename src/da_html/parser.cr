@@ -115,8 +115,33 @@ module DA_HTML
     end # === macro render(node)
 
     def run
-      inspect! @doc
-      raise Exception.new("not ready")
+      counter = -1
+      max = @doc.size
+      is_writing_attrs = false
+      while counter < (max - 1)
+        counter += 1
+        instruct = @doc[counter]
+        first = instruct.first
+        case first
+        when "doctype!"
+          io << instruct.last
+        when "open-tag"
+          io << "<" << instruct.last
+          next_node = @doc[counter + 1]?
+            while next_node && next_node.first == "attr"
+              counter += 1
+              io << " " << next_node[1] << "=" << next_node.last.inspect
+              next_node = @doc[counter + 1]?
+          end
+          io << ">"
+        when "text"
+          io << (DA_HTML_ESCAPE.escape(instruct.last) || "")
+        when "close-tag"
+          io << "</" << instruct.last << ">"
+        else
+          raise Exception.new("Unknown instruction: #{first.inspect}")
+        end
+      end
       self
     end # === def to_html
 
