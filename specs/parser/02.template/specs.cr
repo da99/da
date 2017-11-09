@@ -16,6 +16,28 @@ struct SPECS_TEMPLATE
     end
   end # === def parse
 
+  def render(doc : DA_HTML::Parser::Doc)
+    return super unless doc.current.open_tag?
+    tag = doc.current
+    case tag.last
+    when "template"
+      render(tag, doc)
+      doc.move
+      doc.attrs.each { |a|
+        render(a, doc)
+      }
+      template_io = capture(IO::Memory.new) { |io|
+        doc.children("template").each { |c|
+          render(c, doc)
+        }
+      }
+      io << (DA_HTML_ESCAPE.escape(template_io.to_s) || "")
+      render(doc.current, doc)
+    else
+      super
+    end
+  end # === def render
+
   macro spec(name)
     x = __DIR__ + "{{name.id}}"
 

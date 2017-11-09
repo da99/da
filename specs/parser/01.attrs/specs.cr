@@ -17,9 +17,9 @@ struct SPEC_ATTRS
   def render(tag_name)
     case tag_name
     when "css"
-      @io << %(<link href="/main.css" rel="stylesheet">)
+      io << %(<link href="/main.css" rel="stylesheet">)
     when "js"
-      @io << %(<script src="/main.js" type="application/javascript"></script>)
+      io << %(<script src="/main.js" type="application/javascript"></script>)
     else
       super
     end
