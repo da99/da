@@ -7,12 +7,18 @@ module DA_HTML
 
       getter origin : INSTRUCTION
       getter doc : Doc
+      getter doc_pos : Int32
       def initialize(@origin, @doc)
+        @doc_pos = @doc.pos
       end # === def initialize
 
       def open_tag?
         origin.first == "open-tag"
       end # === def open_tag?
+
+      def attr?
+        @origin.first == "attr"
+      end # === def attr?
 
       def first
         @origin.first
@@ -31,12 +37,12 @@ module DA_HTML
       end # === def []
 
       def attrs
-        doc.move if doc.current.origin == origin
+        doc.move if !attr?
         Parser::Attrs.new(doc)
       end # === def attrs
 
       def children
-        doc.move if doc.current.origin == origin
+        doc.move if @doc_pos == doc.pos
         Children.new(@doc, origin.last)
       end # === def children
 
