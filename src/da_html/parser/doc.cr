@@ -22,7 +22,7 @@ module DA_HTML
       # end # === def rewind
 
       def current
-        Instruction.new(origin[pos])
+        Instruction.new(origin[pos], self)
       end # === def current
 
       def current?
@@ -37,12 +37,8 @@ module DA_HTML
         origin[pos + 1]
       end # === def next
 
-      def attrs
-        Parser::Attrs.new(self)
-      end # === def attrs
-
       def prev
-        origin[pos - 1]
+        Instruction.new(origin[pos - 1], self)
       end
 
       def move
@@ -53,7 +49,7 @@ module DA_HTML
 
       # Returns: the `close-tag` of `tag_name`, while moving past all attrs and child
       # instructions.
-      def skip_tag(tag_name : String) : INSTRUCTION
+      def skip_tag(tag_name : String) : Instruction
         open = 1
         while open != 0 && next?
           case current.first
@@ -78,10 +74,6 @@ module DA_HTML
       def attr?
         current.first == "attr"
       end # === def attr?
-
-      def children(tag_name)
-        Children.new(self, tag_name)
-      end # === def children
 
     end # === class Doc
 

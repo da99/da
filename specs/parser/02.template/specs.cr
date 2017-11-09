@@ -22,12 +22,11 @@ struct SPECS_TEMPLATE
     case tag.last
     when "template"
       render(tag, doc)
-      doc.move
-      doc.attrs.each { |a|
+      tag.attrs.each { |a|
         render(a, doc)
       }
       template_io = capture(IO::Memory.new) { |io|
-        doc.children("template").each { |c|
+        tag.children.each { |c|
           render(c, doc)
         }
       }

@@ -6,7 +6,8 @@ module DA_HTML
     struct Instruction
 
       getter origin : INSTRUCTION
-      def initialize(@origin)
+      getter doc : Doc
+      def initialize(@origin, @doc)
       end # === def initialize
 
       def open_tag?
@@ -28,6 +29,16 @@ module DA_HTML
       def [](i : Int32)
         @origin[i]
       end # === def []
+
+      def attrs
+        doc.move if doc.current.origin == origin
+        Parser::Attrs.new(doc)
+      end # === def attrs
+
+      def children
+        doc.move if doc.current.origin == origin
+        Children.new(@doc, origin.last)
+      end # === def children
 
     end # === struct Instruction
 
