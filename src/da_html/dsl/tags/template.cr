@@ -6,7 +6,7 @@ module DA_HTML
     module TEMPLATE
 
       class INPUT_OUTPUT
-        include DA_HTML::DSL::INPUT_OUTPUT_BASE
+        include DA_HTML::IO_HTML::BASE
 
         def write_text(v : DA_HTML::DSL::TEMPLATE::VAR)
           raw! v.to_s

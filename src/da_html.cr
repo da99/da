@@ -1,5 +1,6 @@
 
 require "da_html_escape"
+require "./da_html/io_html"
 
 module DA_HTML
 

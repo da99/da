@@ -6,7 +6,7 @@ class A_Spec_HTML
 
   getter :io
   def initialize
-    @io = DA_HTML::DSL::INPUT_OUTPUT.new
+    @io = DA_HTML::IO_HTML.new
   end # === def initialize
 
   def render

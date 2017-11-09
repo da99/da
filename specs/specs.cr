@@ -41,9 +41,9 @@ class Basic_Spec_HTML
   include DA_HTML::DSL::TEXT
 
   getter :io
-  @io : DA_HTML::DSL::INPUT_OUTPUT | DA_HTML::DSL::TEMPLATE::INPUT_OUTPUT
+  @io : DA_HTML::IO_HTML | DA_HTML::DSL::TEMPLATE::INPUT_OUTPUT
   def initialize
-    @io = DA_HTML::DSL::INPUT_OUTPUT.new
+    @io = DA_HTML::IO_HTML.new
   end # === def initalize
 
   def self.render
