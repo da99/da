@@ -25,12 +25,12 @@ struct SPECS_TEMPLATE
       tag.attrs.each { |a|
         render(a, doc)
       }
-      template_io = capture(IO::Memory.new) { |io|
+      template_io = capture(DA_HTML::IO_HTML.new) { |io|
         tag.children.each { |c|
           render(c, doc)
         }
       }
-      io << (DA_HTML_ESCAPE.escape(template_io.to_s) || "")
+      io.write_text(template_io.to_s)
       render(doc.current, doc)
     else
       super

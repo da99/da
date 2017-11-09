@@ -5,7 +5,7 @@ module DA_HTML
 
     class Children
 
-      include Iterator(INSTRUCTION)
+      include Iterator(Instruction)
 
       @pos        : Int32
       @origin_pos : Int32
@@ -39,7 +39,8 @@ module DA_HTML
         end
         val = @doc.current
         @doc.move
-        val
+
+        return val
       end # === def next
 
       def rewind

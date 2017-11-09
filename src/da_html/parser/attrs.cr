@@ -1,14 +1,16 @@
 
+require "./instruction"
 module DA_HTML
 
   module Parser
 
     class Attrs
 
-      include Iterator(INSTRUCTION)
+      include Iterator(Instruction)
 
       @origin_pos : Int32
-      @pos : Int32
+      @pos        : Int32
+
       def initialize(@doc : Doc)
         @origin_pos = @doc.pos
         @pos = @doc.pos
@@ -22,11 +24,11 @@ module DA_HTML
         return val
       end # === def next
 
-      # def rewind
-      #   @pos = @origin_pos
-      #   @doc.rewind(@pos)
-      #   self
-      # end # === def rewind
+      def rewind
+        @pos = @origin_pos
+        @doc.rewind(@pos)
+        self
+      end # === def rewind
 
     end # === class Attrs
 

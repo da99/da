@@ -28,10 +28,10 @@ class SPEC_IT_WORKS
     case tag_name
     when "css"
       doc.skip_tag(tag_name)
-      io << %(<link href="/main.css" rel="stylesheet">)
+      io.raw! %(<link href="/main.css" rel="stylesheet">)
     when "js"
       doc.skip_tag(tag_name)
-      io << %(<script src="/main.js" type="application/javascript"></script>)
+      io.raw! %(<script src="/main.js" type="application/javascript"></script>)
     else
       super
     end

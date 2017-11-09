@@ -15,6 +15,7 @@ require "./parser/exception"
 require "./parser/template"
 require "./parser/class_methods"
 require "./parser/doc"
+require "./io_html"
 
 
 module DA_HTML
@@ -32,7 +33,7 @@ module DA_HTML
     SEGMENT_ATTR_HREF  = /[a-z0-9\ \_\-\/\.]{1,50}/
 
     getter file_dir : String
-    getter io       : IO::Memory = IO::Memory.new
+    getter io       : IO_HTML = IO_HTML.new
     @doc : DOC
 
     def initialize(@doc, @file_dir)
@@ -50,7 +51,7 @@ module DA_HTML
       self
     end # === def to_html
 
-    def capture(new_io : IO::Memory)
+    def capture(new_io : IO_HTML)
       old_io = @io
       @io = new_io
       yield @io
@@ -62,21 +63,25 @@ module DA_HTML
       action = i.first
       case action
       when "doctype!"
-        io << i.last
+        io.raw! i.last
+
       when "open-tag"
-        io << "<" << i.last
-        if doc.next? && doc.next.first != "attr"
-          io << ">"
+        if doc.next? && doc.next.first == "attr"
+          io.open_tag_attrs(i.last)
+        else
+          io.open_tag(i.last)
         end
+
       when "attr"
-        io << " " << i[1] << "=" << (DA_HTML_ESCAPE.escape(i.last) || "").inspect
+        io.write_attr(i[1], i.last)
         if doc.next? && doc.next.first != "attr"
-          io << ">"
+          io.close_attrs
         end
+
       when "text"
-        io << (DA_HTML_ESCAPE.escape(i.last) || "")
+        io.write_text(i.last)
       when "close-tag"
-        io << "</" << i.last << ">"
+        io.close_tag(i.last)
       else
         raise Exception.new("Unknown instruction: #{action.inspect}")
       end

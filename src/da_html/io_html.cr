@@ -21,7 +21,7 @@ module DA_HTML
       end # === def write_attr
 
       def escape(s)
-        DA_HTML_ESCAPE.escape(s)
+        DA_HTML_ESCAPE.escape(s) || ""
       end # === def escape
 
       def write_text(s : String)
@@ -86,6 +86,22 @@ module DA_HTML
         raw! "</", tag_name, ">"
       end # === def render!
 
+      def open_tag(tag_name : String)
+        raw! "<", tag_name, ">"
+      end # === def open_tag
+
+      def open_tag_attrs(tag_name : String)
+        raw! "<", tag_name
+      end # === def open_tag
+
+      def close_attrs
+        raw! ">"
+      end # === def close_attrs
+
+      def close_tag(tag_name : String)
+        raw! "</", tag_name, ">"
+      end # === def close_tag
+
       def raw!(*args)
         args.each { |x|
           @io__ << x
@@ -95,6 +111,10 @@ module DA_HTML
       def to_html
         @io__.to_s
       end # === def to_html
+
+      def to_s
+        @io__.to_s
+      end # === def to_s
 
     end # === module IO_HTML
     include BASE
