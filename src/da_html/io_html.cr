@@ -10,6 +10,10 @@ module DA_HTML
 
       @io__ = IO::Memory.new
 
+      def empty?
+        @io__.empty?
+      end
+
       def write_attr(val : String)
         raw!( " ", val)
         self

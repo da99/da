@@ -34,7 +34,7 @@ module DA_HTML
       end # === def next?
 
       def next
-        origin[pos + 1]
+        Instruction.new(origin[pos + 1], self)
       end # === def next
 
       def prev

@@ -16,6 +16,7 @@ module DA_HTML
       end # === def initialize
 
       def next
+        @doc.move
         return stop if !@doc.current?
         action = @doc.current.first
 
@@ -37,10 +38,8 @@ module DA_HTML
         if @open == 0
           return stop
         end
-        val = @doc.current
-        @doc.move
 
-        return val
+        return @doc.current
       end # === def next
 
       def rewind

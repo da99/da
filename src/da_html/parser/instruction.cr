@@ -34,6 +34,10 @@ module DA_HTML
         @origin.last
       end
 
+      def tag_name
+        @origin.last
+      end
+
       def first
         @origin.first
       end # === def first
@@ -51,13 +55,36 @@ module DA_HTML
       end # === def []
 
       def attrs
-        doc.move unless doc.current.attr?
-        Parser::Attrs.new(doc)
+        arr = [] of Instruction
+        if !@doc.current.attr? && @doc.next? && @doc.next.attr?
+          @doc.move
+        end
+
+        while @doc.current.attr?
+          arr << @doc.current
+          doc.move
+        end
+        arr
       end # === def attrs
 
       def children
-        doc.move if @doc_pos == doc.pos
-        Children.new(@doc, origin.last)
+        arr = [] of INSTRUCTION
+        open = 1
+        while @doc.next?
+          curr = doc.current
+          case
+          when curr.open_tag?(tag_name)
+            open += 1
+          when curr.close_tag?(tag_name)
+            open -= 1
+          end
+          if open == 0
+            return arr
+          end
+          arr << curr.origin
+          doc.move
+        end
+        arr
       end # === def children
 
     end # === struct Instruction

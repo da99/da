@@ -4,8 +4,9 @@ require "./da_html/io_html"
 
 module DA_HTML
 
-  PATTERN_ATTR_ID = /[a-z0-9\_]+/
-  PATTERN_ATTR_CLASS = /[a-z0-9\_\-]+/
+  SEGMENT_ATTR_ID    = /([a-z0-9\_\-]{1,15})/
+  SEGMENT_ATTR_CLASS = /[a-z0-9\ \_\-]{1,50}/
+  SEGMENT_ATTR_HREF  = /[a-z0-9\ \_\-\/\.]{1,50}/
 
   def self.prettify(str : String)
     indent = 0

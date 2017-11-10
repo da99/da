@@ -16,7 +16,7 @@ struct SPECS_TEMPLATE
     when "var", "loop"
       allow_tag(node)
     when "p", "div"
-      allow_tag_with_attrs(node, id: DA_HTML::PATTERN_ATTR_ID, class: DA_HTML::PATTERN_ATTR_CLASS)
+      allow_tag_with_attrs(node, id: DA_HTML::SEGMENT_ATTR_ID, class: DA_HTML::SEGMENT_ATTR_CLASS)
     end
   end # === def parse
 
@@ -28,19 +28,18 @@ struct SPECS_TEMPLATE
 
     when doc.current.open_tag?("template")
       tag = doc.current
-      doc.move
+
       io.open_tag_attrs("script") { |io_html|
         io.write_attr("type", "application/template")
         tag.attrs.each { |a|
           io.write_attr("data-" + a.attr_name, a.attr_content)
         }
       }
-      template_io = capture(DA_HTML::IO_HTML.new) { |io|
-        tag.children.each { |c|
-          render(c, doc)
-        }
-      }
-      io.write_text(template_io.to_s)
+
+      childs = tag.children
+      html = self.class.new(childs, file_dir).to_html
+      inspect! html
+      io.write_text( html )
     else
       super
     end

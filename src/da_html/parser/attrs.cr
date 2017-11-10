@@ -17,11 +17,10 @@ module DA_HTML
       end # === def initialize
 
       def next
-        return stop if !@doc.current? || !@doc.current.attr?
-
-        val = @doc.current
+        return stop unless @doc.next?
         @doc.move
-        return val
+        return stop if !@doc.current? || !@doc.current.attr?
+        return @doc.current
       end # === def next
 
       def rewind
