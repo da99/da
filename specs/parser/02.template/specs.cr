@@ -38,7 +38,6 @@ struct SPECS_TEMPLATE
 
       childs = tag.children
       html = self.class.new(childs, file_dir).to_html
-      inspect! html
       io.write_text( html )
     else
       super

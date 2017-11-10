@@ -18,7 +18,7 @@ export IS_DEV_BUILD=yes
 case "$ACTION" in
 
   watch)
-    da_html.cr specs run || :
+    CHANGED_FILE=src/da_html.cr da_html.cr specs run || :
     process watch "-r tmp/out -r examples -r sh -r src -r specs" "da_html.cr specs run"
     ;;
 
