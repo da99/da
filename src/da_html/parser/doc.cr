@@ -5,6 +5,12 @@ module DA_HTML
 
   module Parser
 
+    # It's easy to generate infinite loops when dealing with flattened hierarchies.
+    #   :grab_current + :grab_body (with close-tag "body"/"html" check)
+    #   prevent infinite loops when dealing with flattened hierarchies.
+    #   Without :grab_current, :move would have to be made :public and
+    #   to be used by the developer manually,
+    #   which would lead to more hard-to-find infinite loops.
     class Doc
 
       getter origin : DOC
