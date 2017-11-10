@@ -56,13 +56,8 @@ module DA_HTML
 
       def grab_attrs
         arr = [] of Instruction
-        if !@doc.current.attr? && @doc.next? && @doc.next.attr?
-          @doc.move
-        end
-
         while @doc.current.attr?
-          arr << @doc.current
-          doc.move
+          arr << @doc.grab_current
         end
         arr
       end # === def grab_attrs
@@ -70,20 +65,21 @@ module DA_HTML
       def grab_body
         arr = [] of Instruction
         open = 1
-        while @doc.next?
+        loop do
           curr = doc.current
+          if curr.close_tag?("body") || curr.close_tag?("html")
+            raise Exception.new("Closing tag not found for: #{tag_name}")
+          end
           case
           when curr.open_tag?(tag_name)
             open += 1
           when curr.close_tag?(tag_name)
             open -= 1
           end
-          if open == 0
-            return arr
-          end
-          arr << curr
-          doc.move
-        end
+          break if open == 0
+          arr << doc.grab_current
+          break if !doc.next?
+        end # === loop
         arr
       end # === def grab_body
 

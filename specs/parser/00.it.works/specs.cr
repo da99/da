@@ -20,21 +20,23 @@ class SPEC_IT_WORKS
     end
   end # === def parse_tag
 
-  def render(doc : DA_HTML::Parser::Doc)
+  def render(tag)
     return super unless doc.current.open_tag?
     tag = doc.current
     tag_name = tag.last
 
     case tag_name
     when "css"
-      doc.skip_tag(tag_name)
+      tag.grab_body
       io.raw! %(<link href="/main.css" rel="stylesheet">)
+
     when "js"
-      doc.skip_tag(tag_name)
+      tag.grab_body
       io.raw! %(<script src="/main.js" type="application/javascript"></script>)
+
     else
       super
-    end
+    end # === case
   end # === def render_instruction
 
 end # === class Spec_Parser

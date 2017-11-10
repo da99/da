@@ -20,15 +20,12 @@ struct SPECS_TEMPLATE
     end
   end # === def parse
 
-  def render(doc : DA_HTML::Parser::Doc)
+  def render(tag : DA_HTML::Parser::Instruction)
     case
-    when doc.current.close_tag?("template")
+    when tag.close_tag?("template")
       io.close_tag("script")
-      doc.move
 
-    when doc.current.open_tag?("template")
-      tag = doc.current
-
+    when tag.open_tag?("template")
       io.open_tag_attrs("script") { |io_html|
         io.write_attr("type", "application/template")
         tag.grab_attrs.each { |a|

@@ -17,7 +17,6 @@ require "./parser/class_methods"
 require "./parser/doc"
 require "./io_html"
 
-
 module DA_HTML
   # === It's meant to be used within a Struct.
   module Parser
@@ -45,14 +44,14 @@ module DA_HTML
       new_io
     end # === def capture
 
-    def render(i : Instruction, doc : Doc)
+    def render(i : Instruction)
       action = i.first
       case action
       when "doctype!"
         io.raw! i.last
 
       when "open-tag"
-        if doc.next? && doc.next.first == "attr"
+        if doc.current? && doc.current.attr?
           io.open_tag_attrs(i.last)
         else
           io.open_tag(i.last)
@@ -60,7 +59,7 @@ module DA_HTML
 
       when "attr"
         io.write_attr(i[1], i.last)
-        if doc.next? && doc.next.first != "attr"
+        if doc.current? && !doc.current.attr?
           io.close_attrs
         end
 
@@ -69,27 +68,16 @@ module DA_HTML
 
       when "close-tag"
         io.close_tag(i.last)
+
       else
         raise Exception.new("Unknown instruction: #{action.inspect}")
-      end
-      true
-    end # === def render
 
-    def render(doc : Doc)
-      name = doc.current.tag_name
-      render(doc.current, doc)
-      doc.move
+      end # === case action
     end # === def render
 
     def to_html
-      if doc.next?
-        while doc.current?
-          old_pos = doc.pos
-          render(doc)
-          if old_pos == doc.pos
-            raise Exception.new("Unknown instruction: #{doc.current.origin.inspect}")
-          end
-        end
+      while doc.current?
+        render(doc.grab_current)
       end
       io.to_s
     end # === def to_html

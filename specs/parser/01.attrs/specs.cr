@@ -14,7 +14,7 @@ struct SPEC_ATTRS
     end
   end # === def self.parse_tag
 
-  def render(tag_name)
+  def render(tag_name : DA_HTML::Parser::Instruction)
     case tag_name
     when "css"
       io.raw! %(<link href="/main.css" rel="stylesheet">)
