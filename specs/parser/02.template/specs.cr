@@ -31,13 +31,12 @@ struct SPECS_TEMPLATE
 
       io.open_tag_attrs("script") { |io_html|
         io.write_attr("type", "application/template")
-        tag.attrs.each { |a|
+        tag.grab_attrs.each { |a|
           io.write_attr("data-" + a.attr_name, a.attr_content)
         }
       }
 
-      childs = tag.children
-      html = self.class.new(childs, file_dir).to_html
+      html = self.class.new(tag.grab_body, file_dir).to_html
       io.write_text( html )
     else
       super

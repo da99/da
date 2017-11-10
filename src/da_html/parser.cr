@@ -33,7 +33,7 @@ module DA_HTML
     getter io       : IO_HTML = IO_HTML.new
     getter doc : Doc
 
-    def initialize(arr : DOC, @file_dir)
+    def initialize(arr : DOC | Array(Instruction), @file_dir)
       @doc = Doc.new(arr)
     end # === def initialize
 

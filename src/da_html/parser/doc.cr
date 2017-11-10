@@ -1,6 +1,4 @@
 
-require "./attrs"
-require "./children"
 require "./instruction"
 
 module DA_HTML
@@ -12,6 +10,11 @@ module DA_HTML
       getter origin : DOC
       getter pos = 0
       getter last : Int32
+
+      def initialize(arr : Array(Instruction))
+        @origin = arr.map { |x| x.origin }
+        @last = (@origin.size - 1)
+      end # === def initialize
 
       def initialize(@origin)
         @last = (@origin.size - 1)

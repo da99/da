@@ -54,7 +54,7 @@ module DA_HTML
         @origin[i]
       end # === def []
 
-      def attrs
+      def grab_attrs
         arr = [] of Instruction
         if !@doc.current.attr? && @doc.next? && @doc.next.attr?
           @doc.move
@@ -65,10 +65,10 @@ module DA_HTML
           doc.move
         end
         arr
-      end # === def attrs
+      end # === def grab_attrs
 
-      def children
-        arr = [] of INSTRUCTION
+      def grab_body
+        arr = [] of Instruction
         open = 1
         while @doc.next?
           curr = doc.current
@@ -81,11 +81,11 @@ module DA_HTML
           if open == 0
             return arr
           end
-          arr << curr.origin
+          arr << curr
           doc.move
         end
         arr
-      end # === def children
+      end # === def grab_body
 
     end # === struct Instruction
 
