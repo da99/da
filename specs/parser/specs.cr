@@ -21,7 +21,7 @@ struct SPECS_PARSER
     when "html", "head", "title", "body", "p", "div"
       allow_tag(node)
     when "link"
-      allow_tag_with_attributes(node, "href")
+      allow_tag_with_attrs(node, href: /([\/a-z0-9\_\-\.])+/)
     end
   end # === def self.parse_tag
 end # === class SPECS_PARSER

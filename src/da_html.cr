@@ -4,6 +4,9 @@ require "./da_html/io_html"
 
 module DA_HTML
 
+  PATTERN_ATTR_ID = /[a-z0-9\_]+/
+  PATTERN_ATTR_CLASS = /[a-z0-9\_\-]+/
+
   def self.prettify(str : String)
     indent = 0
     str.gsub( /\>\<([a-z\/])/ ) { |s, x|

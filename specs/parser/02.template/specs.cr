@@ -7,23 +7,33 @@ struct SPECS_TEMPLATE
     case name
     when :doctype!
       allow_tag(node)
-    when "html", "head", "title", "body", "link"
+    when "head"
+      allow_tag(node)
+    when "html", "title", "body", "link"
       allow_tag(node)
     when "template", "var", "loop"
+      allow_tag_with_attrs(node, on: /([a-z0-9\_]+)/)
+    when "var", "loop"
       allow_tag(node)
     when "p", "div"
-      allow_tag_with_attributes(node, "id", "class")
+      allow_tag_with_attrs(node, id: DA_HTML::PATTERN_ATTR_ID, class: DA_HTML::PATTERN_ATTR_CLASS)
     end
   end # === def parse
 
   def render(doc : DA_HTML::Parser::Doc)
-    return super unless doc.current.open_tag?
-    tag = doc.current
-    case tag.last
-    when "template"
-      render(tag, doc)
-      tag.attrs.each { |a|
-        render(a, doc)
+    case
+    when doc.current.close_tag?("template")
+      io.close_tag("script")
+      doc.move
+
+    when doc.current.open_tag?("template")
+      tag = doc.current
+      doc.move
+      io.open_tag_attrs("script") { |io_html|
+        io.write_attr("type", "application/template")
+        tag.attrs.each { |a|
+          io.write_attr("data-" + a.attr_name, a.attr_content)
+        }
       }
       template_io = capture(DA_HTML::IO_HTML.new) { |io|
         tag.children.each { |c|
@@ -31,7 +41,6 @@ struct SPECS_TEMPLATE
         }
       }
       io.write_text(template_io.to_s)
-      render(doc.current, doc)
     else
       super
     end

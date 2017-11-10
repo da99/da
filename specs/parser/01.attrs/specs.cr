@@ -10,7 +10,7 @@ struct SPEC_ATTRS
     when "html", "head", "title", "body"
       allow_tag(node)
     when "p", "div"
-      allow_tag_with_attributes(node, "id", "class")
+      allow_tag_with_attrs(node, id: /(0-9a-z\_)+/, class: /(\ a-z0-9\_)+/)
     end
   end # === def self.parse_tag
 

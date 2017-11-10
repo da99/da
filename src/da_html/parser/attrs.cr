@@ -17,7 +17,7 @@ module DA_HTML
       end # === def initialize
 
       def next
-        return stop if !@doc.current? || @doc.current.first != "attr"
+        return stop if !@doc.current? || !@doc.current.attr?
 
         val = @doc.current
         @doc.move

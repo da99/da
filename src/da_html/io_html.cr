@@ -94,6 +94,12 @@ module DA_HTML
         raw! "<", tag_name
       end # === def open_tag
 
+      def open_tag_attrs(tag_name : String)
+        raw! "<", tag_name
+        yield self
+        close_attrs
+      end # === def open_tag
+
       def close_attrs
         raw! ">"
       end # === def close_attrs

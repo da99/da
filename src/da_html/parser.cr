@@ -45,7 +45,7 @@ module DA_HTML
         old_pos = doc.pos
         render(doc)
         if old_pos == doc.pos
-          raise Exception.new("Unknown instruction: #{doc.current.inspect}")
+          raise Exception.new("Unknown instruction: #{doc.current.origin.inspect}")
         end
       end
       self

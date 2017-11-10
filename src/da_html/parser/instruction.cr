@@ -12,13 +12,27 @@ module DA_HTML
         @doc_pos = @doc.pos
       end # === def initialize
 
-      def open_tag?
-        origin.first == "open-tag"
-      end # === def open_tag?
+      {% for x in %w(open close).map(&.id) %}
+        def {{x}}_tag?
+          origin.first == "{{x}}-tag"
+        end # === def open_tag?
+
+        def {{x}}_tag?(tag_name : String)
+          {{x}}_tag? && origin.last == tag_name
+        end # === def open_tag?
+      {% end %}
 
       def attr?
         @origin.first == "attr"
       end # === def attr?
+
+      def attr_name
+        @origin[1]
+      end
+
+      def attr_content
+        @origin.last
+      end
 
       def first
         @origin.first
@@ -37,7 +51,7 @@ module DA_HTML
       end # === def []
 
       def attrs
-        doc.move if !attr?
+        doc.move unless doc.current.attr?
         Parser::Attrs.new(doc)
       end # === def attrs
 
