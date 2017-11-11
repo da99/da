@@ -9,18 +9,16 @@ class Example_00_Quick
 
     def allow(name : String, node : XML::Node)
       case name
-      when "doctype!"
+      when "doctype!", "head", "html", "body"
         allow_tag(node)
-      when "head"
-        allow_tag(node)
-      when "html", "title", "body", "link"
-        allow_tag(node)
-      when "template", "var", "loop"
-        allow_tag_with_attrs(node, on: /([a-z0-9\_]+)/)
+      when "title"
+        allow_head_tag(node)
+      when "template"
+        allow_body_tag(node, on: /([a-z0-9\_]+)/)
       when "var", "loop", "bang"
-        allow_tag(node)
+        allow_body_tag(node)
       when "p", "div"
-        allow_tag_with_attrs(node, id: DA_HTML::SEGMENT_ATTR_ID, class: DA_HTML::SEGMENT_ATTR_CLASS)
+        allow_body_tag(node, id: DA_HTML::SEGMENT_ATTR_ID, class: DA_HTML::SEGMENT_ATTR_CLASS)
       end
     end # === def parse
 

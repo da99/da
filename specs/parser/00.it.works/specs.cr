@@ -7,13 +7,14 @@ class SPEC_IT_WORKS
       case name
       when "doctype!"
         allow_tag(node)
-      when "html", "head", "title", "body"
+      when "html", "head", "body"
         allow_tag(node)
+      when "title"
+        allow_head_tag(node)
       when "p"
-        allow_tag(node)
-      when "css", "js"
-        allow_tag(node)
-
+        allow_body_tag(node)
+      when "css"
+        allow_head_tag(node)
       when "js"
         allow_tag(node)
       end

@@ -10,10 +10,12 @@ struct SPEC_ATTRS
       case name
       when "doctype!"
         allow_tag(node)
-      when "html", "head", "title", "body"
+      when "html", "head", "body"
         allow_tag(node)
+      when "title"
+        allow_head_tag(node)
       when "p", "div"
-        allow_tag_with_attrs(node, id: DA_HTML::SEGMENT_ATTR_ID, class: DA_HTML::SEGMENT_ATTR_CLASS)
+        allow_body_tag(node, id: DA_HTML::SEGMENT_ATTR_ID, class: DA_HTML::SEGMENT_ATTR_CLASS)
       end
     end # === def self.parse
   end # === struct Parser

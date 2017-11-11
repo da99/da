@@ -20,10 +20,14 @@ struct SPECS_PARSER
       case name
       when "doctype!"
         allow_tag(node)
-      when "html", "head", "title", "body", "p", "div"
+      when "html", "head", "body"
         allow_tag(node)
+      when "title"
+        allow_head_tag(node)
       when "link"
-        allow_tag_with_attrs(node, href: /([\/a-z0-9\_\-\.])+/)
+        allow_head_tag(node, href: /([\/a-z0-9\_\-\.])+/)
+      when "p", "div"
+        allow_body_tag(node)
       end
     end # === def self.parse
   end # === struct Parser

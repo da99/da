@@ -67,51 +67,78 @@ module DA_HTML
 
     end # === def parse
 
-    def allow_tag(node : XML::Node)
-      case
-      when node.element?
-        node.attributes.each { |a|
-          raise Invalid_Attr.new(node, a)
-        }
+    def allow_head_tag(node : XML::Node, **attrs)
+      raise Invalid_Tag.new(node) unless node.element?
 
-        name = node.name
-        case name
-        when "html"
-          parent = node.parent
-          if !parent || parent.name != "document"
-            raise Exception.new("\"html\" tag must be at the toplevel of document")
-          end
-          node
-        when "head"
-          in_tree! node, "html"
-        when "title"
-          in_tree! node, "head"
-        when "input"
-          in_tree! node, "form"
-        else
-          node
-        end
+      name = node.name
+      case name
+      when "head"
+        parent! node, "html"
+      else
+        parent! node, "head"
+      end
+      allow_attrs(node, **attrs)
+
+      node
+    end # === def allow_tag
+
+    def allow_body_tag(node : XML::Node, **attrs)
+      raise Invalid_Tag.new(node) unless node.element?
+
+      name = node.name
+      case name
+      when "body"
+        parent! node, "html"
+      else
+        in_tree! node, "body"
+      end
+      allow_attrs(node, **attrs)
+
+      node
+    end # === def allow_body_tag
+
+    def allow_tag(node : XML::Node, **attrs)
+      case
 
       when node.type == XML::Type::DTD_NODE
         content = node.to_s
         if content != "<!DOCTYPE html>"
           raise Invalid_Doctype.new(node)
         end
-        node
+        return node
+
+      when node.element? && node.name == "html"
+        parent = node.parent
+        if !parent || parent.name != "document"
+          raise Exception.new("\"html\" tag must be at the toplevel of document")
+        end
+
+      when node.element?
+        parent! node, "html"
 
       else
         raise Invalid_Tag.new(node)
 
       end # === case
+
+      allow_attrs(node, **attrs)
+
+      return node
     end # === def allow_tag
 
-    def allow_tag_with_attrs(node : XML::Node, **names)
+    def allow_attrs(node : XML::Node, **names)
       node.attributes.each { |a|
         next if names[a.name]? && a.content =~ /^(#{names[a.name]})$/
         raise Invalid_Attr.new(node, a)
       }
-      node
-    end # === def allow_tag_with_attributes
+      return node
+    end # === def allow_attrs
+
+    def parent!(node : XML::Node, name)
+      target = node.parent
+      return node if target && target.name == name
+      raise Exception.new("#{node.name} must be inside a #{name.inspect}")
+    end
 
     def in_tree!(node : XML::Node, name)
       target = node.parent
