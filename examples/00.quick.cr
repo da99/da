@@ -7,7 +7,7 @@ class Example_00_Quick
 
     include DA_HTML::Parser
 
-    def parse(name : String, node : XML::Node)
+    def allow(name : String, node : XML::Node)
       case name
       when "doctype!"
         allow_tag(node)
@@ -26,7 +26,7 @@ class Example_00_Quick
 
   end # === class Parser
 
-  def render(i : DA_HTML::Instruction)
+  def to_html(i : DA_HTML::Instruction)
     case
     when i.open_tag?("bang")
       io.open_tag "strong"

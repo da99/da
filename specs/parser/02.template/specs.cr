@@ -7,7 +7,7 @@ struct SPECS_TEMPLATE
 
     include DA_HTML::Parser
 
-    def parse(name : String, node : XML::Node)
+    def allow(name : String, node : XML::Node)
       case name
       when "doctype!"
         allow_tag(node)
@@ -26,7 +26,7 @@ struct SPECS_TEMPLATE
 
   end # === struct Parser
 
-  def render(tag : DA_HTML::Instruction)
+  def to_html(tag : DA_HTML::Instruction)
     case
     when tag.close_tag?("template")
       io.close_tag("script")
@@ -44,7 +44,7 @@ struct SPECS_TEMPLATE
     else
       super
     end
-  end # === def render
+  end # === def print
 
   macro spec(name)
     x = __DIR__ + "{{name.id}}"

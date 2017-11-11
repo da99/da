@@ -32,7 +32,7 @@ module DA_HTML
     def parse(raw : XML::Node)
       case
       when raw.type == XML::Type::DTD_NODE
-        node = parse("doctype!", raw)
+        node = allow("doctype!", raw)
         raise Invalid_Tag.new(raw) if !node.is_a?(XML::Node)
         doc << { "doctype!", node.to_s }
 
@@ -50,7 +50,7 @@ module DA_HTML
         doc << { "attr", raw.name, raw.content }
 
       when raw.element?
-        node = parse(raw.name, raw)
+        node = allow(raw.name, raw)
         if node.is_a?(XML::Node)
           doc << { "open-tag", node.name }
           node.attributes.each { |a| parse(a) }

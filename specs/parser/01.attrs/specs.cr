@@ -6,7 +6,7 @@ struct SPEC_ATTRS
   struct Parser
     include DA_HTML::Parser
 
-    def parse(name : String, node : XML::Node)
+    def allow(name : String, node : XML::Node)
       case name
       when "doctype!"
         allow_tag(node)
@@ -18,7 +18,7 @@ struct SPEC_ATTRS
     end # === def self.parse
   end # === struct Parser
 
-  def render(tag_name : DA_HTML::Instruction)
+  def to_html(tag_name : DA_HTML::Instruction)
     case tag_name
     when "css"
       io.raw! %(<link href="/main.css" rel="stylesheet">)
@@ -27,7 +27,7 @@ struct SPEC_ATTRS
     else
       super
     end
-  end # === def render
+  end # === def print
 
 end # === class Spec_Parser
 

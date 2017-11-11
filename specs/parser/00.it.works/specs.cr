@@ -3,7 +3,7 @@ class SPEC_IT_WORKS
   struct Parser
     include DA_HTML::Parser
 
-    def parse(name : String, node : XML::Node)
+    def allow(name : String, node : XML::Node)
       case name
       when "doctype!"
         allow_tag(node)
@@ -22,7 +22,7 @@ class SPEC_IT_WORKS
 
   include DA_HTML::Printer
 
-  def render(tag)
+  def to_html(tag)
     return super unless tag.open_tag?
     tag_name = tag.tag_name
 

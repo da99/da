@@ -16,7 +16,7 @@ struct SPECS_PARSER
 
   struct Parser
     include DA_HTML::Parser
-    def parse(name : String, node : XML::Node)
+    def allow(name : String, node : XML::Node)
       case name
       when "doctype!"
         allow_tag(node)

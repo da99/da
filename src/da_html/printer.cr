@@ -25,7 +25,7 @@ module DA_HTML
       new_io
     end # === def capture
 
-    def render(i : Instruction)
+    def to_html(i : Instruction)
       action = i.first
       case action
       when "doctype!"
@@ -54,11 +54,11 @@ module DA_HTML
         raise Exception.new("Unknown instruction: #{action.inspect}")
 
       end # === case action
-    end # === def render
+    end # === def print
 
     def to_html
       while doc.current?
-        render(doc.grab_current)
+        to_html(doc.grab_current)
       end
       io.to_s
     end # === def to_html
