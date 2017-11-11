@@ -12,69 +12,64 @@ module DA_HTML
   # === It's meant to be used within a Struct.
   module Parser
 
+    getter doc : DOC = [] of INSTRUCTION
     def initialize(raw : String)
       @origin = raw
+      parse
     end # === def initialize
 
-    def parse : DOC
-      doc = [] of INSTRUCTION
+    def parse
+      return @doc unless @doc.empty?
       root = XML.parse_html(@origin, XML::HTMLParserOptions::NONET | XML::HTMLParserOptions::NOBLANKS | XML::HTMLParserOptions::PEDANTIC | XML::HTMLParserOptions::NODEFDTD)
       if @origin.index("<html")
-        root.children.each { |x| parse(x, doc) }
+        root.children.each { |x| parse(x) }
       else
-        query(root, "html > body").children.each { |x| parse(x, doc) }
+        query(root, "html > body").children.each { |x| parse(x) }
       end
-      doc
+      @doc
     end # === def parse
 
-    def parse(raw : XML::Node, doc : DOC)
-      type = raw.type
-      case type
-      when XML::Type::DTD_NODE
-        node = parse_tag(:doctype!, raw)
+    def parse(raw : XML::Node)
+      case
+      when raw.type == XML::Type::DTD_NODE
+        node = parse("doctype!", raw)
         raise Invalid_Tag.new(raw) if !node.is_a?(XML::Node)
         doc << { "doctype!", node.to_s }
 
-      when XML::Type::CDATA_SECTION_NODE
+      when raw.cdata?
         content = (raw.content || "").strip
-        return raw if content.empty?
-        raise Exception.new("CDATA node needs to be implemented: #{raw.content.inspect}")
+        raise Invalid_Text.new(raw) if !content.empty?
 
-      when XML::Type::ELEMENT_NODE
-        node = parse_tag(raw.name, raw)
+      when raw.text?
+        text = raw.content
+        if !text.strip.empty?
+          doc << { "text", text }
+        end
+
+      when raw.attribute?
+        doc << { "attr", raw.name, raw.content }
+
+      when raw.element?
+        node = parse(raw.name, raw)
         if node.is_a?(XML::Node)
           doc << { "open-tag", node.name }
-          node.attributes.each { |a|
-            doc << { "attr", a.name, a.content }
-          }
-
-          node.children.each { |c|
-            case
-            when c.text?
-              text = c.content
-              if !text.strip.empty?
-                doc << { "text", text }
-              end
-            when c.element?
-              parse(c, doc)
-            else
-              raise Exception.new("No parse_tag implementation for: #{c.type.inspect}")
-            end
-          }
+          node.attributes.each { |a| parse(a) }
+          node.children.each { |c| parse(c) }
+          doc << { "close-tag", node.name }
         else
           raise Invalid_Tag.new(raw)
-        end
-        doc << { "close-tag", node.name }
+        end # === case
 
       else
-        raise Exception.new("No implementation for: #{raw.type}")
+        raise Invalid_Tag.new(raw)
+
       end # == case type
+
     end # === def parse
 
     def allow_tag(node : XML::Node)
-      type = node.type
-      case type
-      when XML::Type::ELEMENT_NODE
+      case
+      when node.element?
         node.attributes.each { |a|
           raise Invalid_Attr.new(node, a)
         }
@@ -97,7 +92,7 @@ module DA_HTML
           node
         end
 
-      when XML::Type::DTD_NODE
+      when node.type == XML::Type::DTD_NODE
         content = node.to_s
         if content != "<!DOCTYPE html>"
           raise Invalid_Doctype.new(node)
@@ -105,7 +100,7 @@ module DA_HTML
         node
 
       else
-        raise Exception.new("Unknown type: #{type.inspect}")
+        raise Invalid_Tag.new(node)
 
       end # === case
     end # === def allow_tag

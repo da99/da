@@ -6,16 +6,16 @@ struct SPEC_ATTRS
   struct Parser
     include DA_HTML::Parser
 
-    def parse_tag(name : String | Symbol, node : XML::Node)
+    def parse(name : String, node : XML::Node)
       case name
-      when :doctype!
+      when "doctype!"
         allow_tag(node)
       when "html", "head", "title", "body"
         allow_tag(node)
       when "p", "div"
         allow_tag_with_attrs(node, id: DA_HTML::SEGMENT_ATTR_ID, class: DA_HTML::SEGMENT_ATTR_CLASS)
       end
-    end # === def self.parse_tag
+    end # === def self.parse
   end # === struct Parser
 
   def render(tag_name : DA_HTML::Instruction)

@@ -7,9 +7,9 @@ struct SPECS_TEMPLATE
 
     include DA_HTML::Parser
 
-    def parse_tag(name : String | Symbol, node : XML::Node)
+    def parse(name : String, node : XML::Node)
       case name
-      when :doctype!
+      when "doctype!"
         allow_tag(node)
       when "head"
         allow_tag(node)

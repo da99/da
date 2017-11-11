@@ -3,9 +3,9 @@ class SPEC_IT_WORKS
   struct Parser
     include DA_HTML::Parser
 
-    def parse_tag(name : String | Symbol, node : XML::Node)
+    def parse(name : String, node : XML::Node)
       case name
-      when :doctype!
+      when "doctype!"
         allow_tag(node)
       when "html", "head", "title", "body"
         allow_tag(node)
@@ -17,7 +17,7 @@ class SPEC_IT_WORKS
       when "js"
         allow_tag(node)
       end
-    end # === def parse_tag
+    end # === def parse
   end # === struct Parser
 
   include DA_HTML::Printer
