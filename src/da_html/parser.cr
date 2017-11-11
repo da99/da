@@ -6,81 +6,148 @@ require "xml"
 {% `touch tmp/da_html.tmp.tags` %}
 {% `touch tmp/da_html.tmp.attrs` %}
 
-module DA_HTML
-  alias INSTRUCTION = Tuple(String, String) | Tuple(String, String, String)
-  alias DOC = Array(INSTRUCTION)
-end
-
-require "./parser/exception"
-require "./parser/template"
-require "./parser/class_methods"
-require "./parser/doc"
-require "./io_html"
 
 module DA_HTML
+
   # === It's meant to be used within a Struct.
   module Parser
 
-    extend Class_Methods
-
-    macro included
-      extend Class_Methods
-    end # === macro included
-
-
-    getter file_dir : String
-    getter io       : IO_HTML = IO_HTML.new
-    getter doc : Doc
-
-    def initialize(arr : DOC | Array(Instruction), @file_dir)
-      @doc = Doc.new(arr)
+    def initialize(raw : String)
+      @origin = raw
     end # === def initialize
 
-    def capture(new_io : IO_HTML)
-      old_io = @io
-      @io = new_io
-      yield @io
-      @io = old_io
-      new_io
-    end # === def capture
+    def parse : DOC
+      doc = [] of INSTRUCTION
+      root = XML.parse_html(@origin, XML::HTMLParserOptions::NOBLANKS | XML::HTMLParserOptions::PEDANTIC)
+      root.children.each { |x|
+        parse(x, doc)
+      }
+      doc
+    end # === def parse
 
-    def render(i : Instruction)
-      action = i.first
-      case action
-      when "doctype!"
-        io.raw! i.last
+    def parse(raw : XML::Node, doc : DOC)
+      type = raw.type
+      case type
+      when XML::Type::DTD_NODE
+        node = parse_tag(:doctype!, raw)
+        raise Invalid_Tag.new(raw) if !node.is_a?(XML::Node)
+        doc << { "doctype!", node.to_s }
 
-      when "open-tag"
-        if doc.current? && doc.current.attr?
-          io.open_tag_attrs(i.last)
+      when XML::Type::CDATA_SECTION_NODE
+        content = (raw.content || "").strip
+        return raw if content.empty?
+        raise Exception.new("CDATA node needs to be implemented: #{raw.content.inspect}")
+
+      when XML::Type::ELEMENT_NODE
+        node = parse_tag(raw.name, raw)
+        if node.is_a?(XML::Node)
+          doc << { "open-tag", node.name }
+          node.attributes.each { |a|
+            doc << { "attr", a.name, a.content }
+          }
+
+          node.children.each { |c|
+            c_type = c.type
+            case c_type
+            when XML::Type::TEXT_NODE
+              text = c.content
+              if !text.strip.empty?
+                doc << { "text", text }
+              end
+            when XML::Type::ELEMENT_NODE
+              parse(c, doc)
+            else
+              raise Exception.new("No parse_tag implementation for: #{c_type.inspect}")
+            end
+          }
         else
-          io.open_tag(i.last)
+          raise Invalid_Tag.new(raw)
         end
-
-      when "attr"
-        io.write_attr(i[1], i.last)
-        if doc.current? && !doc.current.attr?
-          io.close_attrs
-        end
-
-      when "text"
-        io.write_text(i.last)
-
-      when "close-tag"
-        io.close_tag(i.last)
+        doc << { "close-tag", node.name }
 
       else
-        raise Exception.new("Unknown instruction: #{action.inspect}")
+        raise Exception.new("No implementation for: #{raw.type}")
+      end # == case type
+    end # === def parse
 
-      end # === case action
-    end # === def render
+    def allow_tag(node : XML::Node)
+      type = node.type
+      case type
+      when XML::Type::ELEMENT_NODE
+        node.attributes.each { |a|
+          raise Invalid_Attr.new(node, a)
+        }
 
-    def to_html
-      while doc.current?
-        render(doc.grab_current)
+        name = node.name
+        case name
+        when "html"
+          parent = node.parent
+          if !parent || parent.name != "document"
+            raise Exception.new("\"html\" tag must be at the toplevel of document")
+          end
+          node
+        when "head"
+          in_tree! node, "html"
+        when "title"
+          in_tree! node, "head"
+        when "input"
+          in_tree! node, "form"
+        else
+          node
+        end
+
+      when XML::Type::DTD_NODE
+        content = node.to_s
+        if content != "<!DOCTYPE html>"
+          raise Invalid_Doctype.new(node)
+        end
+        node
+
+      else
+        raise Exception.new("Unknown type: #{type.inspect}")
+
+      end # === case
+    end # === def allow_tag
+
+    def allow_tag_with_attrs(node : XML::Node, **names)
+      node.attributes.each { |a|
+        next if names[a.name]? && a.content =~ /^(#{names[a.name]})$/
+        raise Invalid_Attr.new(node, a)
+      }
+      node
+    end # === def allow_tag_with_attributes
+
+    def parse_node_into_doc(doc : DOC, node : XML::Node)
+      doc << { "open-tag", node.name }
+      node.attributes.each { |a|
+        doc << { "attr", a.name, a.content }
+      }
+
+      node.children.each { |c|
+        c_type = c.type
+        case c_type
+        when XML::Type::TEXT_NODE
+          text = c.content
+          if !text.strip.empty?
+            doc << { "text", text }
+          end
+        when XML::Type::ELEMENT_NODE
+          parse_node_into_doc(doc, c)
+        else
+          raise Exception.new("No parse_tag implementation for: #{c_type.inspect}")
+        end
+      }
+      doc << { "close-tag", node.name }
+    end # === def parse_tag
+
+    def in_tree!(node : XML::Node, name)
+      target = node.parent
+      while target
+        return node if target.name == name
+        target = target.parent
       end
-      io.to_s
-    end # === def to_html
+      raise Exception.new("#{node.name} must be inside a #{name.inspect}")
+    end
 
   end # === module Parser
 

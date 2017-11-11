@@ -12,18 +12,21 @@ require "../../src/da_html/parser"
 {% end %}
 
 struct SPECS_PARSER
-  include DA_HTML::Parser
+  include DA_HTML::Printer
 
-  def self.parse_tag(name : String | Symbol, node : XML::Node)
-    case name
-    when :doctype!
-      allow_tag(node)
-    when "html", "head", "title", "body", "p", "div"
-      allow_tag(node)
-    when "link"
-      allow_tag_with_attrs(node, href: /([\/a-z0-9\_\-\.])+/)
-    end
-  end # === def self.parse_tag
+  struct Parser
+    include DA_HTML::Parser
+    def parse_tag(name : String | Symbol, node : XML::Node)
+      case name
+      when :doctype!
+        allow_tag(node)
+      when "html", "head", "title", "body", "p", "div"
+        allow_tag(node)
+      when "link"
+        allow_tag_with_attrs(node, href: /([\/a-z0-9\_\-\.])+/)
+      end
+    end # === def self.parse_tag
+  end # === struct Parser
 end # === class SPECS_PARSER
 
 describe "Parser" do
@@ -37,7 +40,7 @@ describe "Parser" do
     next unless File.exists?(input)
     next if File.exists?(specs)
     it "#{name}" do
-      actual = SPECS_PARSER.new_from_file("input.html", x).to_html
+      actual = SPECS_PARSER.new(File.read(input), x).to_html
       should_eq strip(actual), strip(File.read(expect))
     end
   }

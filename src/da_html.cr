@@ -1,9 +1,10 @@
 
 require "da_html_escape"
-require "./da_html/io_html"
 
 module DA_HTML
 
+  alias INSTRUCTION = Tuple(String, String) | Tuple(String, String, String)
+  alias DOC = Array(INSTRUCTION)
   SEGMENT_ATTR_ID    = /([a-z0-9\_\-]{1,15})/
   SEGMENT_ATTR_CLASS = /[a-z0-9\ \_\-]{1,50}/
   SEGMENT_ATTR_HREF  = /[a-z0-9\ \_\-\/\.]{1,50}/
@@ -31,6 +32,14 @@ module DA_HTML
   end # === macro file_read!
 
 end # === module DA_HTML
+
+require "./da_html/io_html"
+require "./da_html/exception"
+require "./da_html/template"
+require "./da_html/doc"
+require "./da_html/io_html"
+require "./da_html/parser"
+require "./da_html/printer"
 
 
 {% if env("IS_DEV_BUILD") %}

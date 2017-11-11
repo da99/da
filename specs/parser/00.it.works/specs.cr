@@ -1,24 +1,28 @@
 
 class SPEC_IT_WORKS
-  include DA_HTML::Parser
+  struct Parser
+    include DA_HTML::Parser
 
-  def self.parse_tag(name : String | Symbol, node : XML::Node)
-    case name
-    when :doctype!
-      allow_tag(node)
-    when "html", "head", "title", "body"
-      allow_tag(node)
-    when "p"
-      allow_tag(node)
-    when "css", "js"
-      allow_tag(node)
-      :done
+    def parse_tag(name : String | Symbol, node : XML::Node)
+      case name
+      when :doctype!
+        allow_tag(node)
+      when "html", "head", "title", "body"
+        allow_tag(node)
+      when "p"
+        allow_tag(node)
+      when "css", "js"
+        allow_tag(node)
+        :done
 
-    when "js"
-      allow_tag(node)
-      :done
-    end
-  end # === def parse_tag
+      when "js"
+        allow_tag(node)
+        :done
+      end
+    end # === def parse_tag
+  end # === struct Parser
+
+  include DA_HTML::Printer
 
   def render(tag)
     return super unless doc.current.open_tag?
@@ -46,7 +50,7 @@ describe DA_HTML::Parser do
   expected   = File.read("#{__DIR__}/expected.html")
 
   it "works" do
-    actual = SPEC_IT_WORKS.new_from_file(input_file, __DIR__).to_html
+    actual = SPEC_IT_WORKS.new(DA_HTML.file_read!(__DIR__, input_file), __DIR__).to_html
     should_eq strip(actual), strip(expected)
   end # === it "#{x.gsub(".", " ")}"
 end # === describe

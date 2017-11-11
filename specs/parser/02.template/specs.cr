@@ -1,26 +1,32 @@
 
 struct SPECS_TEMPLATE
 
-  include DA_HTML::Parser
+  include DA_HTML::Printer
 
-  def self.parse_tag(name : String | Symbol, node : XML::Node)
-    case name
-    when :doctype!
-      allow_tag(node)
-    when "head"
-      allow_tag(node)
-    when "html", "title", "body", "link"
-      allow_tag(node)
-    when "template", "var", "loop"
-      allow_tag_with_attrs(node, on: /([a-z0-9\_]+)/)
-    when "var", "loop"
-      allow_tag(node)
-    when "p", "div"
-      allow_tag_with_attrs(node, id: DA_HTML::SEGMENT_ATTR_ID, class: DA_HTML::SEGMENT_ATTR_CLASS)
-    end
-  end # === def parse
+  struct Parser
 
-  def render(tag : DA_HTML::Parser::Instruction)
+    include DA_HTML::Parser
+
+    def parse_tag(name : String | Symbol, node : XML::Node)
+      case name
+      when :doctype!
+        allow_tag(node)
+      when "head"
+        allow_tag(node)
+      when "html", "title", "body", "link"
+        allow_tag(node)
+      when "template", "var", "loop"
+        allow_tag_with_attrs(node, on: /([a-z0-9\_]+)/)
+      when "var", "loop"
+        allow_tag(node)
+      when "p", "div"
+        allow_tag_with_attrs(node, id: DA_HTML::SEGMENT_ATTR_ID, class: DA_HTML::SEGMENT_ATTR_CLASS)
+      end
+    end # === def parse
+
+  end # === struct Parser
+
+  def render(tag : DA_HTML::Instruction)
     case
     when tag.close_tag?("template")
       io.close_tag("script")
@@ -45,7 +51,7 @@ struct SPECS_TEMPLATE
 
     expect = File.join(x, "expect.html")
     input  = File.join(x, "input.html")
-    actual = SPECS_TEMPLATE.new_from_file("input.html", x).to_html
+    actual = SPECS_TEMPLATE.new(File.read(input), x).to_html
     should_eq actual, File.read expect
   end # === macro spec
 
