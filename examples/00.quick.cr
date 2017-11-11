@@ -17,7 +17,7 @@ class Example_00_Quick
         allow_tag(node)
       when "template", "var", "loop"
         allow_tag_with_attrs(node, on: /([a-z0-9\_]+)/)
-      when "var", "loop"
+      when "var", "loop", "bang"
         allow_tag(node)
       when "p", "div"
         allow_tag_with_attrs(node, id: DA_HTML::SEGMENT_ATTR_ID, class: DA_HTML::SEGMENT_ATTR_CLASS)
@@ -43,14 +43,8 @@ end # === class HTML
 describe "Example_00_Quick" do
 
   it "renders html" do
-    actual = Example_00_Quick.new(%[<p>hello</p>], __DIR__).to_html
-
-    should_eq actual, " <p>hello</p> "
+    actual = Example_00_Quick.new(%[<p><bang>hello</bang></p>], __DIR__).to_html
+    should_eq actual, "<p><strong>hello</strong></p>"
   end
-
-  it "renders html using :to_html" do
-    actual = Example_00_Quick.new(%[<p>h</p>], __DIR__).to_html
-    should_eq actual, "<p>h</p>"
-  end # === it "renders html using :to_html"
 
 end # === desc "Example_00_Quick"
