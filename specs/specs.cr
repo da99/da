@@ -23,6 +23,6 @@ end
 
 # === Parser
 require "./parser/specs"
-require "../examples/00.quick"
+require "../examples/*"
 
 
