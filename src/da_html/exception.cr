@@ -29,7 +29,7 @@ module DA_HTML
     end # === def initialize
 
     def message
-      "#{self.class.name}: #{@message}"
+      "Invalid tag: #{@message}"
     end
   end # === class Invalid_Tag
 
@@ -38,11 +38,11 @@ module DA_HTML
     end # === def initialize
 
     def initialize(tag : XML::Node, attr : XML::Node)
-      @message = "tag: #{tag.name}, attr: #{attr.name}"
+      @message = "tag: #{tag.name}, attr: #{attr.name} value: #{attr.content.inspect}"
     end # === def initialize
 
     def message
-      "#{self.class.name}: #{@message}"
+      "Invalid attribute: #{@message}"
     end
 
   end # === class Invalid_Attr

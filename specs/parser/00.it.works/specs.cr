@@ -13,11 +13,9 @@ class SPEC_IT_WORKS
         allow_tag(node)
       when "css", "js"
         allow_tag(node)
-        :done
 
       when "js"
         allow_tag(node)
-        :done
       end
     end # === def parse_tag
   end # === struct Parser
@@ -25,17 +23,16 @@ class SPEC_IT_WORKS
   include DA_HTML::Printer
 
   def render(tag)
-    return super unless doc.current.open_tag?
-    tag = doc.current
-    tag_name = tag.last
+    return super unless tag.open_tag?
+    tag_name = tag.tag_name
 
     case tag_name
     when "css"
-      tag.grab_body
+      doc.grab_current if doc.current.close_tag?("css")
       io.raw! %(<link href="/main.css" rel="stylesheet">)
 
     when "js"
-      tag.grab_body
+      doc.grab_current if doc.current.close_tag?("js")
       io.raw! %(<script src="/main.js" type="application/javascript"></script>)
 
     else

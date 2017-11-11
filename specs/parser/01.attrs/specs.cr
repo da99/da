@@ -13,7 +13,7 @@ struct SPEC_ATTRS
       when "html", "head", "title", "body"
         allow_tag(node)
       when "p", "div"
-        allow_tag_with_attrs(node, id: /(0-9a-z\_)+/, class: /(\ a-z0-9\_)+/)
+        allow_tag_with_attrs(node, id: DA_HTML::SEGMENT_ATTR_ID, class: DA_HTML::SEGMENT_ATTR_CLASS)
       end
     end # === def self.parse_tag
   end # === struct Parser
@@ -35,7 +35,7 @@ describe DA_HTML::Parser do
   input_file = "/input.html"
   expected   = File.read("#{__DIR__}/expected.html")
 
-  it "works" do
+  it "renders attributes" do
     actual = SPEC_ATTRS.new(DA_HTML.file_read!(__DIR__, input_file), __DIR__).to_html
     should_eq strip(actual), strip(expected)
   end # === it "#{x.gsub(".", " ")}"
