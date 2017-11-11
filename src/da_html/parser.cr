@@ -27,27 +27,6 @@ module DA_HTML
       doc
     end # === def parse
 
-    def query(root : XML::Node, raw : String)
-      pieces = raw.strip.split(/\s*\>\s*/)
-      current = root
-
-      while !pieces.empty? && current
-        next_current = nil
-        current.children.find { |x|
-          if x.element? && x.name == pieces.first?
-            next_current = x
-            pieces.shift
-          end
-        }
-        current = next_current
-      end
-
-      if !current
-        raise Exception.new("Not found: #{raw.inspect}")
-      end
-      current
-    end # === def query
-
     def parse(raw : XML::Node, doc : DOC)
       type = raw.type
       case type
@@ -70,17 +49,16 @@ module DA_HTML
           }
 
           node.children.each { |c|
-            c_type = c.type
-            case c_type
-            when XML::Type::TEXT_NODE
+            case
+            when c.text?
               text = c.content
               if !text.strip.empty?
                 doc << { "text", text }
               end
-            when XML::Type::ELEMENT_NODE
+            when c.element?
               parse(c, doc)
             else
-              raise Exception.new("No parse_tag implementation for: #{c_type.inspect}")
+              raise Exception.new("No parse_tag implementation for: #{c.type.inspect}")
             end
           }
         else
@@ -140,29 +118,6 @@ module DA_HTML
       node
     end # === def allow_tag_with_attributes
 
-    def parse_node_into_doc(doc : DOC, node : XML::Node)
-      doc << { "open-tag", node.name }
-      node.attributes.each { |a|
-        doc << { "attr", a.name, a.content }
-      }
-
-      node.children.each { |c|
-        c_type = c.type
-        case c_type
-        when XML::Type::TEXT_NODE
-          text = c.content
-          if !text.strip.empty?
-            doc << { "text", text }
-          end
-        when XML::Type::ELEMENT_NODE
-          parse_node_into_doc(doc, c)
-        else
-          raise Exception.new("No parse_tag implementation for: #{c_type.inspect}")
-        end
-      }
-      doc << { "close-tag", node.name }
-    end # === def parse_tag
-
     def in_tree!(node : XML::Node, name)
       target = node.parent
       while target
@@ -171,6 +126,27 @@ module DA_HTML
       end
       raise Exception.new("#{node.name} must be inside a #{name.inspect}")
     end
+
+    def query(root : XML::Node, raw : String)
+      pieces = raw.strip.split(/\s*\>\s*/)
+      current = root
+
+      while !pieces.empty? && current
+        next_current = nil
+        current.children.find { |x|
+          if x.element? && x.name == pieces.first?
+            next_current = x
+            pieces.shift
+          end
+        }
+        current = next_current
+      end
+
+      if !current
+        raise Exception.new("Not found: #{raw.inspect}")
+      end
+      current
+    end # === def query
 
   end # === module Parser
 
