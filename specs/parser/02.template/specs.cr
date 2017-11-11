@@ -67,12 +67,13 @@ describe "Parser template tag" do
     SPECS_TEMPLATE.spec "/nested_template_tags"
   end # === it "multi-escapes nested templates"
 
-  it "renders custom attributes" do
-    SPECS_TEMPLATE.spec "/uses_custom_template_attrs"
-  end # === it "renders custom attributes"
-
   it "does not override template attrs" do
-    SPECS_TEMPLATE.spec "/no_override_template_attrs"
+    expect_raises(DA_HTML::Invalid_Attr) {
+      SPECS_TEMPLATE.spec "/no_override_template_attrs"
+    }
+    expect_raises(DA_HTML::Invalid_Attr) {
+      SPECS_TEMPLATE.spec "/uses_custom_template_attrs"
+    }
   end # === it "does not override template attrs"
 
 end # === desc "parser"
