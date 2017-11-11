@@ -18,12 +18,35 @@ module DA_HTML
 
     def parse : DOC
       doc = [] of INSTRUCTION
-      root = XML.parse_html(@origin, XML::HTMLParserOptions::NOBLANKS | XML::HTMLParserOptions::PEDANTIC)
-      root.children.each { |x|
-        parse(x, doc)
-      }
+      root = XML.parse_html(@origin, XML::HTMLParserOptions::NONET | XML::HTMLParserOptions::NOBLANKS | XML::HTMLParserOptions::PEDANTIC | XML::HTMLParserOptions::NODEFDTD)
+      if @origin.index("<html")
+        root.children.each { |x| parse(x, doc) }
+      else
+        query(root, "html > body").children.each { |x| parse(x, doc) }
+      end
       doc
     end # === def parse
+
+    def query(root : XML::Node, raw : String)
+      pieces = raw.strip.split(/\s*\>\s*/)
+      current = root
+
+      while !pieces.empty? && current
+        next_current = nil
+        current.children.find { |x|
+          if x.element? && x.name == pieces.first?
+            next_current = x
+            pieces.shift
+          end
+        }
+        current = next_current
+      end
+
+      if !current
+        raise Exception.new("Not found: #{raw.inspect}")
+      end
+      current
+    end # === def query
 
     def parse(raw : XML::Node, doc : DOC)
       type = raw.type
