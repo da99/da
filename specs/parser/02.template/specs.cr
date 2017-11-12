@@ -11,7 +11,7 @@ struct SPECS_TEMPLATE
       case name
       when "doctype!"
         allow_tag(node)
-      when "html", "head", "body", "link"
+      when "html", "head", "body"
         allow_tag(node)
       when "title"
         allow_head_tag(node)
