@@ -83,12 +83,12 @@ describe ":to_da_html" do
         string
       </div>
     ]
-    input  = TO_DA_HTML.new(html, __DIR__).to_da_html
-    expect = html
+
+    da_html  = TO_DA_HTML.new(html, __DIR__).to_da_html
 
     should_eq(
-      TO_DA_HTML.new_from_da_html(input, __DIR__).to_html,
-      expect
+      TO_DA_HTML.new_from_da_html(da_html, __DIR__).to_html,
+      html
     )
   end # === it "produces a String that can be consumed by a Printer"
 
