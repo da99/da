@@ -8,7 +8,14 @@ macro should_eq(actual, expected)
 end # === macro should_eq
 
 macro strip(str)
-  ({{str}} || "").strip.gsub("\n", "").gsub(/>\s+</, "><")
+  begin
+    %str = ({{str}} || "")
+    if %str.index("<")
+      %str.strip.gsub("\n", "").gsub(/>\s+</, "><")
+    else
+      %str.strip.split("\n").map(&.strip).join("\n")
+    end
+  end
 end
 
 macro render(&blok)

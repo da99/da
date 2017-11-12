@@ -63,6 +63,25 @@ module DA_HTML
       io.to_s
     end # === def to_html
 
+    def to_da_html
+      fin = IO::Memory.new
+      doc.origin.map { |i|
+        if !fin.empty?
+          fin << "\n"
+        end
+        is_first = true
+        i.each { |s|
+          if is_first
+            fin << s
+            is_first = false
+          else
+            fin << " " << s
+          end
+        }
+      }
+      fin.to_s
+    end # === def to_da_html
+
   end # === module Printer
 
 end # === module DA_HTML
