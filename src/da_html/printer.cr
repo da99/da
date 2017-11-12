@@ -3,9 +3,22 @@ module DA_HTML
 
   module Printer
 
+    module Class_Methods
+
+      def new_from_da_html(raw : String, *args)
+        doc = DA_HTML::Format.to_doc(raw)
+        new(doc, *args)
+      end # === def new_from_da_html
+
+    end # === module Class_Methods
+
     getter file_dir : String
     getter io       : IO_HTML = IO_HTML.new
     getter doc      : Doc
+
+    macro included
+      extend Class_Methods
+    end # === macro included
 
     def initialize(raw : String, @file_dir)
       {% begin %}
@@ -66,19 +79,35 @@ module DA_HTML
     def to_da_html
       fin = IO::Memory.new
       doc.origin.map { |i|
-        if !fin.empty?
-          fin << "\n"
-        end
+        fin << "\n" if !fin.empty?
         is_first = true
+        is_text  = false
+
         i.each { |s|
           if is_first
-            fin << s
+            case s
+            when "text"
+              is_text = true
+              lines = i.last.split("\n")
+              last_txts = lines.size
+              lines.each_with_index { |t, ti|
+                fin << "text" << " " << t
+                if ti != (last_txts - 1)
+                  fin << "\n"
+                end
+              }
+            else
+              fin << s
+            end
             is_first = false
           else
-            fin << " " << s
+
+            if !is_text
+              fin << " " << s
+            end
           end
         }
-      }
+      } # === map
       fin.to_s
     end # === def to_da_html
 

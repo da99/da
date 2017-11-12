@@ -38,6 +38,7 @@ require "./da_html/exception"
 require "./da_html/template"
 require "./da_html/doc"
 require "./da_html/io_html"
+require "./da_html/format"
 require "./da_html/parser"
 require "./da_html/printer"
 

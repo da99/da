@@ -35,4 +35,62 @@ describe ":to_da_html" do
     TO_DA_HTML.new(input, __DIR__).to_da_html.should eq(expect)
   end # === it "renders HTML as a String of instructions"
 
+  it "produces a new instruction for each new line of 'text'" do
+    html = %[
+      <p id="main">
+        a
+        b
+        c
+      </p>
+      <div id="second">
+        multi
+        line
+        string
+      </div>
+    ]
+    expect = %[
+      open-tag p
+      attr id main
+      text 
+      text         a
+      text         b
+      text         c
+      text       
+      close-tag p
+      open-tag div
+      attr id second
+      text 
+      text         multi
+      text         line
+      text         string
+      text       
+      close-tag div
+    ].strip.split("\n").map(&.lstrip).join("\n")
+
+    TO_DA_HTML.new(html, __DIR__).to_da_html.should eq(expect)
+  end # === it "produces a new instruction for each new line of 'text'"
+
+  it "produces a String that can be consumed by a Printer" do
+    html = %[
+      <p id="main">
+        a
+        b
+        c
+      </p>
+      <div id="second">
+        multi
+        line
+        string
+      </div>
+    ]
+    input  = TO_DA_HTML.new(html, __DIR__).to_da_html
+    expect = html
+
+    should_eq(
+      TO_DA_HTML.new_from_da_html(input, __DIR__).to_html,
+      expect
+    )
+  end # === it "produces a String that can be consumed by a Printer"
+
 end # === desc ":to_da_html"
+
