@@ -1,4 +1,5 @@
 
+require "json"
 require "xml"
 
 {% `mkdir -p tmp` %}
@@ -8,6 +9,25 @@ require "xml"
 
 
 module DA_HTML
+
+  struct Element
+
+    getter name : String
+    getter attrs
+
+    def initialize(@origin : XML::Node)
+      @attrs  = {} of String => String
+      @name   = @origin.name
+      @origin.attributes.each { |a|
+        @attrs[a.name] = a.content
+      }
+    end # === def initialize
+
+    def children
+      @origin.children
+    end # === def children
+
+  end # === class Node
 
   # === It's meant to be used within a Struct.
   module Parser
@@ -52,10 +72,22 @@ module DA_HTML
         doc << { "attr", raw.name, raw.content }
 
       when raw.element?
-        node = allow(raw.name, raw)
-        if node.is_a?(XML::Node)
-          doc << { "open-tag", node.name }
-          node.attributes.each { |a| parse(a) }
+        first_pass_node = allow(raw.name, raw)
+        if first_pass_node.is_a?(XML::Node)
+          node = clean_element(first_pass_node)
+
+
+          case node
+          when Element
+            doc << { "open-tag", node.name }
+            node.attrs.each { |a_name, a_content| doc << { "attr", a_name, a_content }  }
+          when XML::Node
+            doc << { "open-tag", node.name }
+            node.attributes.each { |a| parse(a) }
+          else
+            raise Invalid_Tag.new(raw)
+          end
+
           node.children.each { |c| parse(c) }
           doc << { "close-tag", node.name }
         else
@@ -64,9 +96,7 @@ module DA_HTML
 
       else
         raise Invalid_Tag.new(raw)
-
       end # == case type
-
     end # === def parse
 
     def allow_html_tag(node : XML::Node, **attrs)
@@ -179,6 +209,32 @@ module DA_HTML
       end
       current
     end # === def query
+
+    def clean_element(x : XML::Node)
+      x = clean_a_element(x)
+      x
+    end # === def clean_element
+
+    def clean_a_element(x : XML::Node)
+      return x if x.name != "a"
+      href = target = rel = nil
+      x.attributes.each { |a|
+        case a.name
+        when "href"
+          href = a.content
+        when "target"
+          target = a.content
+        when "rel"
+          rel = a.content
+        end
+      }
+      return x unless target
+
+      e = Element.new(x)
+      e.attrs["rel"] = "#{rel || ""} nofollow noopener noreferrer".strip
+      e
+    end # === def clean_a_element
+
 
   end # === module Parser
 

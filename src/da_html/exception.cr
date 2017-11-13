@@ -17,6 +17,9 @@ module DA_HTML
       @message = node.to_s
     end # === def initialize
 
+    def initialize(@message : String)
+    end # === def initialize
+
     def message
       "Invalid Doctype: #{@message}"
     end
