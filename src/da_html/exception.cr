@@ -17,6 +17,10 @@ module DA_HTML
       @message = node.to_s
     end # === def initialize
 
+    def message
+      "Invalid Doctype: #{@message}"
+    end
+
   end # === class Invalid_Doctype
 
   class Invalid_Text < Exception
@@ -29,7 +33,7 @@ module DA_HTML
     end # === def initialize
 
     def message
-      "Invalid tag: #{@message}"
+      "Invalid text: #{@message}"
     end
   end # === class Invalid_Tag
 
@@ -39,7 +43,7 @@ module DA_HTML
     end # === def initialize
 
     def initialize(node : XML::Node)
-      @message = node.name
+      @message = "#{node.type.inspect} (#{node.to_s.inspect})"
     end # === def initialize
 
     def message

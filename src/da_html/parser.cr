@@ -122,7 +122,12 @@ module DA_HTML
         end
 
       else
-        raise Invalid_Tag.new(node)
+        case node.type
+        when XML::Type::DTD_NODE
+          raise Invalid_Doctype.new(node)
+        when
+          raise Invalid_Tag.new(node)
+        end
 
       end # === case
 
