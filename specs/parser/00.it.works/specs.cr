@@ -51,4 +51,11 @@ describe DA_HTML::Parser do
     actual = SPEC_IT_WORKS.new(DA_HTML.file_read!(__DIR__, input_file), __DIR__).to_html
     should_eq strip(actual), strip(expected)
   end # === it "#{x.gsub(".", " ")}"
+
+  it "raises an Exception when html is empty" do
+    expect_raises {
+      SPEC_IT_WORKS.new("\n", __DIR__)
+    }
+  end # === it "raises an Exception when html is empty"
 end # === describe
+

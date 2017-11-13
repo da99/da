@@ -13,8 +13,10 @@ module DA_HTML
   module Parser
 
     getter doc : DOC = [] of INSTRUCTION
+    @origin : String
     def initialize(raw : String)
-      @origin = raw
+      @origin = raw.strip
+      raise Exception.new("Empty html") if @origin.empty?
       parse
     end # === def initialize
 

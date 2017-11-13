@@ -1,9 +1,9 @@
 
-struct SPECS_TEMPLATE
+class SPECS_TEMPLATE
 
   include DA_HTML::Printer
 
-  struct Parser
+  class Parser
 
     include DA_HTML::Parser
 
