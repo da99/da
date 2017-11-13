@@ -5,10 +5,10 @@ class SPEC_IT_WORKS
 
     def allow(name : String, node : XML::Node)
       case name
-      when "doctype!"
-        allow_tag(node)
-      when "html", "head", "body"
-        allow_tag(node)
+      when "doctype!", "html"
+        allow_document_tag(node)
+      when "head", "body"
+        allow_html_tag(node)
       when "title"
         allow_head_tag(node)
       when "p"
@@ -16,7 +16,7 @@ class SPEC_IT_WORKS
       when "css"
         allow_head_tag(node)
       when "js"
-        allow_tag(node)
+        allow_html_tag(node)
       end
     end # === def parse
   end # === struct Parser

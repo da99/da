@@ -9,14 +9,14 @@ class Example_00_Quick
 
     def allow(name : String, node : XML::Node)
       case name
-      when "doctype!", "head", "html", "body"
-        allow_tag(node)
-      when "title"
+      when "doctype!", "html"
+        allow_document_tag(node)
+      when "head", "title"
         allow_head_tag(node)
+      when "body", "var", "loop", "bang"
+        allow_body_tag(node)
       when "template"
         allow_body_tag(node, on: /([a-z0-9\_]+)/)
-      when "var", "loop", "bang"
-        allow_body_tag(node)
       when "p", "div"
         allow_body_tag(node, id: DA_HTML::SEGMENT_ATTR_ID, class: DA_HTML::SEGMENT_ATTR_CLASS)
       end

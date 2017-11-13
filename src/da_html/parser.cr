@@ -67,20 +67,26 @@ module DA_HTML
 
     end # === def parse
 
+    def allow_html_tag(node : XML::Node, **attrs)
+      parent! node, "html"
+      allow_attrs(node, **attrs)
+      node
+    end # === def allow_html_tag
+
     def allow_head_tag(node : XML::Node, **attrs)
       raise Invalid_Tag.new(node) unless node.element?
 
       name = node.name
       case name
       when "head"
-        parent! node, "html"
+        allow_html_tag(node, **attrs)
       else
         parent! node, "head"
+        allow_attrs(node, **attrs)
+        node
       end
-      allow_attrs(node, **attrs)
 
-      node
-    end # === def allow_tag
+    end # === def allow_head_tag
 
     def allow_body_tag(node : XML::Node, **attrs)
       raise Invalid_Tag.new(node) unless node.element?
@@ -88,16 +94,15 @@ module DA_HTML
       name = node.name
       case name
       when "body"
-        parent! node, "html"
+        allow_html_tag(node, **attrs)
       else
         in_tree! node, "body"
+        allow_attrs(node, **attrs)
+        node
       end
-      allow_attrs(node, **attrs)
-
-      node
     end # === def allow_body_tag
 
-    def allow_tag(node : XML::Node, **attrs)
+    def allow_document_tag(node : XML::Node, **attrs)
       case
 
       when node.type == XML::Type::DTD_NODE
@@ -105,16 +110,14 @@ module DA_HTML
         if content != "<!DOCTYPE html>"
           raise Invalid_Doctype.new(node)
         end
+        node.attributes.each { |a| raise Invalid_Attr.new(node, a) }
         return node
 
-      when node.element? && node.name == "html"
+      when node.element? && node.name != "document"
         parent = node.parent
         if !parent || parent.name != "document"
-          raise Exception.new("\"html\" tag must be at the toplevel of document")
+          raise Exception.new("#{node.name.inspect} tag must be at the toplevel of document")
         end
-
-      when node.element?
-        parent! node, "html"
 
       else
         raise Invalid_Tag.new(node)
@@ -124,7 +127,7 @@ module DA_HTML
       allow_attrs(node, **attrs)
 
       return node
-    end # === def allow_tag
+    end # === def allow_document_tag
 
     def allow_attrs(node : XML::Node, **names)
       node.attributes.each { |a|

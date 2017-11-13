@@ -18,10 +18,10 @@ struct SPECS_PARSER
     include DA_HTML::Parser
     def allow(name : String, node : XML::Node)
       case name
-      when "doctype!"
-        allow_tag(node)
-      when "html", "head", "body"
-        allow_tag(node)
+      when "doctype!", "html"
+        allow_document_tag(node)
+      when "head", "body"
+        allow_html_tag(node)
       when "title"
         allow_head_tag(node)
       when "link"
