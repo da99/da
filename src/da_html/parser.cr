@@ -10,23 +10,14 @@ require "xml"
 
 module DA_HTML
 
-  struct Element
+  SAFE_TAG_A_ATTR_REL = "nofollow noopener noreferrer"
 
+  struct Attr
+    getter tag_name : String
     getter name : String
-    getter attrs
-
-    def initialize(@origin : XML::Node)
-      @attrs  = {} of String => String
-      @name   = @origin.name
-      @origin.attributes.each { |a|
-        @attrs[a.name] = a.content
-      }
+    getter content : String
+    def initialize(@tag_name, @name, @content)
     end # === def initialize
-
-    def children
-      @origin.children
-    end # === def children
-
   end # === class Node
 
   # === It's meant to be used within a Struct.
@@ -63,31 +54,35 @@ module DA_HTML
         raise Invalid_Text.new(raw) if !content.empty?
 
       when raw.text?
-        text = raw.content
-        if !text.strip.empty?
+        text = allow("text!", raw)
+        case text
+        when String
+          :done
+        when XML::Node
+          text = text.content
+        when Symbol
+          case text
+          when :done
+            return :done
+          else
+            raise Invalid_Text.new(raw)
+          end
+        end
+
+        if text && !text.strip.empty?
           doc << { "text", text }
         end
 
       when raw.attribute?
-        doc << { "attr", raw.name, raw.content }
+        clean_attr!(raw) do |attr|
+          doc << { "attr", attr.name, attr.content }
+        end
 
       when raw.element?
-        first_pass_node = allow(raw.name, raw)
-        if first_pass_node.is_a?(XML::Node)
-          node = clean_element(first_pass_node)
-
-
-          case node
-          when Element
-            doc << { "open-tag", node.name }
-            node.attrs.each { |a_name, a_content| doc << { "attr", a_name, a_content }  }
-          when XML::Node
-            doc << { "open-tag", node.name }
-            node.attributes.each { |a| parse(a) }
-          else
-            raise Invalid_Tag.new(raw)
-          end
-
+        node = allow(raw.name, raw)
+        if node.is_a?(XML::Node)
+          doc << { "open-tag", node.name }
+          node.attributes.each { |a| parse(a) }
           node.children.each { |c| parse(c) }
           doc << { "close-tag", node.name }
         else
@@ -210,31 +205,40 @@ module DA_HTML
       current
     end # === def query
 
-    def clean_element(x : XML::Node)
-      x = clean_a_element(x)
-      x
-    end # === def clean_element
+    def clean_attr!(x : XML::Node)
+      name = x.name
+      parent = x.parent
+      case
+      when name == "rel" && parent && parent.name == "a"
+        target = extract_attr(parent, "target")
+        if target
+          str = IO::Memory.new
+          content = x.content.strip
+          (str << content << " ") if !content.empty?
+          str << SAFE_TAG_A_ATTR_REL
+          doc << { "attr", "rel", str.to_s }
+        end
 
-    def clean_a_element(x : XML::Node)
-      return x if x.name != "a"
-      href = target = rel = nil
-      x.attributes.each { |a|
-        case a.name
-        when "href"
-          href = a.content
-        when "target"
-          target = a.content
-        when "rel"
-          rel = a.content
+      when name == "target" && parent && parent.name == "a"
+        yield x
+        rel    = extract_attr(parent, "rel")
+        if !rel
+          yield Attr.new("a", "rel", SAFE_TAG_A_ATTR_REL)
+        end
+      else
+        yield x
+      end
+    end # === def clean_attr!
+
+    private def extract_attr(x : XML::Node, name : String)
+      x.attributes.each { |attr|
+        parent = x.parent
+        if parent && attr.name == name
+          return Attr.new(parent.name, x.name, x.content)
         end
       }
-      return x unless target
-
-      e = Element.new(x)
-      e.attrs["rel"] = "#{rel || ""} nofollow noopener noreferrer".strip
-      e
-    end # === def clean_a_element
-
+      return nil
+    end # === def extract_attr
 
   end # === module Parser
 

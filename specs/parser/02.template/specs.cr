@@ -9,6 +9,8 @@ class SPECS_TEMPLATE
 
     def allow(name : String, node : XML::Node)
       case name
+      when "text!"
+        node
       when "doctype!", "html"
         allow_document_tag(node)
       when "head", "body"

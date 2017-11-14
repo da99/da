@@ -9,6 +9,8 @@ class Example_00_Quick
 
     def allow(name : String, node : XML::Node)
       case name
+      when "text!"
+        node
       when "doctype!", "html"
         allow_document_tag(node)
       when "head", "title"

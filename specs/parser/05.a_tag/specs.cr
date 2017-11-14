@@ -13,6 +13,8 @@ class SPEC_A_TAG
 
     def allow(name : String, x : XML::Node)
       case name
+      when "text!"
+        x
       when "a"
         allow_body_tag(x, href: /[a-z\/]+/, target: /_blank/, rel: /(archives)/)
       end

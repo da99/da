@@ -8,7 +8,12 @@ class TO_DA_HTML
     include DA_HTML::Parser
 
     def allow(name : String, x : XML::Node)
-      allow_body_tag(x, id: DA_HTML::SEGMENT_ATTR_ID)
+      case name
+      when "text!"
+        x
+      else
+        allow_body_tag(x, id: DA_HTML::SEGMENT_ATTR_ID)
+      end
     end # === def allow
 
   end # === class Parser

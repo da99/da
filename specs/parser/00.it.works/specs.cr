@@ -5,6 +5,8 @@ class SPEC_IT_WORKS
 
     def allow(name : String, node : XML::Node)
       case name
+      when "text!"
+        node
       when "doctype!", "html"
         allow_document_tag(node)
       when "head", "body"
