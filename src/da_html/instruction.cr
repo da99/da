@@ -53,7 +53,7 @@ module DA_HTML
 
     def []?(i : Int32)
       @origin[i]?
-    end # === def []
+    end # === def []?
 
     def [](i : Int32)
       @origin[i]
