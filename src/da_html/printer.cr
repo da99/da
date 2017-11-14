@@ -26,8 +26,11 @@ module DA_HTML
       {% end %}
     end # === def initialize
 
-    def initialize(arr : DOC | Array(Instruction), @file_dir)
-      @doc = Doc.new(arr)
+    def initialize(@doc : Doc, @file_dir)
+    end # === def initialize
+
+    def initialize(raw_doc : Raw_Doc, @file_dir)
+      @doc = Doc.new(raw_doc)
     end # === def initialize
 
     def capture(new_io : IO_HTML)

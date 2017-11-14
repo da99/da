@@ -3,8 +3,6 @@ require "da_html_escape"
 
 module DA_HTML
 
-  alias INSTRUCTION = Tuple(String, String) | Tuple(String, String, String)
-  alias DOC = Array(INSTRUCTION)
   SEGMENT_ATTR_ID    = /([a-z0-9\_\-]{1,15})/
   SEGMENT_ATTR_CLASS = /[a-z0-9\ \_\-]{1,50}/
   SEGMENT_ATTR_HREF  = /[a-z0-9\ \_\-\/\.]{1,50}/

@@ -1,5 +1,4 @@
 
-require "json"
 require "xml"
 
 {% `mkdir -p tmp` %}
@@ -23,7 +22,8 @@ module DA_HTML
   # === It's meant to be used within a Struct.
   module Parser
 
-    getter doc : DOC = [] of INSTRUCTION
+    getter doc = Raw_Doc.new
+
     @origin : String
     def initialize(raw : String)
       @origin = raw.strip
@@ -47,7 +47,7 @@ module DA_HTML
       when raw.type == XML::Type::DTD_NODE
         node = allow("doctype!", raw)
         raise Invalid_Tag.new(raw) if !node.is_a?(XML::Node)
-        doc << { "doctype!", node.to_s }
+        doc.instruct "doctype!", node.to_s
 
       when raw.cdata?
         content = (raw.content || "").strip
@@ -70,21 +70,21 @@ module DA_HTML
         end
 
         if text && !text.strip.empty?
-          doc << { "text", text }
+          doc.instruct "text", text
         end
 
       when raw.attribute?
         clean_attr!(raw) do |attr|
-          doc << { "attr", attr.name, attr.content }
+          doc.instruct "attr", attr.name, attr.content
         end
 
       when raw.element?
         node = allow(raw.name, raw)
         if node.is_a?(XML::Node)
-          doc << { "open-tag", node.name }
+          doc.instruct "open-tag", node.name
           node.attributes.each { |a| parse(a) }
           node.children.each { |c| parse(c) }
-          doc << { "close-tag", node.name }
+          doc.instruct "close-tag", node.name
         else
           raise Invalid_Tag.new(raw)
         end # === case
@@ -216,7 +216,7 @@ module DA_HTML
           content = x.content.strip
           (str << content << " ") if !content.empty?
           str << SAFE_TAG_A_ATTR_REL
-          doc << { "attr", "rel", str.to_s }
+          doc.instruct "attr", "rel", str.to_s
         end
 
       when name == "target" && parent && parent.name == "a"

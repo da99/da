@@ -1,6 +1,8 @@
 
 module DA_HTML
 
+  alias INSTRUCTION = Tuple(String, String) | Tuple(String, String, String)
+
   struct Instruction
 
     getter origin : INSTRUCTION
@@ -61,7 +63,7 @@ module DA_HTML
     end # === def grab_attrs
 
     def grab_body
-      arr = [] of Instruction
+      arr = Raw_Doc.new
       open = 1
       loop do
         curr = doc.current
