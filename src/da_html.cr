@@ -44,11 +44,11 @@ require "./da_html/printer"
 {% if env("IS_DEV") %}
   macro inspect!(*args)
     begin
-      %io = IO::Memory.new
-      \{{args}}.each { |x|
-        x.inspect(%io)
-      }
-      puts %io.to_s
+      puts(
+        \{{args}}.map { |x|
+          x.inspect
+        }.join(", ")
+      )
     end
   end
 {% end %}

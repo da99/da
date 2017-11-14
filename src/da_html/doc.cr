@@ -40,7 +40,7 @@ module DA_HTML
     end # === def <<
 
     def <<(i : Instruction)
-      @origin << i
+      @origin << Instruction.new(i.origin, self)
       reset_size!
       self
     end # === def <<
@@ -71,8 +71,8 @@ module DA_HTML
       origin[pos + 1]
     end # === def next
 
-    def prev
-      origin[pos - 1]
+    def prev(i : Int32 = 1)
+      origin[pos - i]
     end
 
     private def move
@@ -98,11 +98,14 @@ module DA_HTML
     {% if env("IS_DEV") %}
       def inspect(io)
         io << "Doc["
-        @origin.each { |i|
-          io << i.inspect
+        @origin.each_with_index { |i, index|
+          io << "\n  " << i.inspect
         }
-        io << "empty" if @origin.empty?
-        io << "]"
+        if @origin.empty?
+          io << "empty]"
+        else
+          io << "\n]"
+        end
       end
     {% end %}
 

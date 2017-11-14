@@ -20,17 +20,20 @@ module DA_HTML
       extend Class_Methods
     end # === macro included
 
+    @@COUNTER = -1
+    @counter : Int32
+
     def initialize(raw : String, @file_dir)
+      @@COUNTER += 1
+      @counter = @@COUNTER
       {% begin %}
         @doc = {{@type}}::Parser.new(raw).parse
       {% end %}
     end # === def initialize
 
     def initialize(@doc : Doc, @file_dir)
-    end # === def initialize
-
-    def initialize(raw_doc : Raw_Doc, @file_dir)
-      @doc = Doc.new(raw_doc)
+      @@COUNTER += 1
+      @counter = @@COUNTER
     end # === def initialize
 
     def capture(new_io : IO_HTML)
@@ -74,7 +77,8 @@ module DA_HTML
 
     def to_html
       while doc.current?
-        to_html(doc.grab_current)
+        i = doc.grab_current
+        to_html(i)
       end
       io.to_s
     end # === def to_html

@@ -36,12 +36,15 @@ class SPECS_TEMPLATE
     when tag.open_tag?("template")
       io.open_tag_attrs("script") { |io_html|
         io.write_attr("type", "application/template")
-        tag.grab_attrs.each { |a|
+        attrs = tag.grab_attrs
+
+        attrs.each { |a|
           io.write_attr("data-" + a.attr_name, a.attr_content)
         }
       }
 
-      html = self.class.new(tag.grab_body, file_dir).to_html
+      body = tag.grab_body
+      html = self.class.new(body, file_dir).to_html
       io.write_text( html )
     else
       super
