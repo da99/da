@@ -25,7 +25,7 @@ describe ":to_html" do
   it "raises Invalid_Printing if doc is already fin?" do
     input = %[<span></span>]
     doc = SPEC_TO_HTML::Parser.new(input).parse
-    while doc.next?
+    while doc.current?
       doc.grab_current
     end
 
@@ -33,5 +33,17 @@ describe ":to_html" do
       SPEC_TO_HTML.new(doc, __DIR__).to_html
     }
   end # === it "raises Invalid_Printing if doc is already fin?"
+
+  it "renders Doc if size of doc == 1" do
+    input = %[text]
+    doc = SPEC_TO_HTML::Parser.new(input).parse
+    while doc.current?
+      doc.grab_current
+    end
+
+    expect_raises(DA_HTML::Invalid_Printing) {
+      SPEC_TO_HTML.new(doc, __DIR__).to_html
+    }
+  end # === it "renders Doc if size of doc == 1"
 
 end # === desc ":to_html"

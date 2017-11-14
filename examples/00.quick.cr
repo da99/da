@@ -30,7 +30,8 @@ class Example_00_Quick
     case
     when i.open_tag?("bang")
       io.open_tag "strong"
-      io.write_text self.class.new(i.grab_body, file_dir).to_html
+      new_body = i.grab_body
+      io.write_text self.class.new(new_body, file_dir).to_html
       io.close_tag "strong"
       doc.grab_current
     else
@@ -48,3 +49,4 @@ describe "Example_00_Quick" do
   end
 
 end # === desc "Example_00_Quick"
+
