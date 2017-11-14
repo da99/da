@@ -54,23 +54,24 @@ module DA_HTML
         raise Invalid_Text.new(raw) if !content.empty?
 
       when raw.text?
-        text = allow("text!", raw)
-        case text
-        when String
-          :done
-        when XML::Node
-          text = text.content
-        when Symbol
-          case text
-          when :done
-            return :done
-          else
-            raise Invalid_Text.new(raw)
-          end
-        end
+        new_text = allow("text!", raw)
+        text = case new_text
+               when String
+                 new_text
+               when XML::Node
+                 new_text.content
+               when Symbol
+                 new_text
+               end
 
-        if text && !text.strip.empty?
+        case
+        when text.is_a?(String)
+          return :done if text.strip.empty?
           doc.instruct "text", text
+        when text == :done
+          :done
+        else
+          raise Invalid_Text.new(raw)
         end
 
       when raw.attribute?
