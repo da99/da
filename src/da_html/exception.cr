@@ -1,6 +1,9 @@
 
 module DA_HTML
 
+  class Error < Exception
+  end # === class Error
+
   macro exception(name)
     class {{name.id}} < Exception
       def message
@@ -11,7 +14,10 @@ module DA_HTML
 
   exception Invalid_Attr_Value
 
-  class Invalid_Doctype < Exception
+  class Invalid_Printing < Error
+  end # === class Invalid_Printing
+
+  class Invalid_Doctype < Error
 
     def initialize(node : XML::Node)
       @message = node.to_s
@@ -26,7 +32,7 @@ module DA_HTML
 
   end # === class Invalid_Doctype
 
-  class Invalid_Text < Exception
+  class Invalid_Text < Error
 
     def initialize(@message)
     end # === def initialize
@@ -40,7 +46,7 @@ module DA_HTML
     end
   end # === class Invalid_Tag
 
-  class Invalid_Tag < Exception
+  class Invalid_Tag < Error
 
     def initialize(@message)
     end # === def initialize
@@ -54,7 +60,7 @@ module DA_HTML
     end
   end # === class Invalid_Tag
 
-  class Invalid_Attr < Exception
+  class Invalid_Attr < Error
     def initialize(@message)
     end # === def initialize
 
