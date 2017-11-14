@@ -69,6 +69,8 @@ module DA_HTML
     end # === def print
 
     def to_html
+      raise Invalid_Printing.new("Nothing in the document to render.") if doc.empty?
+      raise Invalid_Printing.new("Doc is already at the end.") if !doc.next?
       while doc.current?
         i = doc.grab_current
         to_html(i)
