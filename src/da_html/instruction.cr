@@ -15,16 +15,16 @@ module DA_HTML
 
     {% for x in %w(open close).map(&.id) %}
       def {{x}}_tag?
-        origin.first == "{{x}}-tag"
+        is?("{{x}}-tag")
       end # === def open_tag?
 
       def {{x}}_tag?(tag_name : String)
-        {{x}}_tag? && origin.last == tag_name
+        {{x}}_tag? && last == tag_name
       end # === def open_tag?
     {% end %}
 
     def attr?
-      @origin.first == "attr"
+      is?("attr")
     end # === def attr?
 
     def attr_name
@@ -38,6 +38,10 @@ module DA_HTML
     def tag_name
       @origin.last
     end
+
+    def is?(raw : String)
+      @origin.first == raw
+    end # === def first
 
     def first
       @origin.first

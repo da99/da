@@ -5,7 +5,7 @@ class SPEC_CUSTOM_INSTRUCTIONS
 
   def to_html(i : DA_HTML::Instruction)
     case
-    when i.origin.first == "SAY_HELLO"
+    when i.is?("SAY_HELLO")
       io.write_text i.origin.last
     else
       super
