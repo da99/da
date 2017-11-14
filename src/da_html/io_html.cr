@@ -72,27 +72,23 @@ module DA_HTML
       end # === def write_content
 
       def write_closed_tag(tag_name : String, *attrs)
-        attrs_should_be_closed!
-        raw! "<", tag_name
-
-        attrs.each { |a|
-          len = a.size
-          case len
-          when 1
-            write_attr(a.first)
-          when 2
-            write_attr(a.first, a.last)
-          else
-            raise Exception.new("Invalid attribute: #{a.inspect}")
-          end
+        open_attrs(tag_name) {
+          attrs.each { |a|
+            len = a.size
+            case len
+            when 1
+              write_attr(a.first)
+            when 2
+              write_attr(a.first, a.last)
+            else
+              raise Exception.new("Invalid attribute: #{a.inspect}")
+            end
+          }
         }
-
-        raw! ">"
       end # === def write_closed_tag
 
       def write_tag(tag_name : String, raw_content : String)
-        attrs_should_be_closed!
-        raw! "<", tag_name, ">"
+        open_and_close_attrs(tag_name)
         write_text raw_content
         raw! "</", tag_name, ">"
       end # === def write_tag
@@ -101,6 +97,11 @@ module DA_HTML
         open_and_close_attrs(tag_name) {
         }
       end # === def open_tag
+
+      def open_and_close_attrs(tag_name : String)
+        open_attrs(tag_name)
+        close_attrs
+      end # === def open_attrs
 
       def open_and_close_attrs(tag_name : String)
         open_attrs(tag_name)
