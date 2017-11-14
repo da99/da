@@ -52,25 +52,6 @@ module DA_HTML
         raw! escape(s)
       end # === def write_text
 
-      def write_text(x)
-        attrs_should_be_closed!
-        raise Exception.new("Invalid value for write_text: #{x.inspect}")
-      end # === def write_text
-
-      def write_content_result(s : String)
-        write_text(s)
-      end # === def write_text
-
-      def write_content_result(x)
-        # :ignore all others
-      end # === def write_text
-
-      def write_content
-        raw! ">"
-        write_content_result(yield)
-        nil
-      end # === def write_content
-
       def write_closed_tag(tag_name : String, *attrs)
         open_attrs(tag_name) {
           attrs.each { |a|
