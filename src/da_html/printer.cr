@@ -45,7 +45,7 @@ module DA_HTML
 
       when "open-tag"
         if doc.current? && doc.current.attr?
-          io.open_tag_attrs(i.last)
+          io.open_attrs(i.last)
         else
           io.open_tag(i.last)
         end

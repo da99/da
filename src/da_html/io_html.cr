@@ -97,35 +97,31 @@ module DA_HTML
         raw! "</", tag_name, ">"
       end # === def write_tag
 
-      def write_tag(klass, tag_name : String)
-        close_attrs
-
-        raw! "<", tag_name
-
-        scope = klass.new(self)
-        result = with scope yield
-        raw! "</", tag_name, ">"
-      end # === def render!
-
       def open_tag(tag_name : String)
-        attrs_should_be_closed!
-        raw! "<", tag_name, ">"
+        open_and_close_attrs(tag_name) {
+        }
       end # === def open_tag
 
-      def open_tag_attrs(tag_name : String)
-        attrs_should_be_closed!
-        raw! "<", tag_name
-        @attrs_open = true
-        self
-      end # === def open_tag
+      def open_and_close_attrs(tag_name : String)
+        open_attrs(tag_name)
+        yield
+        close_attrs
+      end # === def open_attrs
 
-      def open_tag_attrs(tag_name : String)
-        open_tag_attrs(tag_name)
+      def open_attrs(tag_name : String)
+        open_attrs(tag_name)
         yield self
         close_attrs
       end # === def open_tag
 
+      def open_attrs(tag_name : String)
+        attrs_should_be_closed!
+        @attrs_open = true
+        raw! "<", tag_name
+      end # === def open_attrs
+
       def close_attrs
+        attrs_should_be_open!
         @attrs_open = false
         raw! ">"
       end # === def close_attrs

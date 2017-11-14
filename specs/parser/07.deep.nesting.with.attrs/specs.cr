@@ -25,7 +25,7 @@ class SPEC_DEEP_NESTING_WITH_ATTRS
     when i.close_tag?("bang")
       io.close_tag "span"
     when i.open_tag?("bang")
-      io.open_tag_attrs("span") {
+      io.open_attrs("span") {
         i.grab_attrs.each { |a|
           io.write_attr(a)
         }

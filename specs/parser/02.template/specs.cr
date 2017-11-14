@@ -34,11 +34,9 @@ class SPECS_TEMPLATE
       io.close_tag("script")
 
     when tag.open_tag?("template")
-      io.open_tag_attrs("script") { |io_html|
+      io.open_attrs("script") { |io_html|
         io.write_attr("type", "application/template")
-        attrs = tag.grab_attrs
-
-        attrs.each { |a|
+        tag.grab_attrs.each { |a|
           io.write_attr("data-" + a.attr_name, a.attr_content)
         }
       }

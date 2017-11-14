@@ -30,7 +30,7 @@ struct SPEC_ATTRS
       io.raw! %(<script src="/main.js" type="application/javascript"></script>)
 
     when tag.open_tag?("bang")
-      io.open_tag_attrs("span") {
+      io.open_attrs("span") {
       }
     else
       super
