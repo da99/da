@@ -28,6 +28,10 @@ macro strip_each_line(str)
   {{str}}.split("\n").map { |x| x.strip }.join
 end
 
+macro file_read!(name)
+  File.read(__DIR__ + "/" + {{name}})
+end # === macro file_read!
+
 # === Parser
 require "./parser/specs"
 require "../examples/*"

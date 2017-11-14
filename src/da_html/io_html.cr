@@ -24,6 +24,12 @@ module DA_HTML
         self
       end # === def write_attr
 
+      def write_attr(attr : DA_HTML::Instruction)
+        raise Invalid_Attr.new(attr) unless attr.attr?
+        raw!( " ", attr.attr_name, "=", escape(attr.attr_content).inspect)
+        self
+      end # === def write_attr
+
       def escape(s)
         DA_HTML_ESCAPE.escape(s) || ""
       end # === def escape
