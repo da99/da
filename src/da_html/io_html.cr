@@ -71,7 +71,7 @@ module DA_HTML
       def write_tag(tag_name : String, raw_content : String)
         open_and_close_attrs(tag_name)
         write_text raw_content
-        raw! "</", tag_name, ">"
+        close_tag(tag_name)
       end # === def write_tag
 
       def open_tag(tag_name : String)
