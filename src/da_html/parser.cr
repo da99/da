@@ -22,7 +22,7 @@ module DA_HTML
   # === It's meant to be used within a Struct.
   module Parser
 
-    getter doc = Raw_Doc.new
+    getter doc = Doc.new
 
     @origin : String
     def initialize(raw : String)

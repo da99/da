@@ -3,8 +3,6 @@ require "./instruction"
 
 module DA_HTML
 
-  alias DOC = Array(INSTRUCTION)
-
   # It's easy to generate infinite loops when dealing with flattened hierarchies.
   #   :grab_current + :grab_body (with close-tag "body"/"html" check)
   #   prevent infinite loops when dealing with flattened hierarchies.
@@ -13,23 +11,39 @@ module DA_HTML
   #   which would lead to more hard-to-find infinite loops.
   class Doc
 
-    getter origin : DOC
+    getter origin = [] of Instruction
     getter pos = 0
-    getter last : Int32
+    getter size : Int32
 
-    def initialize(arr : Array(Instruction))
-      @origin = arr.map { |x| x.origin }
-      @last = (@origin.size - 1)
-    end # === def initialize
-
-    def initialize(raw_doc : Raw_Doc)
-      @origin = raw_doc.origin
-      @last = (@origin.size - 1)
+    def initialize
+      @size = @origin.size
     end # === def initialize
 
     def initialize(@origin)
-      @last = (@origin.size - 1)
+      @size = @origin.size
     end # === def initialize
+
+    macro reset_size!
+      @size = @origin.size
+    end
+
+    def instruct(name : String, content : String)
+      self.<<({ name, content })
+    end # === def instruct
+
+    def instruct(name : String, key : String, content : String)
+      self.<<({ name, key, content })
+    end # === def instruct
+
+    def <<(v : Raw_Instruction)
+      self.<<(Instruction.new(v, self))
+    end # === def <<
+
+    def <<(i : Instruction)
+      @origin << i
+      reset_size!
+      self
+    end # === def <<
 
     def grab_current
       val = current
@@ -38,72 +52,49 @@ module DA_HTML
     end # === def grab_current
 
     def current
-      Instruction.new(origin[pos], self)
+      origin[pos]
     end # === def current
 
+    def last
+      (@size - 1)
+    end # === def last
+
     def current?
-      @pos <= @last
+      @pos <= last
     end # === def current?
 
     def next?
-      @pos < @last
+      @pos < last
     end # === def next?
 
     def next
-      Instruction.new(origin[pos + 1], self)
+      origin[pos + 1]
     end # === def next
 
     def prev
-      Instruction.new(origin[pos - 1], self)
+      origin[pos - 1]
     end
 
     private def move
-      raise Exception.new("Already at end.") if @pos > @last
+      raise Exception.new("Already at end.") if @pos > last
       @pos = @pos + 1
       self
     end # === def move
 
     def attr?
-      current.first == "attr"
+      current.attr?
     end # === def attr?
 
-  end # === class Doc
-
-  class Raw_Doc
-    include Indexable(INSTRUCTION)
-
-    getter origin = [] of INSTRUCTION
-
-    def initialize
-    end # === def initialize
-
-    def initialize(@origin)
-    end # === def initialize
-
-    def instruct(name : String, content : String)
-      @origin << { name, content }
-      self
-    end # === def instruct
-
-    def instruct(name : String, key : String, content : String)
-      @origin << { name, key, content }
-      self
-    end # === def instruct
-
-    def size
-      @origin.size
+    def empty?
+      @size == 0
     end
 
-    def <<(v : Instruction)
-      @origin << v.origin
-      self
-    end # === def <<
+    def each
+      @origin.each { |x|
+        yield x
+      }
+    end # === def each
 
-    def <<(v : INSTRUCTION)
-      @origin << v
-      self
-    end # === def <<
-
-  end # === class Raw_Doc
+  end # === class Doc
 
 end # === module DA_HTML

@@ -22,7 +22,7 @@ module DA_HTML
 
     def initialize(raw : String, @file_dir)
       {% begin %}
-        @doc = Doc.new({{@type}}::Parser.new(raw).parse)
+        @doc = {{@type}}::Parser.new(raw).parse
       {% end %}
     end # === def initialize
 

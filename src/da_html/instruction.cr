@@ -1,13 +1,14 @@
 
 module DA_HTML
 
-  alias INSTRUCTION = Tuple(String, String) | Tuple(String, String, String)
+  alias Raw_Instruction = Tuple(String, String) | Tuple(String, String, String)
 
   struct Instruction
 
-    getter origin : INSTRUCTION
-    getter doc : Doc
+    getter origin  : Raw_Instruction
+    getter doc     : Doc
     getter doc_pos : Int32
+
     def initialize(@origin, @doc)
       @doc_pos = @doc.pos
     end # === def initialize
@@ -55,7 +56,7 @@ module DA_HTML
     end # === def []
 
     def grab_attrs
-      arr = [] of Instruction
+      arr = Doc.new
       while @doc.current.attr?
         arr << @doc.grab_current
       end
@@ -63,7 +64,7 @@ module DA_HTML
     end # === def grab_attrs
 
     def grab_body
-      arr = Raw_Doc.new
+      arr = Doc.new
       open = 1
       loop do
         curr = doc.current
@@ -82,6 +83,12 @@ module DA_HTML
       end # === loop
       arr
     end # === def grab_body
+
+    def each
+      @origin.each { |x|
+        yield x
+      }
+    end # === def each
 
   end # === struct Instruction
 

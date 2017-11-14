@@ -69,7 +69,7 @@ module DA_HTML
 
     def to_doc(raw : String)
       codes  = Stream.new(raw)
-      doc    = Raw_Doc.new
+      doc    = Doc.new
 
       while !codes.fin?
         instruct = codes.grab_word
