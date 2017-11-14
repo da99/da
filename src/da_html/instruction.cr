@@ -90,6 +90,12 @@ module DA_HTML
       }
     end # === def each
 
+    {% if env("IS_DEV") %}
+      def inspect(io)
+        io << "Instruction" << origin.inspect
+      end
+    {% end %}
+
   end # === struct Instruction
 
 end # === module DA_HTML

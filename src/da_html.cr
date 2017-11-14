@@ -41,9 +41,15 @@ require "./da_html/parser"
 require "./da_html/printer"
 
 
-{% if env("IS_DEV_BUILD") %}
+{% if env("IS_DEV") %}
   macro inspect!(*args)
-    puts \{{*args}}
+    begin
+      %io = IO::Memory.new
+      \{{args}}.each { |x|
+        x.inspect(%io)
+      }
+      puts %io.to_s
+    end
   end
 {% end %}
 

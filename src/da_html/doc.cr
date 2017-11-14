@@ -95,6 +95,17 @@ module DA_HTML
       }
     end # === def each
 
+    {% if env("IS_DEV") %}
+      def inspect(io)
+        io << "Doc["
+        @origin.each { |i|
+          io << i.inspect
+        }
+        io << "empty" if @origin.empty?
+        io << "]"
+      end
+    {% end %}
+
   end # === class Doc
 
 end # === module DA_HTML
