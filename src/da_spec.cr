@@ -1,5 +1,6 @@
 
 require "colorize"
+require "terminal_table"
 
 module DA_SPEC
 
@@ -70,16 +71,22 @@ module DA_SPEC
     with d yield
   end # === def describe
 
-  macro examine(key, val)
-    %as_string = {{val}}.inspect
-    %key       = {{key}}
-    %val       = {{val}}
-    case %val
-    when String
-      puts "#{%key}: (String)\n============================\n#{%val}\n============================\n"
-    else
-      puts "#{%key}: #{%as_string}"
-    end
+  def examine(*args)
+    headings = [] of String
+    rows = [] of String
+    args.each { |pair|
+      key       = pair.first
+      val       = pair.last
+      as_string = pair.last.inspect
+
+      headings.push key
+      rows.push as_string
+    }
+
+    t = TerminalTable.new
+    t.headings = headings
+    t << rows
+    puts t.render
   end
 
   macro assert(func_call)
@@ -95,8 +102,7 @@ module DA_SPEC
       print "- ", name.colorize(:green), "\n"
     else
       print(name.colorize(:red), ": ", "#{%origin} -> #{%result.inspect}".colorize.mode(:bold), "\n")
-      examine("A", %a)
-      examine("B", %b)
+      examine({"A", %a}, {"B", %b})
       exit 1
     end
 
