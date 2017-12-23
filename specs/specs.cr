@@ -1,8 +1,19 @@
 
+ORIGIN_ARGS = ARGV.dup
+ARGV.clear
 
 require "../src/da_spec"
 
 extend DA_SPEC
+
+class Result
+
+  getter exit_code : Int32
+  getter output : String
+  def initialize(@exit_code, @output)
+  end # === def initialize
+
+end # === class Result
 
 def run(raw)
   cmd    = "tmp/out/specs"
@@ -10,19 +21,19 @@ def run(raw)
   output = IO::Memory.new
 
   stat = Process.run(cmd, args, output: output, error: output)
-  return({ stat.exit_code, output.rewind.to_s })
+  return(Result.new(stat.exit_code, output.rewind.to_s))
 end # === def shell_out
 
-if ARGV.empty?
-  app = "tmp/out/specs"
-  puts run("Good").last.inspect
-  puts run("Bad").last.inspect
-else
-  Describe.pattern ARGV.join(" ")
-  describe "Good" do
-    it "passes" { assert 1 == 1 }
-  end
-  describe "Bad" do
-    it "fails" { assert 1 == 2 }
-  end # === desc "Bad"
+def in_spec?
+  ORIGIN_ARGS.empty?
 end
+
+if !in_spec?
+  Describe.pattern ORIGIN_ARGS.join(" ")
+end
+
+require "./specs/*"
+
+
+
+

@@ -92,7 +92,7 @@ module DA_SPEC
 
     describe.puts_header
     if %result
-      puts name.colorize(:green)
+      print "- ", name.colorize(:green), "\n"
     else
       print(name.colorize(:red), ": ", "#{%origin} -> #{%result.inspect}".colorize.mode(:bold), "\n")
       examine("A", %a)
