@@ -1,5 +1,6 @@
+---
 name: da_spec
-version: 0.0.0
+version: 0.1.0
 development_dependencies:
   exit_on_error:
     github: da99/exit_on_error
