@@ -38,14 +38,25 @@ module DA_SPEC
     def it(name : String)
       x = It.new(self, name)
       if Describe.matches?(x)
-        with x yield
+        begin
+          with x yield
+        rescue ex
+          puts_header
+          print "- ", x.name.colorize(:red), ": (", ex.class.to_s, ") ", ex.message.colorize.mode(:bold), "\n"
+          count = 0
+          ex.backtrace.each { |line|
+            puts line
+            count += 1
+            break if count > 15
+          }
+          exit 1
+        end
       end
     end # === def it
 
     def puts_header
       unless @already_printed_header
-        print name.colorize.mode(:bold)
-        print ":\n"
+        print name.colorize.mode(:bold), ":", "\n"
         @already_printed_header = true
       end
     end # === def puts_name
@@ -93,16 +104,32 @@ module DA_SPEC
     %origin = %<{{func_call}}>
     %a = {{func_call.receiver}}
     %b = {{func_call.args.first}}
-    %result = %a.{{func_call.name}}(%b)
+    %has_err = nil
+    %result = nil
+    begin
+      %result = %a.{{func_call.name}}(%b)
+    rescue %ex
+      %has_err = %ex
+    end
     %a_string = %a.inspect
     %b_string = %b.inspect
 
     describe.puts_header
-    if %result
+    if %result && !%has_err
       print "- ", name.colorize(:green), "\n"
     else
-      print(name.colorize(:red), ": ", "#{%origin} -> #{%result.inspect}".colorize.mode(:bold), "\n")
-      examine({"A", %a}, {"B", %b})
+      if %has_err
+        print("- ", name.colorize(:red), ": ", "#{%origin} -> (#{%has_err.class}) #{%has_err.message}".colorize.mode(:bold), "\n")
+        %count = 0
+        %has_err.backtrace.each { |line|
+          puts line
+          %count += 1
+          break if %count > 15
+        }
+      else
+        print(name.colorize(:red), ": ", "#{%origin} -> #{%result.inspect}".colorize.mode(:bold), "\n")
+        examine({"A", %a}, {"B", %b})
+      end
       exit 1
     end
 
