@@ -105,31 +105,16 @@ module DA_SPEC
     %a = {{func_call.receiver}}
     %b = {{func_call.args.first}}
     %has_err = nil
-    %result = nil
-    begin
-      %result = %a.{{func_call.name}}(%b)
-    rescue %ex
-      %has_err = %ex
-    end
+    %result = %a.{{func_call.name}}(%b)
     %a_string = %a.inspect
     %b_string = %b.inspect
 
     describe.puts_header
-    if %result && !%has_err
+    if %result
       print "- ", name.colorize(:green), "\n"
     else
-      if %has_err
-        print("- ", name.colorize(:red), ": ", "#{%origin} -> (#{%has_err.class}) #{%has_err.message}".colorize.mode(:bold), "\n")
-        %count = 0
-        %has_err.backtrace.each { |line|
-          puts line
-          %count += 1
-          break if %count > 15
-        }
-      else
-        print(name.colorize(:red), ": ", "#{%origin} -> #{%result.inspect}".colorize.mode(:bold), "\n")
-        examine({"A", %a}, {"B", %b})
-      end
+      print(name.colorize(:red), ": ", "#{%origin} -> #{%result.inspect}".colorize.mode(:bold), "\n")
+      examine({"A", %a}, {"B", %b})
       exit 1
     end
 
