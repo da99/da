@@ -13,6 +13,9 @@ Reference
 
   require "da_spec"
 
+  Describe.pattern "name of test"
+  Describe.pattern /name of test/
+
   describe "My_Class" do
 
     it "does something" do
@@ -20,8 +23,9 @@ Reference
     end
 
     it "fails" do
-      assert_raises(NameError) do
-        My_Class.undefined
+      assert_raises(IndexError) do
+        a = [] of Int32
+        a.pop
       end
     end
 
