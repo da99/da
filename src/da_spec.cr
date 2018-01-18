@@ -42,7 +42,7 @@ module DA_SPEC
           with x yield
         rescue ex
           puts_header
-          print "- ", x.name.colorize(:red), ": (", ex.class.to_s, ") ", ex.message.colorize.mode(:bold), "\n"
+          print "- ", x.name.colorize(:red), ": (", ex.class.to_s, ") ", ex.message.colorize.mode(:bold)
           count = 0
           ex.backtrace.each { |line|
             puts line
@@ -72,8 +72,45 @@ module DA_SPEC
     end # === def initialize
 
     def full_name
-      "#{@describe.name}: #{name}"
+      [@describe.name, name].compact.join(" ")
     end # === def full_name
+
+    def print_pass
+      print "- ", name.colorize(:green), "\n"
+    end
+
+    def print_fail(*args)
+      print "- ", name.colorize(:red), ": ", *args
+      print "\n"
+    end # === def print_fail
+
+    def assert_raises(error_class, msg : Nil | String | Regex = nil)
+      describe.puts_header
+      begin
+        yield
+        print_fail
+        examine({"Expected: ", error_class.name}, {"Actual: ", "[none]"})
+        exit 1
+      rescue e
+        case
+        when e.class == error_class && !msg
+          print_pass
+        when e.class == error_class && msg.is_a?(String) && e.message == msg
+          print_pass
+        when e.class == error_class && msg.is_a?(Regex) && e.message =~ msg
+          print_pass
+        else
+          print_fail
+          if msg
+            examine({"Expected: ", error_class.name + ": " + msg.inspect}, {"Actual: ", e.class.name + ": " + e.message.inspect})
+          else
+            examine({"Expected: ", error_class}, {"Actual: ", e.class})
+          end
+          exit 1
+        end
+      end
+    end # === def assert_raises
+
 
   end # === class It
 
@@ -111,14 +148,13 @@ module DA_SPEC
 
     describe.puts_header
     if %result
-      print "- ", name.colorize(:green), "\n"
+      print_pass
     else
-      print(name.colorize(:red), ": ", "#{%origin} -> #{%result.inspect}".colorize.mode(:bold), "\n")
+      print_fail("#{%origin} -> #{%result.inspect}".colorize.mode(:bold))
       examine({"A", %a}, {"B", %b})
       exit 1
     end
-
-  end # === macro desc
+  end # === macro assert
 
 end # === module DA_SPEC
 

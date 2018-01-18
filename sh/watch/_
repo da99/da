@@ -20,6 +20,7 @@ case "$ACTION" in
     ;;
 
   run)
+    reset
     cd "$THIS_DIR"
     mkdir -p tmp/out tmp/in
     local +x in=specs/specs.cr
