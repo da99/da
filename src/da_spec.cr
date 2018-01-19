@@ -42,7 +42,7 @@ module DA_SPEC
           with x yield
         rescue ex
           puts_header
-          print "- ", x.name.colorize(:red), ": (", ex.class.to_s, ") ", ex.message.colorize.mode(:bold)
+          x.print_fail "(", ex.class.to_s, ") ", ex.message.colorize.mode(:bold)
           count = 0
           ex.backtrace.each { |line|
             puts line
