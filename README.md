@@ -16,6 +16,8 @@ Reference
   Describe.pattern "name of test"
   Describe.pattern /name of test/
 
+  extend DA_SPEC
+
   describe "My_Class" do
 
     it "does something" do
