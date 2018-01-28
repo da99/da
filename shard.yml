@@ -1,6 +1,6 @@
 ---
 name: da_spec
-version: 0.3.1
+version: 0.4.0
 dependencies:
   terminal_table:
     github: benoist/terminal_table.cr
