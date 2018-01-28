@@ -29,7 +29,7 @@ def in_spec?
 end
 
 if !in_spec?
-  Describe.pattern ORIGIN_ARGS.join(" ")
+  DA_SPEC.pattern ORIGIN_ARGS.join(" ")
 end
 
 require "./specs/*"

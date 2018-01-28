@@ -4,29 +4,41 @@ require "terminal_table"
 
 module DA_SPEC
 
-  class Describe
+  @@pattern : String | Symbol | Regex | Nil = nil
 
-    @@pattern : String | Regex | Nil = nil
+  def self.pattern
+    @@pattern
+  end
 
-    def self.matches?(a)
-      p = pattern
-      case p
-      when String
-        a.full_name.index(p)
-      when Regex
-        p =~ a.full_name
-      else
-        true
-      end
-    end # === def self.matches?
+  def self.pattern(r : Regex | String | Symbol | Nil)
+    @@pattern = r
+  end # === def self.patter
 
-    def self.pattern
-      @@pattern
+  def self.skip_all!
+    @@pattern = :skip_all
+  end # === def self.skip!
+
+  def self.skip_all?
+    @@pattern == :skip_all
+  end
+
+  def self.matches?(a)
+    return false if skip_all?
+
+    p = pattern
+    case p
+    when String
+      a.full_name.index(p)
+    when Regex
+      p =~ a.full_name
+    when Nil
+      true
+    else
+      false
     end
+  end # === def self.matches?
 
-    def self.pattern(r : Regex | String)
-      @@pattern = r
-    end # === def self.patter
+  class Describe
 
     getter name : String
 
@@ -37,7 +49,7 @@ module DA_SPEC
 
     def it(name : String)
       x = It.new(self, name)
-      if Describe.matches?(x)
+      if DA_SPEC.matches?(x)
         begin
           with x yield
         rescue ex
@@ -115,6 +127,7 @@ module DA_SPEC
   end # === class It
 
   def describe(*args)
+    return if DA_SPEC.skip_all?
     d = Describe.new(*args)
     with d yield
   end # === def describe

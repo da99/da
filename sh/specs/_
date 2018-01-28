@@ -7,14 +7,14 @@ set -u -e -o pipefail
 local +x ORIGINAL_ARGS="$@"
 
 if [[ -z "$@" ]]; then
-  local +x ACTION="default"
+  local +x ACTION="watch"
 else
   local +x ACTION="$1"; shift
 fi
 
 case "$ACTION" in
-  default)
-    local +x CMD="$THIS_NAME watch run"
+  watch)
+    local +x CMD="$THIS_NAME specs run"
     ${=CMD} || :
     process watch "-r src -r specs -r sh -r bin" "$CMD"
     ;;
