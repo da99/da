@@ -151,11 +151,11 @@ module DA_SPEC
   end
 
   macro assert(func_call)
-    %origin = %<{{func_call}}>
-    %a = {{func_call.receiver}}
-    %b = {{func_call.args.first}}
-    %has_err = nil
-    %result = %a.{{func_call.name}}(%b)
+    %origin   = {{func_call.stringify}}
+    %a        = {{func_call.receiver}}
+    %b        = {{func_call.args.first}}
+    %has_err  = nil
+    %result   = %a.{{func_call.name}}(%b)
     %a_string = %a.inspect
     %b_string = %b.inspect
 
