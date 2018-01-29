@@ -4,15 +4,42 @@ module DA_HTML
   struct Page
 
     @io = IO::Memory.new
+    @tags = Deque(String).new
+    getter validator : Validator
+
+    def initialize(@validator)
+    end # === def initialize
 
     def to_html
       @io.to_s
     end
 
+    def validate_attr!(name)
+      result = validator.attr!(self, @tags.last, name)
+      case
+      when result == true
+        name
+      else
+        raise Invalid_Attr.new("#{@tags.last.inspect} #{name.inspect}")
+      end
+    end # === def validate_attr
+
+    def validate_attr!(name, val)
+      result = validator.attr!(self, @tags.last, name, val)
+      case
+      when result == true
+        DA_HTML_ESCAPE.escape(val)
+      when result.is_a?(String)
+        result
+      else
+        raise Invalid_Attr.new("#{@tags.last.inspect} #{name.inspect}=#{val.inspect}")
+      end
+    end # === def validate_attr
+
     def write_attr(name : Symbol | String)
       raw! ' '
       raw! { |io|
-        name.to_s(io)
+        validate_attr!(name).to_s(io)
       }
       self
     end # === def write_attr
@@ -22,7 +49,7 @@ module DA_HTML
       raw! { |io|
         name.to_s(io)
         io << '='
-        DA_HTML_ESCAPE.escape(raw_val).inspect(io)
+        validate_attr!(name, raw_val).inspect(io)
       }
       self
     end # === def write_attr
@@ -112,7 +139,8 @@ module DA_HTML
       @io << raw
     end # === def text
 
-    def open_and_close_tag(name : Char | String, *args, **attrs)
+    def open_and_close_tag(name : String, *args, **attrs)
+      @tags.push name
       @io << '<' << name
       args.each { |x|
         case x
@@ -132,10 +160,12 @@ module DA_HTML
         text result
       end
       @io << '<' << '/' << name << '>'
+      @tags.pop
       self
     end # === def open_and_close_tag
 
-    def closed_tag(name : Char | String, *args)
+    def closed_tag(name : String, *args)
+      @tags.push name
       raw! '<'
       raw! name
       args.each { |a|
@@ -149,6 +179,7 @@ module DA_HTML
         end
       }
       raw! '>'
+      @tags.pop
     end # === def closed_tag
 
     {% for x in %w[p div span] %}

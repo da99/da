@@ -54,21 +54,6 @@ module DA_HTML
   end # === class Invalid_Tag
 
   class Invalid_Attr < Error
-    def initialize(@message)
-    end # === def initialize
-
-    def initialize(attr : DA_HTML::Instruction)
-      @message = "attr: #{attr.attr_name} value: #{attr.attr_content}"
-    end # === def initialize
-
-    def initialize(tag : XML::Node, attr : XML::Node)
-      @message = "tag: #{tag.name}, attr: #{attr.name} value: #{attr.content.inspect}"
-    end # === def initialize
-
-    def message
-      "Invalid attribute: #{@message}"
-    end
-
   end # === class Invalid_Attr
 
 end # === module DA_HTML
