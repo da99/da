@@ -18,29 +18,25 @@ export IS_DEV_BUILD=yes
 case "$ACTION" in
 
   watch)
-    CHANGED_FILE=src/da_html.cr da_html.cr specs run || :
-    process watch "-r tmp/out -r examples -r sh -r src -r specs" "da_html.cr specs run"
+    da_html.cr specs run || :
+    process watch "-r examples -r sh -r src -r specs" "da_html.cr specs run"
     ;;
 
   run)
+    reset
     cd "$THIS_DIR"
     mkdir -p tmp/out
     case "${CHANGED_FILE:-}" in
-      *.cr)
-        sh_color ORANGE "=== {{Compiling}} specs..."
-        my_crystal crystal build -o tmp/specs.cr specs/specs.cr
-        ;;
       */tmp/out/args) : ;;
       */tmp/out*) return 0 ;;
+      *)
+        sh_color ORANGE "=== {{Compiling}} specs..."
+        my_crystal __ build -o tmp/out/specs.cr specs/specs.cr
+        ;;
     esac
 
-    reset
     sh_color ORANGE "=== {{Running}} specs..."
-    if [[ -s "tmp/out/args" ]]; then
-      tmp/specs.cr -e "$(cat tmp/out/args)" $@
-    else
-      tmp/specs.cr $@
-    fi
+    tmp/out/specs.cr "$(cat tmp/out/args || :)" $@
     sh_color GREEN "=== {{DONE}} ==="
     ;;
 

@@ -4,15 +4,8 @@ module DA_HTML
   class Error < Exception
   end # === class Error
 
-  macro exception(name)
-    class {{name.id}} < Exception
-      def message
-        "#{self.class.name}: #{@message}"
-      end
-    end # === class
-  end # === macro exception
-
-  exception Invalid_Attr_Value
+  class Invalid_Attr_Value < Error
+  end # === class Invalid_Attr_Value
 
   class Invalid_Printing < Error
   end # === class Invalid_Printing

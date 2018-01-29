@@ -7,3 +7,9 @@ dependencies:
   da_uri:
     github: da99/da_uri.cr
     branch: master
+
+development_dependencies:
+  da_spec:
+    github: da99/da_spec.cr
+  inspect_bang:
+    github: da99/inspect_bang.cr

@@ -1,11 +1,13 @@
 
-require "da_html_escape"
+# require "da_html_escape"
+
+require "./da_html/page"
 
 module DA_HTML
 
-  SEGMENT_ATTR_ID    = /([a-z0-9\_\-]{1,15})/
-  SEGMENT_ATTR_CLASS = /[a-z0-9\ \_\-]{1,50}/
-  SEGMENT_ATTR_HREF  = /[a-z0-9\ \_\-\/\.]{1,50}/
+  # SEGMENT_ATTR_ID    = /([a-z0-9\_\-]{1,15})/
+  # SEGMENT_ATTR_CLASS = /[a-z0-9\ \_\-]{1,50}/
+  # SEGMENT_ATTR_HREF  = /[a-z0-9\ \_\-\/\.]{1,50}/
 
   def self.prettify(str : String)
     indent = 0
@@ -21,35 +23,14 @@ module DA_HTML
     }
   end # === def pretty_html
 
-  macro file_read!(dir, raw)
-    File.read(
-      File.expand_path(
-        File.join({{dir}}, {{raw}}.gsub(/\.+/, ".").gsub(/[^a-z0-9\/\_\-\.]+/, "_"))
-      )
-    )
-  end # === macro file_read!
+  def self.to_html
+    page = Page.new
+    with page yield
+    page.to_html
+  end # === def self.to_html
 
 end # === module DA_HTML
 
-require "./da_html/io_html"
-require "./da_html/exception"
-require "./da_html/template"
-require "./da_html/doc"
-require "./da_html/io_html"
-require "./da_html/format"
-require "./da_html/parser"
-require "./da_html/printer"
-
-
-{% if env("IS_DEV") %}
-  macro inspect!(*args)
-    begin
-      puts(
-        \{{args}}.map { |x|
-          x.inspect
-        }.join(", ")
-      )
-    end
-  end
-{% end %}
+# require "./da_html/exception"
+# require "./da_html/format"
 
