@@ -28,9 +28,9 @@ module DA_HTML
       result = validator.attr!(self, @tags.last, name, val)
       case
       when result == true
-        DA_HTML_ESCAPE.escape(val)
+        DA_HTML_ESCAPE.escape(val.to_s)
       when result.is_a?(String)
-        result
+        DA_HTML_ESCAPE.escape(result)
       else
         raise Invalid_Attr.new("#{@tags.last.inspect} #{name.inspect}=#{val.inspect}")
       end
@@ -44,7 +44,7 @@ module DA_HTML
       self
     end # === def write_attr
 
-    def write_attr(name : Symbol | String, raw_val : String)
+    def write_attr(name : Symbol | String, raw_val : String | Symbol | Int32)
       raw! ' '
       raw! { |io|
         name.to_s(io)
