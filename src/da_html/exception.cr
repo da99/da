@@ -37,20 +37,9 @@ module DA_HTML
     def message
       "Invalid text: #{@message}"
     end
-  end # === class Invalid_Tag
+  end # === class Invalid_Text
 
   class Invalid_Tag < Error
-
-    def initialize(@message)
-    end # === def initialize
-
-    def initialize(node : XML::Node)
-      @message = "#{node.type.inspect} (#{node.to_s.inspect})"
-    end # === def initialize
-
-    def message
-      "Invalid tag: #{@message}"
-    end
   end # === class Invalid_Tag
 
   class Invalid_Attr < Error

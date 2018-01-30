@@ -36,6 +36,16 @@ module DA_HTML
       end
     end # === def validate_attr
 
+    def validate_tag!(name)
+      result = validator.tag!(self, name)
+      case result
+      when true
+        return name
+      else
+        raise Invalid_Tag.new(name.inspect)
+      end
+    end # === def validate_tag!
+
     def write_attr(name : Symbol | String)
       raw! ' '
       raw! { |io|
@@ -48,11 +58,18 @@ module DA_HTML
       raw! ' '
       raw! { |io|
         name.to_s(io)
-        io << '='
-        validate_attr!(name, raw_val).inspect(io)
+        io << '=' << '"'
+        validate_attr!(name, raw_val).to_s(io)
+        io << '"'
       }
       self
     end # === def write_attr
+
+    def write_tag(name : String)
+      raw! { |io|
+        validate_tag!(name).to_s(io)
+      }
+    end # === def write_tag
 
     def write_id_class(x : String)
       id      = Deque(Char).new
@@ -141,7 +158,8 @@ module DA_HTML
 
     def open_and_close_tag(name : String, *args, **attrs)
       @tags.push name
-      @io << '<' << name
+      @io << '<'
+      write_tag name
       args.each { |x|
         case x
         when String
