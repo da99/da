@@ -1,36 +1,31 @@
 
-class Validator_01
+class Customize_01
 
-  extend DA_HTML::Validator
+  include DA_HTML::Base
 
-  def self.tag!(page, tag_name)
+  def tag!(page, tag_name)
     return false if tag_name == "span"
     true
   end # === def self.validate
 
-  def self.attr!(page, tag_name, name, val)
+  def attr!(page, tag_name, name, val)
     return true unless name == :hello
     false
   end # === def self.validate
 
 end # === struct Validator_01
 
-describe "Validator" do
-
-  it "allows a Validator" do
-    actual = DA_HTML.to_html(Validator_01) { p { "hello" } }
-    assert actual == %[<p>hello</p>]
-  end # === it "allows a Validator"
+describe "Customize" do
 
   it "raises an error if an invalid attr is requested" do
     assert_raises(DA_HTML::Invalid_Attr) {
-      DA_HTML.to_html(Validator_01) { p(hello: "name") { "hello" } }
+      Customize_01.to_html { p(hello: "name") { "hello" } }
     }
   end # === it "raises an error if an invalid attr is requested"
 
   it "raises an error if an invalid tag is requested" do
     assert_raises(DA_HTML::Invalid_Tag) {
-      DA_HTML.to_html(Validator_01) { span { "hello" } }
+      Customize_01.to_html { span { "hello" } }
     }
   end # === it "raises an error if an invalid tag is requested"
 

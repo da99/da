@@ -1,6 +1,7 @@
 
 require "da_html_escape"
-require "./da_html/validator"
+require "da_uri"
+require "./da_html/base"
 require "./da_html/exception"
 require "./da_html/page"
 
@@ -20,13 +21,11 @@ module DA_HTML
     }
   end # === def pretty_html
 
-  def self.to_html(validator = Default_Validator.new)
-    page = Page.new(validator)
+  def self.to_html
+    page = Default_Page.new
     with page yield
     page.to_html
   end # === def self.to_html
 
 end # === module DA_HTML
-
-# require "./da_html/format"
 
