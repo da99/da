@@ -3,7 +3,7 @@
 describe ":template" do
 
   it "renders as a script tag" do
-    actual = render {
+    actual = DA_HTML.to_html {
       template("#row") { p { "hello" } }
     }
 
@@ -15,7 +15,7 @@ describe ":template" do
   end # === it "renders as a script tag"
 
   it "does not escape template vars returned from a block" do
-    actual = render {
+    actual = DA_HTML.to_html {
       template("#row") { p { var("hello") } }
     }
 
@@ -29,10 +29,10 @@ describe ":template" do
   end # === it "does not escape vars"
 
   it "does not escape template vars used in text(...)" do
-    actual = render {
-      template("#row") { p {
-        text "{{hello1}}", var("hello2")
-      } }
+    actual = DA_HTML.to_html {
+      template("#row") {
+        p { text "{{hello1}}", var("hello2") } 
+      }
     }
 
     should_eq actual, strip_each_line(
@@ -45,7 +45,7 @@ describe ":template" do
   end # === it "does not escape vars"
 
   it "does not escape a var each" do
-    actual = render {
+    actual = DA_HTML.to_html {
       template("#row") {
         var_each("members") {
           p { var("name") }
@@ -65,7 +65,7 @@ describe ":template" do
   end # === it "does not escape a var each"
 
   it "renders an inverted section" do
-    actual = render {
+    actual = DA_HTML.to_html {
       template("#row") {
         var_not("members") {
           p { "no members" }
@@ -85,7 +85,7 @@ describe ":template" do
   end # === it "renders an inverted section"
 
   it "renders double quotation marks" do
-    actual = render {
+    actual = DA_HTML.to_html {
       template("#row") {
         p("#main") { "no members" }
       }
@@ -101,7 +101,7 @@ describe ":template" do
   end # === it "renders double quotation marks"
 
   it "double escapes ampersands" do
-    actual = render {
+    actual = DA_HTML.to_html {
       template("#row") {
         p { "& & &" }
       }

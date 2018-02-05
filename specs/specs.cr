@@ -10,9 +10,6 @@ end
 extend DA_SPEC
 
 require "../examples/*"
-require "./dsl/00.basics"
-require "./dsl/01.customize"
-require "./dsl/02.attrs"
-require "./dsl/03.a"
+require "./dsl/*"
 
 
