@@ -216,7 +216,7 @@ module DA_HTML
     end # === def doctype
 
     def text(raw : String)
-      @io << raw
+      @io << DA_HTML_ESCAPE.escape(raw)
     end # === def text
 
     def open_and_close_tag(name : String, *args, **attrs)

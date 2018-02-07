@@ -13,6 +13,12 @@ class Customize_01
     false
   end # === def self.validate
 
+  def strong
+    open_and_close_tag("strong") {
+      with self yield self
+    }
+  end # === def strong
+
 end # === struct Validator_01
 
 describe "Customize" do
@@ -28,5 +34,12 @@ describe "Customize" do
       Customize_01.to_html { span { "hello" } }
     }
   end # === it "raises an error if an invalid tag is requested"
+
+  it "allows custom tags without attrs" do
+    actual = Customize_01.to_html {
+      strong { "yo & yo" }
+    }
+    assert actual == %[<strong>yo &#x26; yo</strong>]
+  end # === it "allows custom tags without attrs"
 
 end # === desc "Validator"
