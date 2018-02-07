@@ -4,17 +4,22 @@ module DA_HTML
   struct STRONG
 
     module Tag
-      def strong(*args, **attrs)
-        STRONG.new(self, *args, **attrs)
+      def strong
+        STRONG.new(self).to_html { |p|
+          with p yield p
+        }
       end
     end # === module Tag
 
     @page : DA_HTML::Base
-    def initialize(@page, *args, **attrs)
+    def initialize(@page)
     end # === def initialize
 
     def to_html
-      with @page yield @page
+      p = @page
+      p.raw! "<strong>"
+      p.text?(with p yield p)
+      p.raw! "</strong>"
     end # === def to_html
 
   end # === struct STRONG

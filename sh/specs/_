@@ -19,7 +19,7 @@ case "$ACTION" in
 
   watch)
     da_html.cr specs run || :
-    process watch "-r examples -r sh -r src -r specs" "da_html.cr specs run"
+    process watch "-r examples -r sh -r src -r specs -r tmp/in" "da_html.cr specs run"
     ;;
 
   run)

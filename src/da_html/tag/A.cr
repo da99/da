@@ -72,15 +72,16 @@ module DA_HTML
     end # === def initialize
 
     def to_html
-      @page.open_tag(:a) { |p|
-        p.raw_id_class?(@id_class)
-        p.raw_attr?(:target, @target)
-        p.raw_attr?(:href, @href)
-        p.raw_attr?(:rel, @rel)
-      }
+      p = @page
+      p.raw! "<a"
+      p.raw_id_class?(@id_class)
+      p.raw_attr?(:target, @target)
+      p.raw_attr?(:href, @href)
+      p.raw_attr?(:rel, @rel)
 
-      @page.text?(with @page yield @page)
-      @page.close_tag(:a)
+      p.raw! ">"
+      p.text?(with p yield p)
+      p.raw! "</a>"
     end
 
     # =============================================================================

@@ -24,7 +24,6 @@ module DA_HTML
 
     protected getter io = IO::Memory.new
     @is_partial = false
-    @tags = Deque(Symbol).new
 
     def initialize
     end # === def initialize
@@ -169,23 +168,6 @@ module DA_HTML
       raw! x
     end
 
-    def open_tag(tag_name : Symbol)
-      @tags.push tag_name
-      raw!('<') << tag_name
-      _page = self
-      with _page yield _page
-      raw!('>')
-    end # === def open_tag
-
-    def close_tag(tag_name : Symbol)
-      old_tag = @tags.pop
-      if old_tag != tag_name
-        raise Error.new("Leaving tag #{old_tag.inspect} but expecting #{tag_name.inspect}")
-      end
-      raw!('<') << '/' << tag_name << '>'
-      self
-    end # === def close_tag
-
     def html(args = nil)
       if !args
         raw! %[<html lang="en">]
@@ -205,26 +187,23 @@ module DA_HTML
     def text?(raw)
       case raw
       when String
-        text raw
+        text! raw
       else
         false
       end
     end
 
-    def text(raw : String)
+    def text!(raw : String)
       @io << DA_HTML_ESCAPE.escape(raw)
     end # === def text
 
     def raw_tag!(name : Symbol, *args, **attrs)
-      @tags.push name
-
       result = with self yield self
       case result
       when String
         text result
       end
       @io << '<' << '/' << name << '>'
-      @tags.pop
       self
     end # === def open_and_close_tag
 

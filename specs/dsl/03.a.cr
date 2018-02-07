@@ -12,7 +12,7 @@ describe "a tag" do
     actual = DA_HTML.to_html {
       a("#main", href: "/page") { "the page" }
     }
-    assert actual == %(<a id="main" href="/page">the page</a>)
+    assert actual == %(<a id="main" href="/page" rel="nofollow noreferrer noopener">the page</a>)
   end # === it "allows :id attribute"
 
   {% for x in %w[nofollow noreferrer noopener] %}

@@ -4,11 +4,11 @@ class My_Partial_04
   include DA_HTML::Base
 
   def my_block
-    open_tag(:div) {
+    raw! "<div"
       raw_id_class!(".my_block")
-    }
+    raw! '>'
     with self yield self
-    close_tag(:div)
+    raw! "</div>"
   end
 
 end # === class My_Partial_04

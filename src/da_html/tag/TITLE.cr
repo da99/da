@@ -8,8 +8,10 @@ module DA_HTML
     end # === def initialize
 
     def to_html
-      @page.raw! "<title>"
-      with @page yield @page
+      p = @page
+      p.raw! "<title>"
+      p.text!(with p yield p)
+      p.raw! "</title>"
     end # === def to_html
 
   end # === struct TITLE
