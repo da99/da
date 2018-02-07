@@ -11,7 +11,7 @@ module DA_HTML
     @id_class : String? = nil
     @target   : String? = nil
     @href     : String
-    @rel    = Deque(String).new
+    @rel      = Deque(String).new
 
     def initialize(@page, @id_class = nil, **attrs)
       @href = ""
@@ -65,22 +65,11 @@ module DA_HTML
     end # === def initialize
 
     def to_html
-      @page.open_tag(:a) {
-        id_class = @id_class
-        if id_class
-          @page.raw_id_class!(id_class)
-        end
-
-        target = @target
-        if target
-          @page.raw_attr!(:target, target)
-        end
-
-        @page.raw_attr!(:href, @href)
-
-        if !@rel.empty?
-          @page.raw_attr!(:rel, @rel)
-        end
+      @page.open_tag(:a) { |p|
+        p.raw_id_class?(@id_class)
+        p.raw_attr?(:target, @target)
+        p.raw_attr?(:href, @href)
+        p.raw_attr?(:rel, @rel)
       }
 
       with @page yield @page

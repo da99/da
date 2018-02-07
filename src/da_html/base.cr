@@ -48,6 +48,14 @@ module DA_HTML
       @io.to_s
     end
 
+    def raw_id_class?(x : Nil)
+      false
+    end
+
+    def raw_id_class?(x : String)
+      raw_id_class!(x)
+    end
+
     def raw_id_class!(x : String)
       id      = Deque(Char).new
       class_  = nil
@@ -109,9 +117,33 @@ module DA_HTML
       self
     end
 
+    def raw_attr?(k : Symbol, v : String | Nil)
+      case v
+      when String
+        raw_attr!(k, v)
+        return true
+      end
+      false
+    end
+
+    def raw_attr?(k : Symbol, v : Deque(String))
+      return raw_attr!(k, v) unless v.empty?
+      false
+    end
+
+    def raw_attr?(k : Symbol, v)
+      raw_attr!(k, v)
+      true
+    end
+
+    def raw_attr!(k : Symbol, v : Int32)
+      raw!(' ') << k << '=' << '"' << v << '"'
+      nil
+    end # === def raw_attr!
+
     def raw_attr!(k : Symbol, v : String)
       raw!(' ') << k << '=' << '"' << DA_HTML_ESCAPE.escape(v) << '"'
-      self
+      nil
     end # === def raw_attr!
 
     def raw_attr!(k : Symbol, v : Deque(String))
@@ -121,7 +153,7 @@ module DA_HTML
         raw! DA_HTML_ESCAPE.escape(x)
       }
       raw!('"')
-      self
+      nil
     end # === def raw_attr!
 
     def <<(x : Symbol | String | Char)
@@ -130,11 +162,10 @@ module DA_HTML
 
     def open_tag(tag_name : Symbol)
       @tags.push tag_name
-      raw! { |io|
-        io << '<' << tag_name
-        with self yield self
-        io << '>'
-      }
+      raw!('<') << tag_name
+      _page = self
+      with _page yield _page
+      raw!('>')
     end # === def open_tag
 
     def close_tag(tag_name : Symbol)
@@ -165,25 +196,6 @@ module DA_HTML
     def text(raw : String)
       @io << DA_HTML_ESCAPE.escape(raw)
     end # === def text
-
-    def raw_attrs!(*args, **attrs)
-      args.each { |a|
-        raw! ' '
-        case a.size
-        when 1
-          raw! { |io| a.first.to_s(io) }
-        when 2
-          raw! { |io|
-            a.first.to_s(io)
-            io << '=' << '"'
-            io << DA_HTML_ESCAPE.escape(a.last)
-            io << '"'
-          }
-        else
-          raise Error.new("Invalid attribute #{name.inspect}: #{a.inspect}")
-        end
-      }
-    end # === def raw_attrs!
 
     def raw_tag!(name : Symbol, *args, **attrs)
       @tags.push name
