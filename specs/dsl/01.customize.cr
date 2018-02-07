@@ -8,7 +8,7 @@ class Customize_01
     true
   end # === def self.validate
 
-  def attr!(page, tag_name, name, val)
+  def attr!(page, tag_name, name : Symbol, val)
     return true unless name == :hello
     false
   end # === def self.validate

@@ -3,11 +3,13 @@ module DA_HTML
 
   module Base_Class
 
-    def to_html
-      page = new
-      with page yield page
-      page.to_html
-    end
+    # def to_html(*args)
+    #   page = new(*args)
+    #   page.to_html { |p|
+    #     with p yield p
+    #   }
+    #   page.to_html
+    # end
 
   end # === module Base_Class
 
@@ -17,8 +19,24 @@ module DA_HTML
       extend ::DA_HTML::Base_Class
     end
 
-    @io = IO::Memory.new
+    macro to_html(*args, &blok)
+      {{@type}}.new({{*args}}).to_html {{blok}}
+    end
+
+    protected getter io = IO::Memory.new
     @tags = Deque(String).new
+
+    def initialize
+    end # === def initialize
+
+    def initialize(page : DA_HTML::Base)
+      @io = page.io
+    end # === def initialize
+
+    def to_html
+      with self yield self
+      self.to_html
+    end
 
     def to_html
       @io.to_s
@@ -36,7 +54,7 @@ module DA_HTML
       true
     end
 
-    def attr!(page, tag_name, name, val)
+    def attr!(page, tag_name, name : Symbol, val)
       case name
       when :id, :class
         return true

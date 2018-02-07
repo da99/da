@@ -1,7 +1,7 @@
 
 
-
 describe ":basics" do
+
   it "renders p tag" do
     actual = DA_HTML.to_html { p { "hello" } }
     assert actual == "<p>hello</p>"

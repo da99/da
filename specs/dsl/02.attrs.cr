@@ -13,7 +13,7 @@ class Attrs_02
 
 end # === module Validator_02
 
-describe ":closed_tag" do
+describe "Attrs :closed_tag" do
   it "escapes values of attributes" do
     actual = Attrs_02.to_html {
       p(hello: "<joe>") { }
