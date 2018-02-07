@@ -3,17 +3,16 @@ module DA_HTML
 
   module Base_Class
 
-    # def to_html(*args)
-    #   page = new(*args)
-    #   page.to_html { |p|
-    #     with p yield p
-    #   }
-    #   page.to_html
-    # end
-
   end # === module Base_Class
 
   module Base
+
+    macro if_not_nil(name, &blok)
+      %x = {{name}}
+      if %x
+        {{blok.body}}
+      end
+    end
 
     macro included
       extend ::DA_HTML::Base_Class
@@ -25,7 +24,7 @@ module DA_HTML
 
     protected getter io = IO::Memory.new
     @is_partial = false
-    @tags = Deque(String).new
+    @tags = Deque(Symbol).new
 
     def initialize
     end # === def initialize
@@ -49,99 +48,7 @@ module DA_HTML
       @io.to_s
     end
 
-    def tag!(page, tag_name)
-      tag_name.each_char { |c|
-        case c
-        when 'a'..'z', '_', '-'
-          true
-        else
-          return false
-        end
-      }
-      true
-    end
-
-    def attr!(page, tag_name, name : Symbol, val)
-      case name
-      when :id, :class
-        return true
-      end
-
-      case
-      when tag_name == "a" && name == :href
-        return(DA_URI.clean(val) || "#invalid_url")
-      end
-
-      false
-    end # === def self.attr?
-
-    def attr!(page, tag_name, name)
-      case name
-      when :required
-        true
-      else
-        false
-      end
-    end # === def self.attr?
-
-    def validate_attr!(name)
-      result = attr!(self, @tags.last, name)
-      case
-      when result == true
-        name
-      else
-        raise Invalid_Attr.new("#{@tags.last.inspect} #{name.inspect}")
-      end
-    end # === def validate_attr
-
-    def validate_attr!(name, val)
-      result = attr!(self, @tags.last, name, val)
-      case
-      when result == true
-        DA_HTML_ESCAPE.escape(val.to_s)
-      when result.is_a?(String)
-        DA_HTML_ESCAPE.escape(result)
-      else
-        raise Invalid_Attr.new("#{@tags.last.inspect} #{name.inspect}=#{val.inspect}")
-      end
-    end # === def validate_attr
-
-    def validate_tag!(name)
-      result = tag!(self, name)
-      case result
-      when true
-        return name
-      else
-        raise Invalid_Tag.new(name.inspect)
-      end
-    end # === def validate_tag!
-
-    def write_attr(name : Symbol | String)
-      raw! ' '
-      raw! { |io|
-        validate_attr!(name).to_s(io)
-      }
-      self
-    end # === def write_attr
-
-    def write_attr(name : Symbol | String, raw_val : String | Symbol | Int32)
-      raw! ' '
-      raw! { |io|
-        name.to_s(io)
-        io << '=' << '"'
-        validate_attr!(name, raw_val).to_s(io)
-        io << '"'
-      }
-      self
-    end # === def write_attr
-
-    def write_tag(name : String)
-      raw! { |io|
-        validate_tag!(name).to_s(io)
-      }
-    end # === def write_tag
-
-    def write_id_class(x : String)
+    def raw_id_class!(x : String)
       id      = Deque(Char).new
       class_  = nil
       classes = Deque(Deque(Char)).new
@@ -194,11 +101,50 @@ module DA_HTML
 
     def raw!(*raws)
       raws.each { |s| @io << s }
+      self
     end # === def raw!
 
     def raw!
       yield @io
+      self
     end
+
+    def raw_attr!(k : Symbol, v : String)
+      raw!(' ') << k << '=' << '"' << DA_HTML_ESCAPE.escape(v) << '"'
+      self
+    end # === def raw_attr!
+
+    def raw_attr!(k : Symbol, v : Deque(String))
+      raw!(' ') << k << '=' << '"'
+      v.each_with_index { |x, i|
+        raw! ' ' if i > 0
+        raw! DA_HTML_ESCAPE.escape(x)
+      }
+      raw!('"')
+      self
+    end # === def raw_attr!
+
+    def <<(x : Symbol | String | Char)
+      raw! x
+    end
+
+    def open_tag(tag_name : Symbol)
+      @tags.push tag_name
+      raw! { |io|
+        io << '<' << tag_name
+        with self yield self
+        io << '>'
+      }
+    end # === def open_tag
+
+    def close_tag(tag_name : Symbol)
+      old_tag = @tags.pop
+      if old_tag != tag_name
+        raise Error.new("Leaving tag #{old_tag.inspect} but expecting #{tag_name.inspect}")
+      end
+      raw!('<') << '/' << tag_name << '>'
+      self
+    end # === def close_tag
 
     def html(args = nil)
       if !args
@@ -212,12 +158,6 @@ module DA_HTML
       end
     end # === def html
 
-    def head(*args)
-      open_and_close_tag("head", *args) {
-        with self yield
-      }
-    end # === def head
-
     def doctype!
       raw! "<!DOCTYPE html>"
     end # === def doctype
@@ -226,23 +166,29 @@ module DA_HTML
       @io << DA_HTML_ESCAPE.escape(raw)
     end # === def text
 
-    def open_and_close_tag(name : String, *args, **attrs)
-      @tags.push name
-      @io << '<'
-      write_tag name
-      args.each { |x|
-        case x
-        when String
-          write_id_class(x)
+    def raw_attrs!(*args, **attrs)
+      args.each { |a|
+        raw! ' '
+        case a.size
+        when 1
+          raw! { |io| a.first.to_s(io) }
+        when 2
+          raw! { |io|
+            a.first.to_s(io)
+            io << '=' << '"'
+            io << DA_HTML_ESCAPE.escape(a.last)
+            io << '"'
+          }
         else
-          raise Error.new("Unknown arg for tag: #{x.inspect}")
+          raise Error.new("Invalid attribute #{name.inspect}: #{a.inspect}")
         end
       }
+    end # === def raw_attrs!
 
-      attrs.each { |k, v| write_attr k, v }
+    def raw_tag!(name : Symbol, *args, **attrs)
+      @tags.push name
 
-      @io << '>'
-      result = with self yield
+      result = with self yield self
       case result
       when String
         text result
@@ -252,55 +198,19 @@ module DA_HTML
       self
     end # === def open_and_close_tag
 
-    def closed_tag(name : String, *args)
-      @tags.push name
-      raw! '<'
-      raw! name
-      args.each { |a|
-        case a.size
-        when 1
-          write_attr(a.first)
-        when 2
-          write_attr(a.first, a.last)
-        else
-          raise Error.new("Invalid attribute: #{a.inspect}")
-        end
+    def head(*args)
+      HEAD.new(self, *args).to_html {
+        with self yield self
       }
-      raw! '>'
-      @tags.pop
-    end # === def closed_tag
+    end # === def head
 
-    {% for x in %w[p div span] %}
+    {% for x in %w[body p div span title strong a] %}
       def {{x.id}}(*args, **attrs)
-        open_and_close_tag({{x.id.stringify}}, *args, **attrs) {
-          with self yield
+        {{x.upcase.id}}.new(self, *args, **attrs).to_html {
+          with self yield self
         }
       end # === def {{x.id}}
     {% end %}
-
-    def title
-      open_and_close_tag("title") {
-        with self yield
-      }
-    end # === def title
-
-    def strong(content : String)
-      open_and_close_tag("strong") {
-        text content
-      }
-    end # === def strong
-
-    def body(*args)
-      open_and_close_tag("body", *args) {
-        with self yield
-      }
-    end # === def body
-
-    def a(*args, **attrs)
-      open_and_close_tag("a", *args, **attrs) {
-        with self yield
-      }
-    end # === def a
 
   end # === module Base
 

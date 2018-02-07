@@ -2,14 +2,8 @@
 class Attrs_02
 
   include DA_HTML::Base
-
-  def attr!(page, tag_name, name, val)
-    true
-  end
-
-  def attr!(page, tag_name, name)
-    true
-  end # === def self.attr!
+  include DA_HTML::P::Tag
+  include DA_HTML::INPUT_TEXT::Tag
 
 end # === module Validator_02
 
@@ -23,7 +17,7 @@ describe "Attrs :closed_tag" do
 
   it "allows single attributes: <input required ...>" do
     actual = Attrs_02.to_html {
-      closed_tag("input", {:maxlength, "10"}, {:required})
+      input_text(:required, maxlength: "10")
     }
     assert actual == %(<input maxlength="10" required>)
   end # === it "allows single attributes: <input required ...>"

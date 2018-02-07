@@ -4,9 +4,11 @@ class My_Partial_04
   include DA_HTML::Base
 
   def my_block
-    open_and_close_tag("div", ".my_block") {
-      with self yield
+    open_tag(:div) {
+      raw_id_class!(".my_block")
     }
+    with self yield self
+    close_tag(:div)
   end
 
 end # === class My_Partial_04
@@ -41,4 +43,5 @@ describe "Partials" do
     }
     assert actual == nil
   end # === it "does a nil when :to_html is used with a block"
+
 end # === desc "Partials"

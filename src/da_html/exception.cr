@@ -5,6 +5,16 @@ module DA_HTML
   end # === class Error
 
   class Invalid_Attr_Value < Error
+    def initialize(@message)
+    end # === def initialize
+
+    def initialize(tag_name, key, val)
+      @message = "#{tag_name} #{key}=#{val.inspect}"
+    end # === def initialize
+
+    def initialize(tag_name, val)
+      @message = "#{tag_name} #{val.inspect}"
+    end # === def initialize
   end # === class Invalid_Attr_Value
 
   class Invalid_Printing < Error

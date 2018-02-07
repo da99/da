@@ -2,22 +2,7 @@
 class Customize_01
 
   include DA_HTML::Base
-
-  def tag!(page, tag_name)
-    return false if tag_name == "span"
-    true
-  end # === def self.validate
-
-  def attr!(page, tag_name, name : Symbol, val)
-    return true unless name == :hello
-    false
-  end # === def self.validate
-
-  def strong
-    open_and_close_tag("strong") {
-      with self yield self
-    }
-  end # === def strong
+  include DA_HTML::STRONG::Tag
 
 end # === struct Validator_01
 
