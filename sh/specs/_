@@ -25,10 +25,9 @@ case "$ACTION" in
   run)
     reset
     cd "$THIS_DIR"
-    mkdir -p tmp/out
+    mkdir -p tmp/in tmp/out
     case "${CHANGED_FILE:-}" in
-      */tmp/out/args) : ;;
-      */tmp/out*) return 0 ;;
+      */tmp/out/*) return 0 ;;
       *)
         sh_color ORANGE "=== {{Compiling}} specs..."
         my_crystal __ build -o tmp/out/specs.cr specs/specs.cr
@@ -36,7 +35,7 @@ case "$ACTION" in
     esac
 
     sh_color ORANGE "=== {{Running}} specs..."
-    tmp/out/specs.cr "$(cat tmp/out/args || :)" $@
+    tmp/out/specs.cr "$(cat tmp/in/args || :)" $@
     sh_color GREEN "=== {{DONE}} ==="
     ;;
 

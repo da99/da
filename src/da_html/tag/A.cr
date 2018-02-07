@@ -7,6 +7,7 @@ module DA_HTML
     # Instance
     # =============================================================================
 
+    REL_COMMON = Set{"nofollow", "noreferrer", "noopener"}
     @page     : DA_HTML::Base
     @id_class : String? = nil
     @target   : String? = nil
@@ -62,6 +63,12 @@ module DA_HTML
       if !@href || @href.strip.empty?
         raise Invalid_Attr_Value.new(:a, :href, @href)
       end
+
+      REL_COMMON.each { |x|
+        if !@rel.includes?(x)
+          @rel.push x
+        end
+      }
     end # === def initialize
 
     def to_html
@@ -72,7 +79,7 @@ module DA_HTML
         p.raw_attr?(:rel, @rel)
       }
 
-      with @page yield @page
+      @page.text?(with @page yield @page)
       @page.close_tag(:a)
     end
 

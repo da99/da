@@ -117,12 +117,18 @@ module DA_HTML
       self
     end
 
-    def raw_attr?(k : Symbol, v : String | Nil)
+    def raw_attr?(k : Symbol, v : String)
       case v
       when String
-        raw_attr!(k, v)
-        return true
+        if v
+          raw_attr!(k, v)
+          return true
+        end
       end
+      false
+    end
+
+    def raw_attr?(k : Symbol, v : Nil)
       false
     end
 
@@ -132,7 +138,10 @@ module DA_HTML
     end
 
     def raw_attr?(k : Symbol, v)
-      raw_attr!(k, v)
+      raw_attr!(k, v) if v
+      # 'if v' is here because the compiler will complain,
+      # if v is a union type (String | Nil),
+      # but at runtime the previous, proper method (raw_attr?(Symbol, Nil)) is used
       true
     end
 
@@ -192,6 +201,15 @@ module DA_HTML
     def doctype!
       raw! "<!DOCTYPE html>"
     end # === def doctype
+
+    def text?(raw)
+      case raw
+      when String
+        text raw
+      else
+        false
+      end
+    end
 
     def text(raw : String)
       @io << DA_HTML_ESCAPE.escape(raw)

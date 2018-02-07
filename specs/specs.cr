@@ -13,6 +13,7 @@ macro strip(str)
   end
 end
 
+DA_SPEC.pattern(ARGV.join(" ")) unless ARGV.empty?
 extend DA_SPEC
 
 require "../examples/*"
