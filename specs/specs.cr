@@ -4,7 +4,13 @@ require "inspect_bang"
 require "../src/da_html"
 
 macro strip(str)
-  {{str}}.strip.split("\n").map { |x| x.strip }.join
+  %result = {{str}}
+  case %result
+  when String
+    %result.strip.split("\n").map { |x| x.strip }.join
+  else
+    %result
+  end
 end
 
 extend DA_SPEC

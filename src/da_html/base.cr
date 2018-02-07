@@ -24,6 +24,7 @@ module DA_HTML
     end
 
     protected getter io = IO::Memory.new
+    @is_partial = false
     @tags = Deque(String).new
 
     def initialize
@@ -31,11 +32,17 @@ module DA_HTML
 
     def initialize(page : DA_HTML::Base)
       @io = page.io
+      @is_partial = true
     end # === def initialize
 
+    def is_partial?
+      @is_partial
+    end
+
+    # NOTE: returns nil if page is a partial (i.e. .new(Some_Page))
     def to_html
       with self yield self
-      self.to_html
+      self.to_html unless is_partial?
     end
 
     def to_html
