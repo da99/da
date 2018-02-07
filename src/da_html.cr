@@ -1,6 +1,7 @@
 
 require "da_html_escape"
 require "da_uri"
+require "./da_html/DA_Helpers"
 
 module DA_HTML
 

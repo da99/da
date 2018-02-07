@@ -116,34 +116,6 @@ module DA_HTML
       self
     end
 
-    def raw_attr?(k : Symbol, v : String)
-      case v
-      when String
-        if v
-          raw_attr!(k, v)
-          return true
-        end
-      end
-      false
-    end
-
-    def raw_attr?(k : Symbol, v : Nil)
-      false
-    end
-
-    def raw_attr?(k : Symbol, v : Deque(String))
-      return raw_attr!(k, v) unless v.empty?
-      false
-    end
-
-    def raw_attr?(k : Symbol, v)
-      raw_attr!(k, v) if v
-      # 'if v' is here because the compiler will complain,
-      # if v is a union type (String | Nil),
-      # but at runtime the previous, proper method (raw_attr?(Symbol, Nil)) is used
-      true
-    end
-
     def raw_attr!(k : Symbol, v : Int32)
       raw!(' ') << k << '=' << '"' << v << '"'
       nil

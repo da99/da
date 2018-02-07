@@ -3,6 +3,8 @@ module DA_HTML
 
   struct A
 
+    include DA_Helpers
+
     # =============================================================================
     # Instance
     # =============================================================================
@@ -75,9 +77,10 @@ module DA_HTML
       p = @page
       p.raw! "<a"
       p.raw_id_class?(@id_class)
-      p.raw_attr?(:target, @target)
-      p.raw_attr?(:href, @href)
-      p.raw_attr?(:rel, @rel)
+
+      ignore_nil(@target) { |x| p.raw_attr!(:target, x) }
+      ignore_nil(@href) { |x| p.raw_attr!(:href, x) }
+      ignore_nil(@rel) { |x| p.raw_attr!(:rel, x) }
 
       p.raw! ">"
       p.text?(with p yield p)
