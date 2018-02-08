@@ -3,98 +3,75 @@ module DA_HTML
 
   module A
 
+    REL_COMMON = Set{"nofollow", "noreferrer", "noopener"}
+
     module Tag
 
-      def a(*args, **attrs)
-      end # === def a
+      def a(id_class : String? = nil, **attrs)
+        rel    = Deque(String).new
+        target = nil
+        href   = nil
 
-    end # === module Tag
+        attrs.each { |k, v|
+          case k
+          when :rel
+            v.split.each { |x|
+              case x
+              when "external", "help",
+                "prev", "next",
+                "nofollow", "noopener", "noreferrer",
+                "search"
+                rel.push x
+              else
+                raise Invalid_Attr_Value.new(:a, k, v)
+              end
+            }
 
-
-    # =============================================================================
-    # Instance
-    # =============================================================================
-
-    REL_COMMON = Set{"nofollow", "noreferrer", "noopener"}
-    @page     : DA_HTML::Base
-    @id_class : String? = nil
-    @target   : String? = nil
-    @href     : String
-    @rel      = Deque(String).new
-
-    def initialize(@page, @id_class = nil, **attrs)
-      @href = ""
-      href_was_specified = false
-
-      attrs.each { |k, v|
-        case k
-        when :rel
-          v.split.each { |x|
-            case x
-            when "external", "help",
-              "prev", "next",
-              "nofollow", "noopener", "noreferrer",
-              "search"
-              @rel.push x
+          when :target
+            case v
+            when "_self", "_blank", "_parent", "_top"
+              target = v
             else
               raise Invalid_Attr_Value.new(:a, k, v)
             end
-          }
 
-        when :target
-          case v
-          when "_self", "_blank", "_parent", "_top"
-            @target = v
+          when :href
+            href = DA_URI.clean(v)
+
           else
             raise Invalid_Attr_Value.new(:a, k, v)
-          end
 
-        when :href
-          _href = DA_URI.clean(v)
-          if _href
-            @href = _href
+          end # case
+        }
+
+        if !href || href.strip.empty?
+          if !attrs[:href]?
+            raise Invalid_Attr_Value.new(%[attribute for 'a' tag was not specified.])
           else
-            raise Invalid_Attr_Value.new(:a, k, v)
+            raise Invalid_Attr_Value.new(%[attribute for 'a' tag has an invalid URL: #{attrs[:href]?.inspect}.])
           end
-          href_was_specified = true
-
-        else
-          raise Invalid_Attr_Value.new(:a, k, v)
-
-        end # case
-      }
-
-      if !href_was_specified
-        raise Invalid_Attr_Value.new(%[attribute for 'a' tag was not specified.])
-      end
-
-      if !@href || @href.strip.empty?
-        raise Invalid_Attr_Value.new(:a, :href, @href)
-      end
-
-      REL_COMMON.each { |x|
-        if !@rel.includes?(x)
-          @rel.push x
         end
-      }
-    end # === def initialize
 
-    def to_html
-      p = @page
-      p.raw! "<a"
-      p.id_class!(@id_class)
-      p.attr!(:target, @target)
-      p.attr!(:href, @href)
-      p.attr!(:rel, @rel)
+        REL_COMMON.each { |x|
+          if !rel.includes?(x)
+            rel.push x
+          end
+        }
 
-      p.raw! ">"
-      if_string(with p yield p) { |x| p.text!(x) }
-      p.raw! "</a>"
-    end
+        raw! "<a"
+        id_class!(id_class) if id_class
+        attr!(:target, target) if target
+        attr!(:href, href) if href
+        attr!(:rel, rel) unless rel.empty?
 
-    # =============================================================================
-    # Class
-    # =============================================================================
+        raw! ">"
+        text? {
+          with p yield p
+        }
+        raw! "</a>"
+      end # === def a
+
+    end # === module Tag
 
   end # === struct A
 

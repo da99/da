@@ -5,6 +5,16 @@ module DA_HTML
 
     include DA_Helpers
 
+    include HEAD::Tag
+    include BODY::Tag
+    include DIV::Tag
+    include SPAN::Tag
+    include TITLE::Tag
+    include STRONG::Tag
+    include A::Tag
+    include P::Tag
+    include INPUT_TEXT::Tag
+
     macro included
     end
 
@@ -98,7 +108,9 @@ module DA_HTML
       self
     end
 
-    def attr!(k : Symbol, n : Nil)
+    def attr!(k : Symbol)
+      raw!(' ') << k
+      nil
     end
 
     def attr!(k : Symbol, v : Int32)
@@ -121,7 +133,7 @@ module DA_HTML
       nil
     end # === def attr!
 
-    def <<(x : Symbol | String | Char)
+    def <<(x : Symbol | String | Char | Int32)
       raw! x
     end
 
@@ -153,15 +165,6 @@ module DA_HTML
     def text!(raw : String)
       @io << DA_HTML_ESCAPE.escape(raw)
     end # === raw_def text
-
-    include HEAD::Tag
-    include BODY::Tag
-    include DIV::Tag
-    include SPAN::Tag
-    include TITLE::Tag
-    include STRONG::Tag
-    include A::Tag
-    include P::Tag
   end # === module Base
 
 end # === module DA_HTML

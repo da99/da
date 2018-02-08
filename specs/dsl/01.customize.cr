@@ -3,6 +3,24 @@ class Customize_01
 
   include DA_HTML::Base
 
+  def p(**attrs)
+    attrs.each { |k, v|
+      case k
+      when :id
+        :ignore
+      else
+        raise DA_HTML::Invalid_Attr.new(k.inspect)
+      end
+    }
+    with self yield self
+  end
+
+  def my_strong
+    raw! "<strong>"
+    text!(with self yield self)
+    raw! "</strong>"
+  end # === def my_strong
+
 end # === struct Validator_01
 
 describe "Customize" do
@@ -13,17 +31,12 @@ describe "Customize" do
     }
   end # === it "raises an error if an invalid attr is requested"
 
-  it "raises an error if an invalid tag is requested" do
-    assert_raises(DA_HTML::Invalid_Tag) {
-      Customize_01.to_html { span { "hello" } }
-    }
-  end # === it "raises an error if an invalid tag is requested"
-
   it "allows custom tags without attrs" do
     actual = Customize_01.to_html {
-      strong { "yo & yo" }
+      my_strong { "yo & yo" }
     }
     assert actual == %[<strong>yo &#x26; yo</strong>]
   end # === it "allows custom tags without attrs"
 
 end # === desc "Validator"
+
