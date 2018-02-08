@@ -1,15 +1,27 @@
 
 module DA_Helpers
 
-  macro ignore_nil(name, &blok)
+  extend self
+
+  macro if_not_nil(name, &blok)
     %x = {{name}}
     case %x
     when Nil
       nil
     else
-      yield_value(%x) {{blok}}
+      DA_Helpers.yield_value(%x) {{blok}}
     end
-  end # === macro ignore_nil
+  end # === macro if_not_nil
+
+  macro if_string(*args, &blok)
+    %x = begin
+           {{*args}}
+         end
+    case %x
+    when String
+      DA_Helpers.yield_value(%x) {{blok}}
+    end
+  end # === macro if_string
 
   def yield_value(x)
     yield x

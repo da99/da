@@ -1,18 +1,15 @@
 
 module DA_HTML
 
-  struct TITLE
+  module TITLE
 
-    @page : DA_HTML::Base
-    def initialize(@page, *args)
-    end # === def initialize
-
-    def to_html
-      p = @page
-      p.raw! "<title>"
-      p.text!(with p yield p)
-      p.raw! "</title>"
-    end # === def to_html
+    module Tag
+      def title
+        raw! "<title>"
+        text!(with self yield self)
+        raw! "</title>"
+      end # === def title
+    end # === module Tag
 
   end # === struct TITLE
 

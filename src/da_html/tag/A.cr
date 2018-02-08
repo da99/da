@@ -1,9 +1,15 @@
 
 module DA_HTML
 
-  struct A
+  module A
 
-    include DA_Helpers
+    module Tag
+
+      def a(*args, **attrs)
+      end # === def a
+
+    end # === module Tag
+
 
     # =============================================================================
     # Instance
@@ -76,14 +82,13 @@ module DA_HTML
     def to_html
       p = @page
       p.raw! "<a"
-      p.raw_id_class?(@id_class)
-
-      ignore_nil(@target) { |x| p.raw_attr!(:target, x) }
-      ignore_nil(@href) { |x| p.raw_attr!(:href, x) }
-      ignore_nil(@rel) { |x| p.raw_attr!(:rel, x) }
+      p.id_class!(@id_class)
+      p.attr!(:target, @target)
+      p.attr!(:href, @href)
+      p.attr!(:rel, @rel)
 
       p.raw! ">"
-      p.text?(with p yield p)
+      if_string(with p yield p) { |x| p.text!(x) }
       p.raw! "</a>"
     end
 

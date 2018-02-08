@@ -30,7 +30,7 @@ case "$ACTION" in
       */tmp/out/*) return 0 ;;
       *)
         sh_color ORANGE "=== {{Compiling}} specs..."
-        my_crystal __ build -o tmp/out/specs.cr specs/specs.cr
+        my_crystal __ build --error-trace -o tmp/out/specs.cr specs/specs.cr
         ;;
     esac
 

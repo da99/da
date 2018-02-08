@@ -1,18 +1,21 @@
 
 module DA_HTML
 
-  struct SPAN
+  module SPAN
 
-    @page : DA_HTML::Base
-    def initialize(@page, *args)
-    end # === def initialize
+    module Tag
 
-    def to_html
-      p = @page
-      p.raw! "<span>"
-      p.text?(with p yield p)
-      p.raw! "</span>"
-    end # === def to_html
+      def span(id_class : String? = nil)
+        raw! "<span"
+        id_class!(id_class) if id_class
+        raw! '>'
+        text? {
+          with self yield self
+        }
+        raw! "</span>"
+      end
+
+    end # === module Tag
 
   end # === struct SPAN
 

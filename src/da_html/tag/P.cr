@@ -1,29 +1,20 @@
 
 module DA_HTML
 
-  struct P
+  module P
 
     module Tag
-
-      def p(*args, **attrs)
-        P.new(self, *args, **attrs).to_html { |page|
-          with page yield page
-        }
+      def p(id_class : String? = nil)
+        raw! "<p"
+        id_class!(id_class) if id_class
+        raw! '>'
+        x = with self yield self
+        if x.is_a?(String)
+          text! x
+        end
+        raw! "</p>"
       end
-
     end # === module Tag
-
-    @page : DA_HTML::Base
-    def initialize(@page, *args, **attrs)
-    end # === def initialize
-
-    def to_html
-      p = @page
-      p.raw! "<p"
-      p.raw! '>'
-      p.text?(with p yield p)
-      p.raw! "</p>"
-    end # === def to_html
 
   end # === struct P
 

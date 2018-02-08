@@ -2,8 +2,6 @@
 class Attrs_02
 
   include DA_HTML::Base
-  include DA_HTML::P::Tag
-  include DA_HTML::INPUT_TEXT::Tag
 
 end # === module Validator_02
 

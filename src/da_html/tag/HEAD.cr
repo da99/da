@@ -1,18 +1,17 @@
 
 module DA_HTML
 
-  struct HEAD
+  module HEAD
 
-    @page : DA_HTML::Base
-    def initialize(@page)
-    end # === def initialize
+    module Tag
 
-    def to_html
-      p = @page
-      p.raw! "<head>"
-      p.text?(with p yield p)
-      p.raw! "</head>"
-    end # === def to_html
+      def head(*args)
+        raw! "<head>"
+        if_string(with self yield self) { |x| text! x }
+        raw! "</head>"
+      end # === def head
+
+    end # === module Tag
 
   end # === struct HEAD
 

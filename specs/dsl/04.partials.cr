@@ -5,7 +5,7 @@ class My_Partial_04
 
   def my_block
     raw! "<div"
-      raw_id_class!(".my_block")
+    id_class!(".my_block")
     raw! '>'
     with self yield self
     raw! "</div>"

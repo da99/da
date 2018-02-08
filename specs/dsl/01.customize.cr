@@ -2,7 +2,6 @@
 class Customize_01
 
   include DA_HTML::Base
-  include DA_HTML::STRONG::Tag
 
 end # === struct Validator_01
 

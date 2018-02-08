@@ -2,8 +2,15 @@
 require "da_html_escape"
 require "da_uri"
 require "./da_html/DA_Helpers"
+require "./da_html/tag/*"
+require "./da_html/base"
+require "./da_html/exception"
 
 module DA_HTML
+
+  class Default_Page
+    include Base
+  end # === struct Page
 
   def self.prettify(str : String)
     indent = 0
@@ -26,9 +33,3 @@ module DA_HTML
   end # === def self.to_html
 
 end # === module DA_HTML
-
-require "./da_html/base"
-require "./da_html/exception"
-require "./da_html/page"
-require "./da_html/Tag"
-require "./da_html/tag/*"
