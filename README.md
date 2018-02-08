@@ -49,5 +49,24 @@ Custom Tags:
   }
 ```
 
+Partials:
+=========
+
+```Crystal
+  class My_Partial
+    include DA_HTML::Base
+    def my_tag
+      raw! "<my_tag></my_tag>"
+    end
+  end
+
+  DA_HTML.to_html { |p|
+    div {}
+    My_Partial.to_html(p) {
+      my_tag
+    }
+  }
+```
+
 
 
