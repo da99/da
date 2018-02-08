@@ -1,11 +1,12 @@
 
 describe "a tag" do
 
-  it "throws javascript :href values" do
-    actual = DA_HTML.to_html {
-      a(href: "javascript://a") { "my page" }
+  it "raises DA_HTML::Invalid_Attr_Value on javascript :href values" do
+    assert_raises(DA_HTML::Invalid_Attr_Value) {
+      DA_HTML.to_html {
+        a(href: "javascript://a") { "my page" }
+      }
     }
-    assert actual == %(<a href="#invalid_url">my page</a>)
   end # === it "sanitizes javascript :href values"
 
   it "allows :id attribute" do
@@ -20,7 +21,9 @@ describe "a tag" do
       actual = DA_HTML.to_html {
         a("#main", href: "/page") { "the page" }
       }
-      assert actual == %[<a id="main" href="/page" rel="nofollow noreferrer noopener">the page</a>"]
+      assert actual == %[
+        <a id="main" href="/page" rel="nofollow noreferrer noopener">the page</a>
+      ].strip
     end # === it "rel=\"{{x.id}}\""
   {% end %}
 
