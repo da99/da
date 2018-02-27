@@ -4,8 +4,3 @@ version: 0.4.1
 dependencies:
   terminal_table:
     github: benoist/terminal_table.cr
-development_dependencies:
-  exit_on_error:
-    github: da99/exit_on_error
-  shell_out:
-    github: da99/shell_out.cr
