@@ -3,7 +3,7 @@ require "da_html_escape"
 require "da_uri"
 require "./da_html/DA_Helpers"
 require "./da_html/tag/*"
-require "./da_html/base"
+require "./da_html/Base"
 require "./da_html/exception"
 
 module DA_HTML

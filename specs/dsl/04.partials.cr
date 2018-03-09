@@ -19,12 +19,12 @@ class My_Partial_04_Main
 
 end # === class My_Partial_04
 
-describe "Partials" do
+describe ".partial" do
   it "renders a partial" do
     actual = My_Partial_04_Main.to_html { |p|
       div {
       }
-      My_Partial_04.to_html(p) {
+      My_Partial_04.partial(p) {
         my_block { }
       }
     }
@@ -32,12 +32,12 @@ describe "Partials" do
     assert strip(actual) == strip(%{<div></div><div class="my_block"></div>})
   end # === it "renders a partial"
 
-  it "does a nil when :to_html is used with a block" do
+  it "returns a nil when :to_html is used with a block" do
     actual = :none
     My_Partial_04_Main.to_html { |p|
       div {
       }
-      actual = My_Partial_04.to_html(p) {
+      actual = My_Partial_04.partial(p) {
         my_block { }
       }
     }

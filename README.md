@@ -60,9 +60,9 @@ Partials:
     end
   end
 
-  DA_HTML.to_html { |p|
-    div {}
-    My_Partial.to_html(p) {
+  DA_HTML.to_html { |page|
+    div { }
+    My_Partial.partial(page) {
       my_tag
     }
   }

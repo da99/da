@@ -16,11 +16,22 @@ module DA_HTML
     include INPUT_TEXT::Tag
 
     macro included
+      extend Class_Methods
     end
 
-    macro to_html(*args, &blok)
-      {{@type}}.new({{*args}}).to_html {{blok}}
-    end
+    module Class_Methods
+      def to_html
+        page = new
+        with page yield page
+        page.to_html
+      end
+
+      def partial(*args)
+        page = new(*args)
+        with page yield page
+        nil
+      end
+    end # === module Class_Methods
 
     protected getter io = IO::Memory.new
     @is_partial = false
