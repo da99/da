@@ -144,6 +144,13 @@ module DA_HTML
       nil
     end # === def attr!
 
+    def attrs!(x)
+      x.each { |k, v|
+        attr! k, v
+      }
+      nil
+    end
+
     def <<(x : Symbol | String | Char | Int32)
       raw! x
     end
@@ -176,6 +183,24 @@ module DA_HTML
     def text!(raw : String)
       @io << DA_HTML_ESCAPE.escape(raw)
     end # === raw_def text
+
+    def tag(name : String, raw_id_class : String? = nil, **attrs)
+      raw! "<#{name}"
+      id_class!(raw_id_class) if raw_id_class
+      attrs! attrs
+      raw! ">"
+      text? {
+        with self yield self
+      }
+      raw! "</#{name}>"
+    end # === def tag
+
+    def self_closing_tag(name : String, raw_id_class : String? = nil, **attrs)
+      raw! "<#{name}"
+      id_class!(raw_id_class) if raw_id_class
+      attrs! attrs
+      raw! ">"
+    end
   end # === module Base
 
 end # === module DA_HTML
