@@ -65,4 +65,11 @@ describe ".tag" do
     assert actual == %[<input selected>]
   end # === it "creates a self-closing tag when no block is given"
 
+  it "allows name: as an attribute" do
+    actual = Customize_Tag_01.to_html {
+      tag("input", :selected, name: "something")
+    }
+    assert actual == %[<input selected name="something">]
+  end # === it "allows name: as an attribute"
+
 end # === desc ".tag"

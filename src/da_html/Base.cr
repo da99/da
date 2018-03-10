@@ -184,18 +184,21 @@ module DA_HTML
       @io << DA_HTML_ESCAPE.escape(raw)
     end # === raw_def text
 
-    def tag(name : String, *args, **attrs)
-      tag(name, *args, **attrs)
+    def tag(*args, **attrs)
+      name = args.first
+      tag(*args, **attrs)
       text? {
         with self yield self
       }
       raw! "</#{name}>"
     end # === def tag
 
-    def tag(name : String, *args, **attrs)
+    def tag(*args, **attrs)
+      name = args.first
       raw! "<#{name}"
       used_id_class = false
-      args.each { |x|
+      args.each_with_index { |x, i|
+        next if i.zero?
         case
         when x.is_a?(String) && !used_id_class
           id_class!(x)
