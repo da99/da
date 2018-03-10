@@ -40,33 +40,4 @@ describe "Customize" do
 
 end # === desc "Validator"
 
-describe ".tag" do
-  it "allows an id and class" do
-    actual = Customize_01.to_html {
-      tag("my_tag", "#the_id.red") {
-        "my content"
-      }
-    }
-    assert actual == %[<my_tag id="the_id" class="red">my content</my_tag>]
-  end # === it "allows an id and class"
-
-  it "allows custom attributes" do
-    actual = Customize_01.to_html {
-      tag("my_tag", red: "blue", blue: "green") {
-        "my content"
-      }
-    }
-    assert actual == %[<my_tag red="blue" blue="green">my content</my_tag>]
-  end # === it "allows attributes"
-
-  it "escapes custom attribute values" do
-    actual = Customize_01.to_html {
-      tag("my_tag", red: "blue & yellow", blue: "green & orange") {
-        "my content"
-      }
-    }
-    assert actual == %[<my_tag red="blue &#x26; yellow" blue="green &#x26; orange">my content</my_tag>]
-  end # === it "escapes custom attribute values"
-
-end # === desc ".tag"
 

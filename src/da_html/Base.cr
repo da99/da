@@ -184,20 +184,28 @@ module DA_HTML
       @io << DA_HTML_ESCAPE.escape(raw)
     end # === raw_def text
 
-    def tag(name : String, raw_id_class : String? = nil, **attrs)
-      raw! "<#{name}"
-      id_class!(raw_id_class) if raw_id_class
-      attrs! attrs
-      raw! ">"
+    def tag(name : String, *args, **attrs)
+      tag(name, *args, **attrs)
       text? {
         with self yield self
       }
       raw! "</#{name}>"
     end # === def tag
 
-    def self_closing_tag(name : String, raw_id_class : String? = nil, **attrs)
+    def tag(name : String, *args, **attrs)
       raw! "<#{name}"
-      id_class!(raw_id_class) if raw_id_class
+      used_id_class = false
+      args.each { |x|
+        case
+        when x.is_a?(String) && !used_id_class
+          id_class!(x)
+          used_id_class = true
+        when x.is_a? Symbol
+          attr! x
+        else
+          raise Invalid_Attr.new(x.inspect)
+        end
+      }
       attrs! attrs
       raw! ">"
     end
