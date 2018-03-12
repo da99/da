@@ -64,9 +64,10 @@ module DA_HTML
         attr!(:href, href) if href
         attr!(:rel, rel) unless rel.empty?
 
+        page = self
         raw! ">"
         text? {
-          with p yield p
+          with page yield page
         }
         raw! "</a>"
       end # === def a
