@@ -10,9 +10,12 @@ module DA
       fin = Deque(String).new
       prev_line_was_doc = false
       action_name = File.basename(file_path)
+      cmd = "#{app_name}"
+
       case
       when action_name == "_.sh" || action_name == "_"
         action_name = File.basename(File.dirname(file_path))
+        cmd = "#{app_name} #{action_name}"
       end
 
       if substring && !action_name[substring]?
@@ -33,7 +36,7 @@ module DA
 
         l = pieces.join(DIVIDER)
         prev_line_was_doc = true
-        l = l.gsub("{{CMD}}", "{{#{app_name} #{action_name}}}").split.join(' ')
+        l = l.gsub("{{CMD}}", "{{#{cmd}}}").split.join(' ')
         fin.push(DA.bold l)
       }
 
