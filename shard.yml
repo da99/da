@@ -1,0 +1,7 @@
+name: da
+version: 0.0.0
+development_dependencies:
+  da_spec:
+    github: da99/da_spec.cr
+  da_process:
+    github: da99/da_process.cr
