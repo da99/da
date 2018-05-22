@@ -14,6 +14,8 @@ module DA
     def bold(raw : String)
       raw.gsub(PATTERN) { |raw, match|
         match.captures.first.not_nil!.colorize.mode(:bold)
+      }.gsub(BOLD_PATTERN) { |raw, match|
+        match.captures.first.not_nil!.colorize.mode(:bold)
       }
     end
 
