@@ -19,9 +19,14 @@ when 0
 else
   full = ARGV.map(&.strip).join(" ")
   case
-  when "-h --help help".split.includes?(full)
+  when "-h --help help".split.includes?(ARGV.first)
     # === {{CMD}} -h|--help|help
-    DA::Help.print
+    substring = (ARGV[1]? || "").strip
+    if substring.empty?
+      DA::Help.print
+    else
+      DA::Help.print substring
+    end
   else
     DA.exit! 1, "!!! Invalid arguments: #{ARGV.map(&.inspect).join " "}"
   end
