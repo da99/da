@@ -4,7 +4,7 @@ module DA
   def repo_names
     Dir.glob("/apps/*/").map { |x|
       File.basename x
-    }.reject { |x| x.index(".Trash") == 0 || x == "lost+found" }.sort
+    }.reject { |x| x.index(".Trash") == 0 || x == "progs" || x == "lost+found" }.sort
   end
 
   def next_dirty_repo
