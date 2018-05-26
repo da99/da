@@ -13,22 +13,33 @@ module DA
 end # === module DA
 
 
-case ARGV.size
-when 0
+if 0 == ARGV.size
   DA.exit! 1, "!!! No arguments specified."
-else
-  full = ARGV.map(&.strip).join(" ")
-  case
-  when "-h --help help".split.includes?(ARGV.first)
-    # === {{CMD}} -h|--help|help
-    substring = (ARGV[1]? || "").strip
-    if substring.empty?
-      DA::Help.print
-    else
-      DA::Help.print substring
-    end
+end
+
+
+full_cmd = ARGV.map(&.strip).join(" ")
+case
+
+when "-h --help help".split.includes?(ARGV.first)
+  # === {{CMD}} -h|--help|help
+  substring = (ARGV[1]? || "").strip
+  if substring.empty?
+    DA::Help.print
   else
-    DA.exit! 1, "!!! Invalid arguments: #{ARGV.map(&.inspect).join " "}"
+    DA::Help.print substring
   end
+
+when full_cmd == "first-repo"
+  # === {{CMD}} first-repo
+  puts DA.first_repo
+
+when full_cmd == "next-repo"
+  # === {{CMD}} next-repo
+  puts DA.next_repo
+
+else
+  DA.exit! 1, "!!! Invalid arguments: #{ARGV.map(&.inspect).join " "}"
+
 end # case
 
