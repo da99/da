@@ -38,6 +38,10 @@ when full_cmd == "next-repo"
   # === {{CMD}} next-repo
   puts DA.next_repo
 
+when full_cmd == "next-dirty-repo"
+  # === {{CMD}} next-dirty-repo
+  puts DA.next_dirty_repo
+
 else
   DA.exit! 1, "!!! Invalid arguments: #{ARGV.map(&.inspect).join " "}"
 
