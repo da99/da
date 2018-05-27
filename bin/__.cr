@@ -25,9 +25,9 @@ when "-h --help help".split.includes?(ARGV.first)
   # === {{CMD}} -h|--help|help
   substring = (ARGV[1]? || "").strip
   if substring.empty?
-    DA::Help.print
+    DA.print_help
   else
-    DA::Help.print substring
+    DA.print_help substring
   end
 
 when full_cmd == "first-repo"

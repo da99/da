@@ -82,4 +82,9 @@ module DA
     end
 
   end # === module Documentation
+
+  def print_help(*substring)
+    Help.print(*substring)
+  end
+
 end # === module DA_Dev
