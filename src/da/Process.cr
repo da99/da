@@ -3,6 +3,15 @@ module DA
 
   @@IS_INTERACTIVE : Bool? = nil
 
+  def process_dir
+    exec_path = Process.executable_path
+    if exec_path
+      File.dirname(exec_path)
+    else
+      Dir.current
+    end
+  end
+
   def interactive_session
     if interactive_session?
       yield
