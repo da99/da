@@ -56,11 +56,11 @@ module DA
 
       bin_script = "bin/#{File.basename Dir.current}"
 
-      if Dir.exists?("sh")
+      if !Dir.glob("sh/*/").empty?
         arr.concat `find sh/ -type f -path 'sh/*/_'`.strip.split("\n")
       end
 
-      if Dir.exists?("bin/public")
+      if !Dir.glob("bin/public/*").empty?
         arr.concat `find bin/public/ -type f -path 'bin/public/*/_.sh'`.strip.split("\n")
       end
 
@@ -68,7 +68,7 @@ module DA
         arr.push(bin_script)
       end
 
-      if Dir.exists?("src")
+      if !Dir.glob("src/*").empty?
         arr.concat `find src -type f -iname '*.cr' -print`.strip.split("\n")
       end
 
