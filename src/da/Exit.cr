@@ -12,7 +12,7 @@ module DA
   end
 
   def exit_with_error!(msg : String)
-    error(2, msg)
+    exit_with_error!(2, msg)
   end # === def self.error
 
 end # === module DA
