@@ -3,10 +3,15 @@ module DA
 
   @@IS_INTERACTIVE : Bool? = nil
 
-  def process_dir
+  def process_dir : String
     exec_path = Process.executable_path
     if exec_path
-      File.dirname(exec_path)
+      dir = File.dirname(exec_path)
+      if File.basename(dir) == "bin"
+        File.dirname(dir)
+      else
+        dir
+      end
     else
       Dir.current
     end
