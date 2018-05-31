@@ -23,9 +23,9 @@ module DA
 
   # Push the bin/da binary to /tmp on the remote server
   def init_remote(server_name : String)
-    run_command!("rsync", "-v -e ssh #{Process.executable_path} #{server_name}:/tmp/".split)
+    system!("rsync", "-v -e ssh #{Process.executable_path} #{server_name}:/tmp/".split)
     orange! "=== {{Run command on remote}}: BOLD{{/tmp/da init deploy}}"
-    run_command!("ssh #{server_name}")
+    system!("ssh #{server_name}")
   end # === def init_server
 
   # Run this on the remote server you want to setup.
@@ -34,41 +34,41 @@ module DA
       if Dir.exists?("/deploy") 
         orange! "=== {{DONE}}: BOLD{{directory}} /deploy"
       else
-        run_command!("sudo mkdir /deploy")
-        run_command!("sudo chown #{ENV["USER"]} /deploy")
+        system!("sudo mkdir /deploy")
+        system!("sudo chown #{ENV["USER"]} /deploy")
       end
     }
 
-    run_command! "test -e /var/service/dhcpcd"
-    run_command! "test -e /var/service/sshd"
-    run_command! "test -e /var/service/ufw"
-    run_command! "test -e /var/service/nanoklogd"
-    run_command! "test -e /var/service/socklog-unix"
+    system! "test -e /var/service/dhcpcd"
+    system! "test -e /var/service/sshd"
+    system! "test -e /var/service/ufw"
+    system! "test -e /var/service/nanoklogd"
+    system! "test -e /var/service/socklog-unix"
 
-    run_command! "mkdir -p /deploy/apps/da/bin"
-    run_command! "mv -f #{Process.executable_path} /deploy/apps/da/bin/"
+    system! "mkdir -p /deploy/apps/da/bin"
+    system! "mv -f #{Process.executable_path} /deploy/apps/da/bin/"
 
     Dir.cd("/deploy/apps/da") {
       dir = "sv/deploy_watch"
       if Dir.exists?(dir)
-        run_command! "sudo chown #{ENV["USER"]} #{dir}/run"
-        run_command! "sudo chown #{ENV["USER"]} #{dir}/log/run"
+        system! "sudo chown #{ENV["USER"]} #{dir}/run"
+        system! "sudo chown #{ENV["USER"]} #{dir}/log/run"
       else
-        run_command! "mkdir -p #{dir}/log"
+        system! "mkdir -p #{dir}/log"
       end
 
       File.write("#{dir}/run", {{system("cat templates/sv_da_deploy_watch.sh").stringify}})
       File.write("#{dir}/log/run", {{system("cat templates/sv_da_deploy_watch.log.sh").stringify}})
 
-      run_command! "chmod +x #{dir}/run"
-      run_command! "chmod +x #{dir}/log/run"
-      run_command! "sudo chown --recursive root:root #{dir}"
+      system! "chmod +x #{dir}/run"
+      system! "chmod +x #{dir}/log/run"
+      system! "sudo chown --recursive root:root #{dir}"
 
       service = "/var/service/da_deploy_watch"
       if File.exists?(service)
-        run_command! "sudo sv restart #{service}"
+        system! "sudo sv restart #{service}"
       else
-        run_command! "sudo ln -s /deploy/apps/#{dir} #{service}"
+        system! "sudo ln -s /deploy/apps/#{dir} #{service}"
       end
     }
 
