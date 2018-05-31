@@ -5,6 +5,7 @@ module DA
 end # === module DA
 
 require "da_process"
+require "./da/Which"
 require "./da/Process"
 require "./da/CLI"
 require "./da/Deploy"
