@@ -1,0 +1,14 @@
+version: 1.0
+shards:
+  da_process:
+    github: da99/da_process.cr
+    version: 1.3.4
+
+  da_spec:
+    github: da99/da_spec.cr
+    version: 0.4.2
+
+  terminal_table:
+    github: benoist/terminal_table.cr
+    commit: a14e244219a6a7b804b3491bafcff73f4b74855e
+

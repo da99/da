@@ -12,11 +12,9 @@ module DA
 
 end # === module DA
 
-
 if 0 == ARGV.size
   DA.exit! 1, "!!! No arguments specified."
 end
-
 
 full_cmd = ARGV.map(&.strip).join(" ")
 case
@@ -30,6 +28,10 @@ when "-h --help help".split.includes?(ARGV.first)
     DA.print_help substring
   end
 
+when DA.argv?(ARGV, "init", "remote", String)
+  # === {{CMD}} init remote server-name
+  DA.init_remote(ARGV[2])
+
 when full_cmd == "first-repo"
   # === {{CMD}} first-repo
   puts DA.first_repo
@@ -41,6 +43,15 @@ when full_cmd == "next-repo"
 when full_cmd == "next-dirty-repo"
   # === {{CMD}} next-dirty-repo
   puts DA.next_dirty_repo
+
+when full_cmd == "init deploy"
+  # === {{CMD}} init deploy
+  DA.init_deploy
+
+when full_cmd == "deploy watch"
+  # === {{CMD}} deploy watch
+  # === Run this on remote server.
+  DA.deploy_watch
 
 else
   DA.exit! 1, "!!! Invalid arguments: #{ARGV.map(&.inspect).join " "}"

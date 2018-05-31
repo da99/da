@@ -37,8 +37,16 @@ module DA
       colorize(raw, :yellow)
     end
 
+    def orange!(*args)
+      STDERR.puts orange(*args)
+    end # === def orange!
+
     def green(raw : String)
       colorize(raw, :green)
+    end # === def green
+
+    def green!(*args)
+      puts green(*args)
     end # === def green
 
 end # === module DA

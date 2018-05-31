@@ -1,8 +1,8 @@
 ---
 name: da
 version: 0.0.1
-development_dependencies:
-  da_spec:
-    github: da99/da_spec.cr
+dependencies:
   da_process:
     github: da99/da_process.cr
+  da_spec:
+    github: da99/da_spec.cr
