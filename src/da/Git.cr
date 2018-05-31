@@ -12,4 +12,18 @@ module DA
     !git_is_clean?
   end
 
+  def git_clone_or_pull(url : String)
+    name = File.basename(url, ".git")
+
+    if Dir.exists?(name)
+      Dir.cd(name) {
+        system("git pull")
+        success! $?
+      }
+    else
+      system("git clone --depth 1 #{url}")
+      success! $?
+    end
+  end
+
 end # === module DA
