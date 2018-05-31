@@ -15,7 +15,7 @@ module DA
         Dir.glob("/deploy/*/").each { |dir|
           next unless Dir.exists?(File.join dir, "releases")
           app_name = File.basename(dir)
-          init_sv(app_name) if !Dir.exists?("/deploy/sv/#{app_name}")
+          # init_sv(app_name) if !Dir.exists?("/deploy/sv/#{app_name}")
         }
       end
     }
