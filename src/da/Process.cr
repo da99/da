@@ -15,6 +15,13 @@ module DA
     end
   end
 
+  def success?(full_cmd : String)
+    args = full_cmd.split
+    bin = args.shift
+    `#{full_cmd}`
+    success? $?
+  end
+
   def system!(cmd : String)
     args = cmd.split
     bin  = args.shift
