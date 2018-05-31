@@ -1,6 +1,6 @@
 ---
 name: da
-version: 0.0.1
+version: 1.0.0
 dependencies:
   da_process:
     github: da99/da_process.cr
