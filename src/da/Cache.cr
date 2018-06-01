@@ -18,9 +18,10 @@ module DA
       File.read(file_name(k))
     end
 
-    def read_or_write(k, default_value)
-      return read(k) if exists?(k)
-      write(k, default_value)
+    def read_or_write(k, default_value) : String
+      if !exists?(k)
+        write(k, default_value)
+      end
       read(k).not_nil!
     end
 
