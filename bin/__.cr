@@ -55,11 +55,13 @@ when full_cmd == "deploy watch"
 
 when ARGV[0..1].join(' ') == "cache read" && ARGV.size == 3
   # === {{CMD}} cache read KEY
-  DA.cache_read ARGV[2]
+  cache = DA::Cache.new("raw")
+  cache.read ARGV[2]
 
 when ARGV[0..1].join(' ') == "cache write" && ARGV.size == 4
   # === {{CMD}} cache write KEY VALUE
-  DA.cache_write ARGV[2], ARGV[3]
+  cache = DA::Cache.new("raw")
+  cache.write ARGV[2], ARGV[3]
 
 else
   DA.exit! 1, "!!! Invalid arguments: #{ARGV.map(&.inspect).join " "}"

@@ -1,28 +1,36 @@
 
 module DA
-  CACHE_DIR = "/tmp/da_cache"
 
-  def cache_write(k : String, v : String)
-    FileUtils.mkdir_p(CACHE_DIR)
-    File.write(cache_file_name(k), v)
-  end # === def write
+  struct Cache
+    DIR = "/tmp/da_cache"
 
-  def cache_read(k)
-    return nil unless cache_exists?(k)
-    File.read(cache_file_name(k))
-  end
+    getter prefix : String
+    def initialize(@prefix)
+    end # === def initialize(prefix : String)
 
-  def cache_read_or_write(k, default_value)
-    return read(k) if cache_exists?(k)
-    cache_write(k, default_value)
-    cache_read(k)
-  end
+    def write(k : String, v : String)
+      FileUtils.mkdir_p(DIR)
+      File.write(file_name(k), v)
+    end # === def write
 
-  def cache_exists?(k)
-    File.file?( cache_file_name(k) )
-  end
+    def read(k)
+      return nil unless exists?(k)
+      File.read(file_name(k))
+    end
 
-  def cache_file_name(k)
-    File.join(CACHE_DIR, k)
-  end
+    def read_or_write(k, default_value)
+      return read(k) if exists?(k)
+      write(k, default_value)
+      read(k)
+    end
+
+    def exists?(k)
+      File.file?( file_name(k) )
+    end
+
+    def file_name(k)
+      File.join(DIR, "#{@prefix}.#{k}")
+    end
+
+  end # === class Cache
 end # === module DA
