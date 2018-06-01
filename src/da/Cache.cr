@@ -21,7 +21,7 @@ module DA
     def read_or_write(k, default_value)
       return read(k) if exists?(k)
       write(k, default_value)
-      read(k)
+      read(k).not_nil!
     end
 
     def exists?(k)
