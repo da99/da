@@ -23,7 +23,7 @@ module DA
       end
 
       File.read(file_path).each_line { |l|
-        if !l[DIVIDER]? || !(prev_line_was_doc || l["{{"]?)
+        if !l[DIVIDER]? || !(prev_line_was_doc || l[/\\?{\\?{/]?)
           prev_line_was_doc = false
           next
         end
@@ -36,7 +36,7 @@ module DA
 
         l = pieces.join(DIVIDER)
         prev_line_was_doc = true
-        l = l.gsub("{{CMD}}", "{{#{cmd}}}").split.join(' ')
+        l = l.gsub(/\\?{\\?{CMD}}/, "{{#{cmd}}}").split.join(' ')
         fin.push(DA.bold l)
       }
 
