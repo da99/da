@@ -34,7 +34,7 @@ module DA
     success!(cmd, args)
   end # === def success!
 
-  def success!(cmd : String, args : Arrray(String))
+  def success!(cmd : String, args : Array(String))
     output = IO::Memory.new
     error = IO::Memory.new
     status = Process.run(cmd, args, output: output, error: error)
