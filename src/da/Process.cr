@@ -28,6 +28,26 @@ module DA
     system!(bin, args)
   end
 
+  def success!(full_cmd : String)
+    args = full_cmd.split
+    cmd = args.shift
+    success!(cmd, args)
+  end # === def success!
+
+  def success!(cmd : String, args : Arrray(String))
+    output = IO::Memory.new
+    error = IO::Memory.new
+    status = Process.run(cmd, args, output: output, error: error)
+    if !success?(status)
+      output.rewind
+      error.rewind
+      STDOUT.puts(output) unless output.empty?
+      STDERR.puts(error) unless error.empty?
+      exit! status
+    end
+    status
+  end # def success!
+
   def system!(cmd : String, args : Array(String))
     if STDOUT.tty?
       orange!("=== {{Running}}: BOLD{{#{cmd}}} #{args.join ' '}")
