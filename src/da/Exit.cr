@@ -26,7 +26,7 @@ module DA
 
   def success!(s : Process::Status)
     return true if success?(s)
-    exit! $?
+    exit! s
   end # === def process_success!
 
   def success?(stat : Process::Status)
