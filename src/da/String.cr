@@ -33,12 +33,24 @@ module DA
       colorize(raw, :red)
     end
 
+    def red!(*args)
+      if STDERR.tty?
+        STDERR.puts red(*args)
+      else
+        STDERR.puts(*args)
+      end
+    end
+
     def orange(raw : String)
       colorize(raw, :yellow)
     end
 
     def orange!(*args)
-      STDERR.puts orange(*args)
+      if STDERR.tty?
+        STDERR.puts orange(*args)
+      else
+        STDERR.puts(*args)
+      end
     end # === def orange!
 
     def green(raw : String)
@@ -46,7 +58,11 @@ module DA
     end # === def green
 
     def green!(*args)
-      puts green(*args)
+      if STDOUT.tty?
+        STDOUT.puts green(*args)
+      else
+        STDOUT.puts(*args)
+      end
     end # === def green
 
 end # === module DA

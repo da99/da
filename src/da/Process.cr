@@ -22,12 +22,6 @@ module DA
     success? $?
   end
 
-  def system!(cmd : String)
-    args = cmd.split
-    bin  = args.shift
-    system!(bin, args)
-  end
-
   def success!(full_cmd : String)
     args = full_cmd.split
     cmd = args.shift
@@ -47,6 +41,12 @@ module DA
     end
     status
   end # def success!
+
+  def system!(cmd : String)
+    args = cmd.split
+    bin  = args.shift
+    system!(bin, args)
+  end
 
   def system!(cmd : String, args : Array(String))
     if STDOUT.tty?
