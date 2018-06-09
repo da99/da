@@ -17,11 +17,11 @@ module DA
 
   def exit!(exit_code : Int32)
     if exit_code >= 0 && exit_code <= 255
-      Process.exit exit_code
+      exit exit_code
     end
     orange! "!!! Undefined exit code found: #{exit_code}"
     orange! "!!! Read more about it: https://unix.stackexchange.com/questions/394639/why-do-high-exit-codes-on-linux-shells-256-not-work-as-expected"
-    Process.exit 1
+    exit 1
   end # === def exit!(i : int32)
 
   def success!(s : Process::Status)

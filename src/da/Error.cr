@@ -4,6 +4,6 @@ module DA
     args.each { |s|
       STDERR.puts s
     }
-    Process.exit x
+    exit x
   end # === def exit!
 end # === module DA
