@@ -3,7 +3,7 @@ da\_spec.cr
 ===========
 
 My personal testing library for use in Crystal.
-Don't use this.
+No one would want to use this except myself.
 
 
 Reference
