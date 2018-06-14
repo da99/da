@@ -9,7 +9,10 @@ module DA
     end # === def initialize(prefix : String)
 
     def write(k : String, v : String)
-      FileUtils.mkdir_p(DIR)
+      if !Dir.exists?(DIR)
+        FileUtils.mkdir_p(DIR)
+        Process.run("chmod", ["o+rxw", DIR])
+      end
       File.write(file_name(k), v)
     end # === def write
 
