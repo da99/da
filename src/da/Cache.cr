@@ -8,6 +8,16 @@ module DA
     def initialize(@prefix)
     end # === def initialize(prefix : String)
 
+    def delete(k : String)
+      f = file_name(k)
+      if File.exists?(f)
+        File.delete(f)
+        true
+      else
+        false
+      end
+    end
+
     def write(k : String, v : String)
       if !Dir.exists?(DIR)
         FileUtils.mkdir_p(DIR)
