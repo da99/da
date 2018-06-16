@@ -1,5 +1,5 @@
 
-module DA_Deploy
+module DA
   struct Runit
 
     # =============================================================================
@@ -20,9 +20,9 @@ module DA_Deploy
     getter app_dir      : String
 
     def initialize(@name)
-      @service_link = File.join(SERVICE_DIR, name)
+      @service_link = File.join(Deploy::SERVICE_DIR, name)
       @name         = File.basename(@service_link)
-      @app_dir      = File.join(DEPLOY_DIR, "apps", name)
+      @app_dir      = File.join(Deploy::DEPLOY_DIR, "apps", name)
 
       status = self.class.status(@service_link)
       is_running = status.split(':').first == "run"
@@ -137,4 +137,4 @@ module DA_Deploy
 
   end # === struct Runit
 
-end # === module DA_Deploy
+end # === module DA

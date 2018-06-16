@@ -1,11 +1,11 @@
 
-module DA_Deploy
+module DA
   struct Public_Dir
 
-    getter name : String
-    getter app_dir : String
+    getter name        : String
+    getter app_dir     : String
     getter public_link : String
-    getter app : App
+    getter app         : App
 
     def initialize(@name)
       @app         = App.new(@name)

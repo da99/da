@@ -116,7 +116,7 @@ when full_cmd == "releases"
 
 when full_cmd == "latest"
   # === {{CMD}} latest release
-  puts DA::Releases.latest!(Dir.current)
+  puts DA::Release.latest!(Dir.current)
 
 when full_cmd == "deploy init"
   # === {{CMD}} deploy init
@@ -128,15 +128,15 @@ when full_cmd == "deploy init ssh"
 
 when full_cmd == "deploy init www"
   # === {{CMD}} deploy init www
-  DA_Deploy.init_www
+  DA::Deploy.init_www
 
 when "#{ARGV[0]?} #{ARGV[1]?}" == "deploy remove" && ARGV[2]?
   # === {{CMD}} deploy remove app_name
-  DA::Deploy.remove(ARGV[2])
+  DA::App.new(ARGV[2]).remove!
 
 when "#{ARGV[0]?} #{ARGV[1]?}" == "deploy Public" && ARGV[2]?
   # === {{CMD}} deploy Public service_name
-  DA_Deploy.deploy_public(ARGV[2])
+  DA::Deploy.public(ARGV[2])
 
 when full_cmd["upload shell config to "]?
   # === {{CMD}} upload shell config
@@ -166,7 +166,7 @@ when "service up" == "#{ARGV[0]?} #{ARGV[1]?}" && ARGV[2]?
 
 when "inspect" == ARGV[0]? && ARGV[1]? && !ARGV[2]?
   # === {{CMD}} inspect app_name
-  app = DA::Deploy::App.new(ARGV[1])
+  app = DA::App.new(ARGV[1])
   puts "name:       #{app.name}"
   puts "dir:        #{app.dir}"
   puts "latest:     #{app.latest}"

@@ -1,8 +1,5 @@
 
-module DA_Deploy
-  def generate_release_id
-    `git show -s --format=%ct-%h`.strip
-  end
+module DA
 
   def is_release?(dir)
     File.basename(dir)[/^\d{10}-[\da-zA-Z]{7}$/]?
@@ -15,16 +12,26 @@ module DA_Deploy
     }.compact
   end
 
-  def latest(dir : String)
-    releases.last?
-  end # === def latest(dir : String)
+  # =============================================================================
+  module Release
+    extend self
 
-  def latest!(dir : String)
-    d = releases(dir).last?
-    if !d || !File.directory?(d)
-      DA.exit_with_error!("!!! No latest release found for #{dir}")
+    def generate_id
+      `git show -s --format=%ct-%h`.strip
     end
-    d
-  end # === def self.latest_release
-  
-end # === module DA_Deploy
+
+    def latest(dir : String)
+      releases.last?
+    end # === def latest(dir : String)
+
+    def latest!(dir : String)
+      d = DA.releases(dir).last?
+      if !d || !File.directory?(d)
+        DA.exit_with_error!("!!! No latest release found for #{dir}")
+      end
+      d
+    end # === def self.latest_release
+
+  end # === module Release
+
+end # === module DA

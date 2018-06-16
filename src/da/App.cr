@@ -7,28 +7,15 @@ module DA
     # Struct:
     # =============================================================================
 
-    def self.remove(app_name : String)
-      sv = Runit.new(app_name)
-      sv.down! if sv.run?
-      sv.wait_pids
-      if sv.any_pids_up?
-        DA.exit_with_error!("!!! Pids still up for #{app_name}: #{sv.pids_up.join ", "}")
-      end
-      if sv.linked?
-        DA.system!("sudo rm -f #{sv.service_link}")
-      end
-    end # === def remove
-
     # =============================================================================
     # Instance:
     # =============================================================================
 
     getter name   : String
-    getter latest : String
     getter dir    : String
 
     def initialize(@name)
-      @dir = if File.directory?("/deploy")
+      @dir = if File.directory?("/deploy") || !DA.is_development?
                "/deploy/#{@name}"
              else
                "/apps/#{@name}"
@@ -36,11 +23,11 @@ module DA
     end # === def initialize
 
     def latest
-      DA::Releases(@dir).pop
+      DA.releases(@dir).pop
     end
 
     def latest?
-      !!@latest
+      !!latest
     end # === def latest?
 
     def latest(dir : String)
@@ -51,6 +38,18 @@ module DA
         nil
       end
     end # === def latest
+
+    def remove!
+      sv = Runit.new(name)
+      sv.down! if sv.run?
+      sv.wait_pids
+      if sv.any_pids_up?
+        DA.exit_with_error!("!!! Pids still up for #{name}: #{sv.pids_up.join ", "}")
+      end
+      if sv.linked?
+        DA.system!("sudo rm -f #{sv.service_link}")
+      end
+    end # === def remove
 
     def releases
       DA.releases(@dir)
@@ -71,4 +70,4 @@ module DA
     {% end %}
 
   end # === struct App
-end # === module DA_Deploy
+end # === module DA
