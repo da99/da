@@ -94,7 +94,7 @@ module DA
       Dir.cd da_dir
       new_file = "tmp/out/run-#{Time.now.epoch}.txt"
       if File.exists?(run_file)
-        run_contents = File.read(raw_file)
+        run_contents = [app_dir,File.read(run_file)].join('\n')
         if run_contents.empty?
           File.write(new_file, "run echo empty contents: #{raw_file}")
         else
@@ -148,16 +148,23 @@ module DA
           Dir.glob("tmp/out/run-*.txt").each { |file|
             next if !File.file?(file)
             kill_procs
-            File.read(file).each_line { |cmd|
-              next if cmd.strip.empty?
-              if !CMD_ERRORS.empty?
-                STDERR.puts "=== Skipping #{cmd} because of previous errors."
-                next
-              end
-              break if run_cmd(cmd.split) != true
-            }
+            lines = File.read(file).split('\n')
+            dir = lines.shift
+            Dir.cd(dir) {
+              DA.orange! "=== in {{#{dir}}} #{"-=" * 20}"
+              lines.each_with_index { |cmd, i|
+                next if cmd.strip.empty?
+                if !CMD_ERRORS.empty?
+                  STDERR.puts "=== Skipping #{cmd} because of previous errors."
+                  next
+                end
+                break if run_cmd(cmd.split) != true
+              }
+            } # Dir.cd
             CMD_ERRORS.clear
+
             FileUtils.rm(file)
+            puts ""
           } # files.each
           sleep 0.5
         } # loop

@@ -84,6 +84,10 @@ when ARGV[0..1].join(' ') == "cache write" && ARGV.size == 4
   cache = DA::Cache.new("raw")
   cache.write ARGV[2], ARGV[3]
 
+when full_cmd == "git zsh_prompt"
+  # === {{CMD}} git zsh_prompt
+  puts DA::Git.zsh_prompt
+
 else
   DA.exit! 1, "!!! Invalid arguments: #{ARGV.map(&.inspect).join " "}"
 

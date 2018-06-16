@@ -69,11 +69,11 @@ module DA
     end
 
     def current_ref
-      head = DA_Process.new("git symbolic-ref --quiet HEAD")
+      head = DA.process_new("git symbolic-ref --quiet HEAD")
       val = if head.success?
               head.output
             else
-              rev = DA_Process.new("git rev-parse --short HEAD")
+              rev = DA.process_new("git rev-parse --short HEAD")
               if rev.success?
                 rev.output
               else
@@ -84,17 +84,16 @@ module DA
     end
 
     def repo?
-      p = DA_Process.new("git rev-parse --is-inside-work-tree")
-      p.success?
+      DA.success? Process.run("git", "rev-parse --is-inside-work-tree".split)
     end
 
     def clean?
-      p = DA_Process.new("git status --porcelain")
-      p.success? && p.output.to_s.empty?
+      p = DA.process_new("git status --porcelain")
+      p.success? && p.output.to_s.strip.empty?
     end
 
     def ahead_of_remote?
-      p = DA_Process.new("git status --branch --porcelain")
+      p = DA.process_new("git status --branch --porcelain")
       p.success? && p.output.to_s[/\[\w+ [0-9]+\]/]?
     end
 

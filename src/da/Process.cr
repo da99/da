@@ -86,4 +86,36 @@ module DA
     output
   end # def output!
 
+  def process_new(*args)
+    Child_Process.new(*args)
+  end
+
+  struct Child_Process
+
+    getter output = IO::Memory.new
+    getter error  = IO::Memory.new
+    getter cmd    : String
+    getter args   : Array(String)
+    getter status : Process::Status
+
+    def initialize(full_cmd : String)
+      @args = full_cmd.split
+      @cmd = @args.shift
+      @status = Process.run(@cmd, @args, output: @output, error: @error)
+      @output.rewind
+      @error.rewind
+    end # === def initialize
+
+    def initialize(@cmd : String, @args : Array(String))
+      @status = Process.new(@cmd, @args, output: @output, error: @error)
+      @output.rewind
+      @error.rewind
+    end # === def initialize
+
+    def success?
+      DA.success? @status
+    end # === def success?
+
+  end # === struct Child_Process
+
 end # === module DA
