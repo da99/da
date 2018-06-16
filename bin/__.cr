@@ -32,6 +32,11 @@ when full_cmd == "crystal install"
   # === {{CMD}} crystal install
   DA::Crystal.install
 
+when ARGV[0]? == "crystal" && ARGV[1]?
+  # === {{CMD}} crystal --args ...
+  args = ARGV.clone
+  DA::Crystal.crystal args.shift, args
+
 when ARGV[0]? == "service" && ARGV[1]? && ARGV[2]?
   # === {{CMD}} service sv service
   DA::VoidLinux.service! ARGV[1], ARGV[2]

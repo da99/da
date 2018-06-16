@@ -6,6 +6,10 @@ module DA
     BIN = "crystal"
     extend self
 
+    def crystal(*args)
+      DA.system! *args
+    end
+
     def install
       Dir.cd "/progs"
       host = "https://github.com"
