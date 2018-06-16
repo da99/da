@@ -27,6 +27,6 @@ module DA
         DA.system!("git push #{repo}")
       end
     }
-  end
+  end # def
 
 end # === module DA_Dev

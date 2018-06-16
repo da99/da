@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+#
+
+set -u -e
+exec 2>&1
+
+dir={{DEPLOY_DIR}}/{{NAME}}
+
+
+cd "$dir"
+release="$(find . -maxdepth 1 -mindepth 1 -type d | sort | tail -n 1)"
+
+test -d "$release" || { echo "!!! latest release not found in $dir" >&2; exit 1; }
+
+cd "$release"
+bin="bin/{{NAME}}"
+echo "=== Starting @ $(date): $bin service run"
+exec chpst -u deployer -U deployer "$bin" service run
