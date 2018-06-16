@@ -1,7 +1,7 @@
 version: 1.0
 shards:
   da_spec:
-    github: da99/da_spec.cr
+    git: file:///apps/da_spec
     version: 0.4.2
 
   terminal_table:
