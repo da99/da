@@ -141,13 +141,20 @@ module DA
     end
 
     def deps(run_bin_compile = true)
-      shard_file = "shard.lock"
-      shard_lock = File.exists?(shard_file) ? File.read(shard_file) : ""
-      DA.system! "#{BIN} deps update"
-      DA.system! "#{BIN} deps prune"
-      new_shard_lock = File.read(shard_file)
+      shard_yml = "shard.yml"
+      shard_lock = "shard.lock"
+      lock = File.exists?(shard_lock) ? File.read(shard_lock) : ""
+      if File.exists?(shard_lock)
+        DA.system! "shards update"
+        DA.system! "shards prune"
+      else
+        DA.system! "shards install"
+      end
+
+      new_lock = File.read(shard_lock)
+
       if run_bin_compile
-        if shard_lock != new_shard_lock
+        if lock != new_lock
           bin_compile
         else
           STDERR.puts "=== Skipping bin compile. shard.lock the same."
