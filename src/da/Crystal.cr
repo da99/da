@@ -1,8 +1,59 @@
 
+require "http/client"
+
 module DA
   module Crystal
     BIN = "crystal"
     extend self
+
+    def install
+      Dir.cd "/progs"
+      host = "https://github.com"
+      url  = "#{host}/crystal-lang/crystal/releases"
+      doc  = HTTP::Client.get(url).body
+      raw  = doc.split.find { |x|
+        x[/releases\/download\/.+linux-x86_64\.tar\.gz/]?
+      } || ""
+      href = raw.split('"')[1]
+      if !href
+        DA.exit_with_error!("!!! Latest release not found: #{url}")
+      end
+
+      VoidLinux.install("
+        git llvm
+        gc-devel libatomic_ops pcre-devel libevent-devel libyaml-devel
+        libxml2-devel
+        gc-devel libatomic_ops pcre-devel libevent-devel libyaml-devel
+        libxml2-devel gmp-devel libressl-devel llvm gcc pkg-config
+        readline-devel libyaml-devel gmp-devel libressl-devel
+      ".split)
+
+      Dir.cd("/tmp") {
+        file = File.basename(href)
+        dir = File.basename(href, "-linux-x86_64.tar.gz")
+        target = File.join("/progs/crystal", dir)
+        current = "/progs/crystal/current"
+        Dir.mkdir_p(File.dirname(target))
+        if !Dir.exists?(target)
+          if !Dir.exists?(dir)
+            DA.system!("wget", ["--continue",File.join(host, href)])
+            DA.system!("tar", ["-xzf", file])
+          end
+          DA.system! "mv #{dir} #{target}"
+        end
+        DA.system! "ln -sf #{target} #{current}"
+        Dir.cd(current) {
+          Dir.glob("share/crystal/src/openssl/lib_*.cr").each { |f|
+            contents = File.read(f)
+              .sub(/OPENSSL_102 = .+/, %[OPENSSL_102 = {{ `command -v pkg-config > /dev/null && pkg-config --atleast-version=1.0.2 libssl && pkg-config --exists libtls || printf succ`.stringify == "succ" }}])
+              .sub(/OPENSSL_110 = .*/, %[OPENSSL_110 = {{ `command -v pkg-config > /dev/null && pkg-config --atleast-version=1.1.0 libssl && pkg-config --exists libtls || printf succ`.stringify == "succ" }}])
+            File.write(f, contents)
+            DA.orange! "=== {{Updated}}: BOLD{{#{f}}}"
+          }
+          DA.system! "bin/crystal --version"
+        }
+      }
+    end # === def install
 
     def init
       repo_name  = File.basename(Dir.current)
@@ -116,7 +167,7 @@ module DA
       shard_lock = "shard.lock"
 
       if File.exists?(shard_yml)
-        if !File.exists?(shard_lock) || File.stat(shard_yml).mtime > File.stat(shard_lock).mtime
+        if !File.exists?(shard_lock) || File.info(shard_yml).modification_time > File.info(shard_lock).modification_time
           deps(run_bin_compile: false)
         end
       end # if

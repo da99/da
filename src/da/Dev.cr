@@ -152,14 +152,16 @@ module DA
             dir = lines.shift
             Dir.cd(dir) {
               DA.orange! "=== in {{#{dir}}} #{"-=" * 20}"
-              lines.each_with_index { |cmd, i|
+              result = lines.each_with_index { |cmd, i|
                 next if cmd.strip.empty?
                 if !CMD_ERRORS.empty?
                   STDERR.puts "=== Skipping #{cmd} because of previous errors."
                   next
                 end
                 break if run_cmd(cmd.split) != true
+                true
               }
+              DA.orange!("-=" * 28)
             } # Dir.cd
             CMD_ERRORS.clear
 

@@ -28,6 +28,10 @@ when "-h --help help".split.includes?(ARGV.first)
     DA.print_help substring
   end
 
+when full_cmd == "crystal install"
+  # === {{CMD}} crystal install
+  DA::Crystal.install
+
 when "watch run" == "#{ARGV[0]?} #{ARGV[1]?}" && ARGV[2]?
   # === {{CMD}} watch run [file]
   DA::Dev.watch_run(ARGV[2])

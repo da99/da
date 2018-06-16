@@ -14,5 +14,15 @@ module DA
       end
     end # === def install
 
+    def install(pkgs : Array(String))
+      system "sudo xbps-install -S #{pkgs.join ' '}"
+      status = $?
+      if [6, 17].includes?(status.exit_code)
+        DA.orange! "=== xbps-install exited: {{#{status.exit_code}}}"
+      else
+        DA.success! status
+      end
+    end # === def install
+
   end # === module VoidLinux
 end # === module DA

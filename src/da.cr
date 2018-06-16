@@ -1,6 +1,10 @@
 
-ENV["SHARDS_INSTALL_PATH"] = File.join(Dir.current, "/.shards/.install")
-ENV["CRYSTAL_PATH"] = "/usr/lib/crystal:#{Dir.current}/.shards/.install"
+_temp = `which crystal`.strip
+if !_temp.empty?
+  _dir = File.dirname(File.dirname(_temp))
+  ENV["SHARDS_INSTALL_PATH"] = File.join(Dir.current, "/.shards/.install")
+  ENV["CRYSTAL_PATH"] = "#{_dir}/share/crystal/src:#{Dir.current}/.shards/.install"
+end
 require "file_utils"
 
 module DA

@@ -11,7 +11,7 @@ then
 fi
 
 export SHARDS_INSTALL_PATH="$PWD/.shards/.install"
-export CRYSTAL_PATH="/usr/lib/crystal:$PWD/.shards/.install"
+export CRYSTAL_PATH="/progs/crystal/current/share/crystal/src:$PWD/.shards/.install"
 mkdir -p $(dirname $out_file)
 rm -f $out_file
 set -x
