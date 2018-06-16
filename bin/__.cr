@@ -28,6 +28,24 @@ when "-h --help help".split.includes?(ARGV.first)
     DA.print_help substring
   end
 
+when "watch run" == "#{ARGV[0]?} #{ARGV[1]?}" && ARGV[2]?
+  # === {{CMD}} watch run [file]
+  DA::Dev.watch_run(ARGV[2])
+
+when full_cmd == "watch"
+  # === {{CMD}} watch
+  DA::Dev.watch
+
+when full_cmd == "deps"
+  # === {{CMD}} deps
+  DA::Crystal.deps
+
+when full_cmd == "bin compile"
+  # === {{CMD}} bin compile [release]
+  DA::Crystal.bin_compile
+when full_cmd == "bin compile release"
+  DA::Crystal.bin_compile(["release"])
+
 when full_cmd == "first-repo"
   # === {{CMD}} first-repo
   puts DA.first_repo

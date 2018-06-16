@@ -2,7 +2,5 @@
 name: da
 version: 1.11.2
 dependencies:
-  da_process:
-    github: da99/da_process.cr
   da_spec:
     github: da99/da_spec.cr

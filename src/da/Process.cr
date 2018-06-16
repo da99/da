@@ -13,7 +13,11 @@ module DA
     else
       Dir.current
     end
-  end
+  end # def app_dir
+
+  def app_dir(*args : String)
+    File.join(*args)
+  end # === def app_dir
 
   def success?(full_cmd : String)
     args = full_cmd.split

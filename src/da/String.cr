@@ -19,6 +19,14 @@ module DA
       }
     end
 
+    def bold!(*args)
+      if STDOUT.tty?
+        STDOUT.puts bold(*args)
+      else
+        STDOUT.puts *args
+      end
+    end # === def bold!
+
     def colorize(raw : String, color : Symbol)
       raw
         .gsub(BOLD_PATTERN) { |raw, match|

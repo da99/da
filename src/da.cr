@@ -1,11 +1,15 @@
 
+ENV["SHARDS_INSTALL_PATH"] = File.join(Dir.current, "/.shards/.install")
+ENV["CRYSTAL_PATH"] = "/usr/lib/crystal:#{Dir.current}/.shards/.install"
 require "file_utils"
 
 module DA
   extend self
 end # === module DA
 
-require "da_process"
+require "./da/Inspect"
+require "./da/Crystal"
+require "./da/Dev"
 require "./da/Cache"
 require "./da/Process"
 require "./da/CLI"
@@ -18,4 +22,3 @@ require "./da/Git"
 require "./da/Exit"
 require "./da/VoidLinux"
 require "./da/File_System"
-require "./da/Inspect"
