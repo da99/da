@@ -1,6 +1,6 @@
 ---
 name: da
-version: 2.1.1
+version: 2.1.2
 dependencies:
   da_spec:
     github: da99/da_spec.cr
