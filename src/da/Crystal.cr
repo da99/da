@@ -146,7 +146,7 @@ module DA
       lock = File.exists?(shard_lock) ? File.read(shard_lock) : ""
       DA.system! "shards install"
       DA.system! "shards update"
-      DA.system! "shards prune"
+      DA.system! "shards prune -v"
 
       new_lock = File.read(shard_lock)
 
