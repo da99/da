@@ -22,7 +22,7 @@ module DA
 
       DA.orange! "=== {{#{repo}}} ==="
       if repo == "origin" && !configured
-        DA.system!("git push -u #{repo}")
+        DA.system!("git push -u #{repo} master")
       else
         DA.system!("git push #{repo}")
       end

@@ -41,7 +41,7 @@ module DA
     end
 
     def status
-      DA.success! "git status"
+      DA.system! "git status"
       puts_url_origin
     end
 
