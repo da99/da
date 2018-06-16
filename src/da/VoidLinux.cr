@@ -25,5 +25,35 @@ module DA
       end
     end # === def install
 
+    def service!(raw_dir, raw_service)
+      sv = if File.directory?(raw_dir)
+             raw_dir
+           else
+             File.join "/etc/sv", raw_dir
+           end
+      service = if File.directory?(raw_service)
+                  raw_service
+                else
+                  File.join "/var/service", raw_service
+                end
+
+      real_sv = `realpath #{sv}`.strip
+      if !File.directory?(real_sv)
+        DA.exit_with_error! "!!! Directory not found: #{raw_dir}"
+      end
+
+      if File.exists?(service)
+        real_service = `realpath #{service}`.strip
+        if real_sv == real_service
+          DA.orange! "=== Already installed: #{sv} -> #{service}"
+          return
+        else
+          DA.exit_with_error! "!!! Service linked to another directory: #{real_sv} #{service}"
+        end
+      end
+
+      DA.system! "sudo ln -s #{sv} #{service}"
+    end # === def service
+
   end # === module VoidLinux
 end # === module DA
