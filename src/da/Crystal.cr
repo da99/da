@@ -144,12 +144,9 @@ module DA
       shard_yml = "shard.yml"
       shard_lock = "shard.lock"
       lock = File.exists?(shard_lock) ? File.read(shard_lock) : ""
-      if File.exists?(shard_lock)
-        DA.system! "shards update"
-        DA.system! "shards prune"
-      else
-        DA.system! "shards install"
-      end
+      DA.system! "shards install"
+      DA.system! "shards update"
+      DA.system! "shards prune"
 
       new_lock = File.read(shard_lock)
 
