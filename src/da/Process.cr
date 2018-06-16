@@ -19,6 +19,14 @@ module DA
     File.join(*args)
   end # === def app_dir
 
+  def exit!(stat : Process::Status)
+    return false if DA_Process.success?(stat)
+    red! "!!! {{Exit}}: BOLD{{#{stat.exit_code}}}"
+    red! "!!! {{Exit Signal}}: BOLD{{#{stat.exit_signal}}}" if stat.signal_exit?
+    Process.exit stat.exit_code
+    true
+  end
+
   def success?(full_cmd : String)
     args = full_cmd.split
     bin = args.shift
@@ -60,5 +68,22 @@ module DA
     system(cmd, args)
     success! $?
   end
+
+  def output!(full_cmd : String)
+    args = full_cmd.split
+    cmd = args.shift
+    output!(cmd, args)
+  end
+
+  def output!(*args)
+    output = IO::Memory.new
+    status = Process.run(*args, output: output, error: STDERR)
+    if !success?(status)
+      DA.red! "!!! BOLD{{Failed}}: {{#{args.join ' '}}}"
+    end
+    success! status
+    output.rewind
+    output
+  end # def output!
 
 end # === module DA

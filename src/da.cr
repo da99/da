@@ -10,6 +10,7 @@ end # === module DA
 require "./da/Inspect"
 require "./da/Crystal"
 require "./da/Dev"
+require "./da/Backup"
 require "./da/Cache"
 require "./da/Process"
 require "./da/CLI"

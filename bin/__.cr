@@ -32,6 +32,22 @@ when "watch run" == "#{ARGV[0]?} #{ARGV[1]?}" && ARGV[2]?
   # === {{CMD}} watch run [file]
   DA::Dev.watch_run(ARGV[2])
 
+when full_cmd == "backup"
+  # === {{CMD}} backup
+  DA.backup
+
+when full_cmd == "update"
+  # === {{CMD}} update
+  DA::Git.update
+
+when full_cmd == "status"
+  # === {{CMD}} status
+  DA::Git.status
+
+when full_cmd == "development checkpoint"
+  # === {{CMD}} development checkpoint
+  DA::Git.development_checkpoint
+
 when full_cmd == "watch"
   # === {{CMD}} watch
   DA::Dev.watch
