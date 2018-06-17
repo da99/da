@@ -90,8 +90,7 @@ module DA
       end
 
       Dir.cd("/") {
-        DA.system! "sudo mkdir -p /deploy"
-        DA.system! "sudo mkdir #{DEPLOY_DIR}"
+        DA.system! "sudo mkdir -p #{DEPLOY_DIR}"
         DA.system! "sudo chown #{user}:#{user} #{DEPLOY_DIR}"
         DA.system! "sudo chmod o+rX #{DEPLOY_DIR}"
       }
