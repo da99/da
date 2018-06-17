@@ -171,11 +171,7 @@ module DA
 
     # Push the bin/da_deploy binary to /tmp on the remote server
     def upload_binary_to_remote(server_name : String)
-      dir = File.dirname(File.dirname(Process.executable_path.not_nil!))
-      Dir.cd(dir)
       DA.system!("rsync", "-v -e ssh --relative --recursive bin #{server_name}:/home/deployer/".split)
-      # DA.orange! "=== {{Run command on remote}}: BOLD{{/home/deployer/da_deploy init}}"
-      # DA.system!("ssh #{server_name}")
     end # === def init_server
 
     def upload_commit_to_remote(server_name : String)
