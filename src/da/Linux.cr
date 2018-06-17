@@ -21,7 +21,12 @@ module DA
     end # === def groupadd
 
     def add_user_to_group(user : String, group : String)
-      DA.system! "sudo usermod -a -G #{group} #{user}"
+      groups = DA.output!("id --name --groups #{user}").split
+      if groups.includes?(group)
+        DA.orange! "=== User, {{#{user}}}, already in group, {{#{group}}}."
+      else
+        DA.system! "sudo usermod -a -G #{group} #{user}"
+      end
     end # === def add_user_to_group
 
   end # === module Linux
