@@ -15,10 +15,13 @@ module DA
     getter dir    : String
 
     def initialize(@name)
-      @dir = if File.directory?("/deploy") || !DA.is_development?
-               "/deploy/#{@name}"
+      @dir = case
+             when DA.is_test?
+               File.join("/tmp/deploy", @name)
+             when DA.is_development?
+               File.join("/apps", @name)
              else
-               "/apps/#{@name}"
+               File.join("/deploy", @name)
              end
     end # === def initialize
 
@@ -37,6 +40,10 @@ module DA
     def dir(*args)
       File.join(@dir, *args)
     end # === def dir
+
+    def current
+      File.join app.dir(current)
+    end
 
   end # === struct App
 end # === module DA

@@ -52,6 +52,13 @@ when full_cmd == "watch"
   # === {{CMD}} watch
   DA::Dev.watch
 
+# =============================================================================
+
+when ARGV[0..2].join(' ') == "specs compile run"
+  # === {{CMD}} specs compile run
+  DA::Specs.compile
+  DA::Specs.run ARGV[3..-1]
+
 # === File_System =============================================================
 
 when ARGV[0..1].join(' ') == "link symbolic!" && ARGV[2]? && ARGV[3]? && !ARGV[4]?

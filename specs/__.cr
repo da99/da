@@ -1,8 +1,13 @@
 
+ENV["IS_TEST"] = "yes"
+
 require "../src/da"
 require "da_spec"
 
 extend DA_SPEC
+
+DA.system! "mkdir -p /tmp/deploy/var/service"
+DA.system! "mkdir -p /tmp/deploy/etc/sv"
 
 describe "DA" do
   it "sets SHARDS_INSTALL_PATH" do
@@ -15,4 +20,5 @@ describe "DA" do
     assert path[/\.shards\/\.install/]? == ".shards/.install"
   end # === it "sets CRYSTAL_PATH"
 end # === desc "DA_DEV"
-require "./*"
+
+require "./Colorize"

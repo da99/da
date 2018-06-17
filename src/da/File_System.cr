@@ -5,6 +5,10 @@ module DA
     ENV["IS_DEVELOPMENT"]? || ENV["IS_DEV"]?
   end # === def is_development?
 
+  def is_test?
+    ENV["IS_TEST"]?
+  end
+
   def text_file?(s : String)
     File.exists?(s) && `file --mime #{s}`["text/plain"]?
   end

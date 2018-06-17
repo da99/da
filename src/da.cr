@@ -35,3 +35,6 @@ require "./da/Deploy"
 require "./da/Runit"
 require "./da/Public_Dir"
 require "./da/PG"
+
+require "./da/Specs"
+

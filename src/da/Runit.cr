@@ -17,8 +17,19 @@ module DA
     @pids : Array(Int32) = [] of Int32
 
     def initialize(@name)
-      @sv_dir = "/etc/sv/#{@name}"
-      @service_dir = File.join("/var/service", @name)
+      @sv_dir = case
+                when DA.is_test?
+                  "/tmp/deploy/etc/sv/#{@name}"
+                else
+                  "/etc/sv/#{@name}"
+                end
+
+      @service_dir = case
+                     when DA.is_test?
+                       File.join("/tmp/deploy/var/service", @name)
+                     else
+                       File.join("/var/service", @name)
+                     end
     end # === def initialize(name : String)
 
     def initialize(@name, @sv_dir, @service_dir)

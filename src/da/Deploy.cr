@@ -24,6 +24,11 @@ module DA
       puts "check directing listing is off for all sites."
     end # === def deploy_check
 
+    def current!(app : App)
+      latest = Release.latest(app)
+      DA.link_symbolic! app.current, latest
+    end # === def current!
+
     def public(app_name : String)
       public = Public_Dir.new(app_name)
       if !public.latest?
