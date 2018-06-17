@@ -107,7 +107,7 @@ module DA
     end # === def initialize
 
     def initialize(@cmd : String, @args : Array(String))
-      @status = Process.new(@cmd, @args, output: @output, error: @error)
+      @status = Process.run(@cmd, @args, output: @output, error: @error)
       @output.rewind
       @error.rewind
     end # === def initialize
