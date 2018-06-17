@@ -52,6 +52,12 @@ when full_cmd == "watch"
   # === {{CMD}} watch
   DA::Dev.watch
 
+# === File_System =============================================================
+
+when ARGV[0..1].join(' ') == "link symbolic!" && ARGV[2]? && ARGV[3]? && !ARGV[4]?
+  # === {{CMD}} link symbolic
+  DA.link_symbolic!(ARGV[2], ARGV[3])
+
 # =============================================================================
 when ARGV[0]? == "exec"
   # === {{CMD}} crystal install

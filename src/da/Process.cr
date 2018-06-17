@@ -124,6 +124,19 @@ module DA
 
   # =============================================================================
 
+  def run(full_cmd : String)
+    args = full_cmd.split
+    cmd = args.shift
+    run(cmd, args)
+  end # === def run
+
+  def run(cmd : String, args : Array(String))
+    DA.orange! "=== {{Running}}: BOLD{{#{cmd}}} #{args.flatten.join ' '}"
+    Process.run(cmd, args)
+  end # === def run
+
+  # =============================================================================
+
   def output(*args)
     output = IO::Memory.new
     Process.run(*args, output: output, error: STDERR)
