@@ -89,7 +89,6 @@ module DA
         Process.exit 1
       end
 
-
       Dir.cd("/") {
         DA.system! "sudo mkdir -p /deploy"
         DA.system! "sudo mkdir #{DEPLOY_DIR}"

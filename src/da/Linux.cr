@@ -20,5 +20,9 @@ module DA
       end
     end # === def groupadd
 
+    def add_user_to_group(user : String, group : String)
+      DA.system! "sudo useradd -g #{group} #{user}"
+    end # === def add_user_to_group
+
   end # === module Linux
 end # === module DA
