@@ -175,20 +175,22 @@ module DA
 
     def upload_commit_to_remote(server_name : String)
       release_id = Release.generate_id
-      name = File.basename(Dir.current)
-      path = Dir.current
-      FileUtils.mkdir_p "tmp/#{name}"
-      Dir.cd("tmp/#{name}") {
-        FileUtils.rm_rf(release_id)
-        DA.system!("git clone --depth 1 file://#{path} #{release_id}")
-      }
-      remote_dir = "/deploy/apps/#{name}/#{release_id}"
-      system("ssh #{server_name} test -d #{remote_dir}")
-      if DA.success?($?)
+      app_name   = File.basename(Dir.current)
+      remote_dir = "/deploy/#{app_name}/#{release_id}"
+
+      if DA.success?("ssh #{server_name} test -d #{remote_dir}")
         DA.exit_with_error!("!!! Already exists on server: #{remote_dir}")
       end
-      Dir.cd("tmp") {
-        DA.system!("rsync -v --ignore-existing --exclude .git -e ssh --relative --recursive #{name}/#{release_id} #{server_name}:/deploy/apps/")
+
+      path = Dir.current
+      tmp = "/tmp/commits"
+      FileUtils.mkdir_p tmp
+      Dir.cd(tmp) {
+        clone_dir = "#{app_name}/#{release_id}"
+        FileUtils.rm_rf(release_id)
+        DA.system!("git clone --depth 1 file://#{path} #{clone_dir}")
+        DA.system!("rm -rf #{clone_dir}/.git")
+        DA.system!("rsync -v -e ssh --relative --recursive #{clone_dir} #{server_name}:/deploy/")
       }
     end # === def upload_commit_to_remote
 

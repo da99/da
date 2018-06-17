@@ -25,7 +25,6 @@ require "./da/File"
 require "./da/String"
 require "./da/Repo"
 require "./da/Git"
-require "./da/Exit"
 require "./da/VoidLinux"
 require "./da/File_System"
 
