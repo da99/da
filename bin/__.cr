@@ -37,10 +37,6 @@ when ARGV[0]? == "crystal" && ARGV[1]?
   args = ARGV.clone
   DA::Crystal.crystal args.shift, args
 
-when ARGV[0]? == "service" && ARGV[1]? && ARGV[2]?
-  # === {{CMD}} service sv service
-  DA::VoidLinux.service! ARGV[1], ARGV[2]
-
 when "watch run" == "#{ARGV[0]?} #{ARGV[1]?}" && ARGV[2]?
   # === {{CMD}} watch run [file]
   DA::Dev.watch_run(ARGV[2])
@@ -126,16 +122,12 @@ when full_cmd == "deploy init ssh"
   # === {{CMD}} deploy ssh
   DA::Deploy.init_ssh
 
-when full_cmd == "deploy init www"
-  # === {{CMD}} deploy init www
-  DA::Deploy.init_www
-
 when "#{ARGV[0]?} #{ARGV[1]?}" == "deploy remove" && ARGV[2]?
   # === {{CMD}} deploy remove app_name
   DA::App.new(ARGV[2]).remove!
 
 when "#{ARGV[0]?} #{ARGV[1]?}" == "deploy Public" && ARGV[2]?
-  # === {{CMD}} deploy Public service_name
+  # === {{CMD}} deploy Public app_name
   DA::Deploy.public(ARGV[2])
 
 when full_cmd["upload shell config to "]?
@@ -148,15 +140,21 @@ when full_cmd["upload shell config to "]?
 
 when "service inspect" == "#{ARGV[0]?} #{ARGV[1]?}" && ARGV[2]?
   # === {{CMD}} service inspect dir_service
-  service = DA::Runit.new(ARGV[2])
-  {% for x in "name service_link latest_linked? app_dir pids latest".split %}
-    puts "{{x.id}}:  #{service.{{x.id}}.inspect}"
-  {% end %}
-  if service.latest?
-    puts "sv_dir:  #{service.sv_dir}"
-  end
+  service = if File.directory?(ARGV[2])
+              DA::Runit.new(File.basename(ARGV[2]), ARGV[2], ARGV[2])
+            else
+              DA::Runit.new(ARGV[2])
+            end
+  puts "name        #{service.name.inspect}"
+  puts "sv_dir      #{service.sv_dir.inspect}"
+  puts "service_dir #{service.service_dir.inspect}"
+  puts "pids        #{service.pids.inspect}"
+  puts "status      #{service.status.inspect}"
+  puts "run?        #{service.run?.inspect}"
+  puts "down?       #{service.down?.inspect}"
+  puts "exit?       #{service.exit?.inspect}"
 
-when "service down" == "#{ARGV[0]?} #{ARGV[1]?}" && ARGV[2]?
+when "service down" == "#{ARGV[0]?} #{ARGV[1]?}" && ARGV[2]? && !ARGV[3]?
   # === {{CMD}} service down dir_service
   DA::Runit.new(ARGV[2]).down!
 
@@ -167,6 +165,7 @@ when "service up" == "#{ARGV[0]?} #{ARGV[1]?}" && ARGV[2]?
 when "inspect" == ARGV[0]? && ARGV[1]? && !ARGV[2]?
   # === {{CMD}} inspect app_name
   app = DA::App.new(ARGV[1])
+
   puts "name:       #{app.name}"
   puts "dir:        #{app.dir}"
   puts "latest:     #{app.latest}"

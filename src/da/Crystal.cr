@@ -10,6 +10,17 @@ module DA
       DA.system! *args
     end
 
+    def init
+      VoidLinux.install("
+        git llvm
+        gc-devel libatomic_ops pcre-devel libevent-devel libyaml-devel
+        libxml2-devel
+        gc-devel libatomic_ops pcre-devel libevent-devel libyaml-devel
+        libxml2-devel gmp-devel libressl-devel llvm gcc pkg-config
+        readline-devel libyaml-devel gmp-devel libressl-devel
+      ".split)
+    end # === def init
+
     def install
       Dir.cd "/progs"
       host = "https://github.com"
@@ -23,14 +34,7 @@ module DA
         DA.exit_with_error!("!!! Latest release not found: #{url}")
       end
 
-      VoidLinux.install("
-        git llvm
-        gc-devel libatomic_ops pcre-devel libevent-devel libyaml-devel
-        libxml2-devel
-        gc-devel libatomic_ops pcre-devel libevent-devel libyaml-devel
-        libxml2-devel gmp-devel libressl-devel llvm gcc pkg-config
-        readline-devel libyaml-devel gmp-devel libressl-devel
-      ".split)
+      init
 
       Dir.cd("/tmp") {
         file = File.basename(href)
@@ -75,7 +79,7 @@ module DA
       default_contents = <<-EOF
 
       THIS_DIR = File.dirname(__DIR__)
-      require "da_dev"
+      require "da"
       full_cmd = ARGV.join(" ")
       args     = ARGV.dup
       cmd      = args.shift
@@ -84,7 +88,7 @@ module DA
 
       when "-h --help help".split.includes?(full_cmd)
         # === {{CMD}} -h|--help|help
-        DA_Dev::Documentation.print_help([__FILE__])
+        DA::Documentation.print_help([__FILE__])
 
       else
         red! "!!! Invalid arguments: \#{ARGV.map(&.inspect).join " "}"
@@ -96,7 +100,7 @@ module DA
 
       if !File.exists?(file)
         File.write(file, default_contents)
-        DA_Dev.green! "=== BOLD{{Wrote}}: {{#{file}}}"
+        DA.green! "=== BOLD{{Wrote}}: {{#{file}}}"
       end
     end # === def init_bin
 
@@ -105,8 +109,8 @@ module DA
       name: #{shard_name}
       version: 0.0.0
       dependencies:
-        da_dev:
-          github: da99/da_dev
+        da:
+          github: da99/da
       development_dependencies:
         da_spec:
           github: da99/da_spec.cr
@@ -114,10 +118,10 @@ module DA
           github: da99/da_process.cr
       EOF
       if File.exists?("shard.yml")
-        DA_Dev.deps
+        DA::Crystal.deps
       else
         File.write("shard.yml", default_contents)
-        DA_Dev.green! "=== BOLD{{Wrote}}: {{shard.yml}}"
+        DA.green! "=== BOLD{{Wrote}}: {{shard.yml}}"
       end
     end # === def init_shard_yml
 
@@ -135,11 +139,11 @@ module DA
       contents = contents.join('\n')
       if !File.exists?(file)
         File.write(file, contents)
-        DA_Dev.green! "=== BOLD{{Wrote}}: {{#{file}}}"
+        DA.green! "=== BOLD{{Wrote}}: {{#{file}}}"
       else
         if old_contents.strip != contents.strip
           File.write(file, contents)
-          DA_Dev.green! "=== BOLD{{Updated}}: {{#{file}}}"
+          DA.green! "=== BOLD{{Updated}}: {{#{file}}}"
         end
       end
     end

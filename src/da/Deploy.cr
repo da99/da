@@ -82,21 +82,19 @@ module DA
 
     # Run this on the remote server you want to setup.
     def init
-      if ENV["IS_DEVELOPMENT"]?
+      user = ENV["USER"]
+
+      if DA.is_development?
         STDERR.puts "!!! Not a production machine."
         Process.exit 1
       end
 
-      app_name = File.basename(Process.executable_path || self.to_s.downcase)
-      required_services = "dhcpcd sshd ufw nanoklogd socklog-unix".split
 
       Dir.cd("/") {
-        if Dir.exists?(DEPLOY_DIR) 
-          DA.orange! "=== {{DONE}}: BOLD{{directory}} #{DEPLOY_DIR}"
-        else
-          DA.system!("sudo mkdir #{DEPLOY_DIR}")
-          DA.system!("sudo chown #{ENV["USER"]} #{DEPLOY_DIR}")
-        end
+        DA.system! "sudo mkdir -p /deploy"
+        DA.system! "sudo mkdir #{DEPLOY_DIR}"
+        DA.system! "sudo chown #{user}:#{user} #{DEPLOY_DIR}"
+        DA.system! "sudo chmod o+rX #{DEPLOY_DIR}"
       }
 
       DA::VoidLinux.install("git", "git")
@@ -109,31 +107,25 @@ module DA
       DA::VoidLinux.install("wget", "wget")
       DA::VoidLinux.install("curl", "curl")
 
-      DA.system! "test -e #{SERVICE_DIR}/dhcpcd"
-      DA.system! "test -e #{SERVICE_DIR}/sshd"
-      DA.system! "test -e #{SERVICE_DIR}/ufw"
-      DA.system! "test -e #{SERVICE_DIR}/nanoklogd"
-      DA.system! "test -e #{SERVICE_DIR}/socklog-unix"
+      "dhcpcd sshd ufw nanoklogd socklog-unix".split.each { |name|
+        Runit.new(name).link!
+      }
 
       "3 4 5 6".split.each { |x|
-        service = "/var/service/agetty-tty#{x}"
-        DA.system! "sudo rm #{service}" if File.exists?(service)
+        service = Runit.new("agetty-tty#{x}")
+        service.remove! if service.service_dir?
       }
 
       init_ssh
 
-      DA.system! "mkdir -p /tmp/da_cache"
-      DA.system! "sudo chmod o+rxw /tmp/da_cache"
+      Linux.useradd("da_cache")
+      DA.system! "mkdir -p /deploy/da_cache"
+      DA.system! "sudo chown da_cache:da_cache /deploy/da_cache"
+      DA.system! "sudo chmod g+rXw /deploy/da_cache"
+      DA.system! "sudo chmod o-rXw /deploy/da_cache"
 
       DA.green! "=== {{Done}}: BOLD{{init deploy}}"
     end # === def init_deploy
-
-    def init_www
-      "www-redirector www-deployer www-data".split.each { |user|
-        Linux.useradd(user)
-      }
-      VoidLinux.install("hiawatha", "hiawatha")
-    end
 
     def init_ssh
       file = "/etc/ssh/sshd_config"

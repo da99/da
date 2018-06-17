@@ -2,7 +2,11 @@
 module DA
 
   struct Cache
-    DIR = "/tmp/da_cache"
+    DIR = if DA.is_development?
+            "/deploy/da_cache"
+          else
+            "/tmp/da_cache"
+          end
 
     getter prefix : String
     def initialize(@prefix)
@@ -21,7 +25,7 @@ module DA
     def write(k : String, v : String)
       if !Dir.exists?(DIR)
         FileUtils.mkdir_p(DIR)
-        Process.run("chmod", ["o+rxw", DIR])
+        # Process.run("chmod", ["o+rXw", DIR])
       end
       File.write(file_name(k), v)
     end # === def write
