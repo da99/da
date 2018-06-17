@@ -53,6 +53,17 @@ when full_cmd == "watch"
   DA::Dev.watch
 
 # =============================================================================
+when ARGV[0]? == "exec"
+  # === {{CMD}} crystal install
+  args = ARGV.clone
+  args.shift
+  if args.empty?
+    DA.orange! "no arguments found."
+    exit 1
+  end
+  cmd = args.shift
+  DA.orange! "{{#{cmd}}} BOLD{{#{args.join ' '}}}"
+  Process.exec(cmd, args)
 
 when full_cmd == "crystal install"
   # === {{CMD}} crystal install
