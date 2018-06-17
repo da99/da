@@ -153,6 +153,12 @@ module DA
     end
 
     def deps(run_bin_compile = true)
+      if DA.is_development?
+        global_cache = File.join(ENV["HOME"], ".cache/crystal")
+        if File.directory?(global_cache)
+          DA.system! "rm -rf #{global_cache}"
+        end
+      end
       shard_yml = "shard.yml"
       shard_lock = "shard.lock"
       lock = File.exists?(shard_lock) ? File.read(shard_lock) : ""
