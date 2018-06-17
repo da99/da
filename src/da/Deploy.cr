@@ -170,7 +170,13 @@ module DA
 
     # Push the bin/da_deploy binary to /tmp on the remote server
     def upload_binary_to_remote(server_name : String)
-      DA.system!("rsync", "-v -e ssh --relative --recursive bin #{server_name}:/home/deployer/".split)
+      app_name = File.basename Dir.current
+      file     = File.join "bin", app_name
+      if !File.executable?(file)
+        DA.orange! "!!! {{Not found}}: BOLD{{#{file}}}"
+        exit 1
+      end
+      DA.system!("rsync -v -e ssh --relative #{file} #{server_name}:/home/deployer/")
     end # === def init_server
 
     def upload_commit_to_remote(server_name : String)

@@ -137,7 +137,7 @@ module DA
     output!(cmd, args)
   end
 
-  def output!(*args)
+  def output!(*args) : String
     output = IO::Memory.new
 
     status = Process.run(*args, output: output, error: STDERR)
@@ -147,7 +147,7 @@ module DA
     end
 
     output.rewind
-    output
+    output.to_s.strip
   end # def output!
 
   # =============================================================================

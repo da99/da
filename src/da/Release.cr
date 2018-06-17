@@ -1,35 +1,44 @@
 
 module DA
 
-  def is_release?(dir)
-    File.basename(dir)[/^\d{10}-[\da-zA-Z]{7}$/]?
-  end
-
-  def releases(dir : String)
-    Dir.glob("#{dir}/*/").sort.map { |dir|
-      next unless is_release?(dir)
-      dir
-    }.compact
-  end
-
   # =============================================================================
   module Release
+
     extend self
 
+    def is?(dir)
+      File.basename(dir)[/^\d{10}-[\da-zA-Z]{7}$/]?
+    end
+
+    def list(dir : String)
+      Dir.glob("#{dir}/*/").sort.map { |dir|
+        next unless is?(dir)
+        dir
+      }.compact
+    end
+
     def generate_id
-      `git show -s --format=%ct-%h`.strip
+      generate_id Dir.current
+    end
+
+    def generate_id(dir) : String
+      output = nil
+      Dir.cd(dir) {
+        output = DA.output!("git show -s --format=%ct-%h")
+      }
+      output.not_nil!
     end
 
     def latest(dir : String)
-      releases.last?
+      list(dir).last?
     end # === def latest(dir : String)
 
     def latest!(dir : String)
-      d = DA.releases(dir).last?
-      if !d || !File.directory?(d)
+      r = DA::Release.list(dir).last?
+      if !r
         DA.exit_with_error!("!!! No latest release found for #{dir}")
       end
-      d
+      r
     end # === def self.latest_release
 
   end # === module Release

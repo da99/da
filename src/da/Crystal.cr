@@ -122,7 +122,7 @@ module DA
           github: da99/da_process.cr
       EOF
       if File.exists?("shard.yml")
-        DA::Crystal.deps
+        DA::Crystal.shards!
       else
         File.write("shard.yml", default_contents)
         DA.green! "=== BOLD{{Wrote}}: {{shard.yml}}"
@@ -152,21 +152,39 @@ module DA
       end
     end
 
-    def deps(run_bin_compile = true)
-      if DA.is_development?
-        global_cache = File.join(ENV["HOME"], ".cache/shards")
-        if File.directory?(global_cache)
-          DA.system! "rm -rf #{global_cache}"
-        end
+    def shards_clear!
+      global_cache = File.join(ENV["HOME"], ".cache/shards")
+      if File.directory?(global_cache)
+        DA.system! "rm -rf #{global_cache}"
+      else
+        DA.orange! "=== {{Not found}}: BOLD{{#{global_cache}}}"
       end
+    end
+
+    def shards!(run_bin_compile = true)
       shard_yml = "shard.yml"
       shard_lock = "shard.lock"
+
+      if !File.exists?(shard_yml)
+        DA.exit_with_error! "!!! No #{shard_yml} file found."
+      end
+
+      if File.exists?(shard_lock) && File.info(shard_yml).modification_time < File.info(shard_lock).modification_time
+        DA.orange! "=== {{Skipping shards install/update}}: #{shard_yml} hasn't changed."
+        return
+      end
+
       lock = File.exists?(shard_lock) ? File.read(shard_lock) : ""
       DA.system! "shards install"
       DA.system! "shards update"
       DA.system! "shards prune -v"
 
-      new_lock = File.read(shard_lock)
+      # Sometimes no shard.lock is made if no shards are used.
+      new_lock = if File.exists?(shard_lock)
+                   File.read(shard_lock)
+                 else
+                   ""
+                 end
 
       if run_bin_compile
         if lock != new_lock
@@ -175,7 +193,7 @@ module DA
           STDERR.puts "=== Skipping bin compile. shard.lock the same."
         end
       end
-    end # === def deps
+    end # === def shards
 
     def bin_compile(args = [] of String)
       shell_script = "sh/bin_compile.sh"
@@ -185,14 +203,7 @@ module DA
         return
       end
 
-      shard_yml = "shard.yml"
-      shard_lock = "shard.lock"
-
-      if File.exists?(shard_yml)
-        if !File.exists?(shard_lock) || File.info(shard_yml).modification_time > File.info(shard_lock).modification_time
-          deps(run_bin_compile: false)
-        end
-      end # if
+      shards!(run_bin_compile: false)
 
       name = File.basename(Dir.current)
       bin  = "bin/#{name}"

@@ -38,8 +38,8 @@ when ARGV[0]? == "crystal" && ARGV[1]?
   args.shift
   DA::Crystal.crystal args
 
-when ARGV[0]? == "shards" && ARGV[1]?
-  # === {{CMD}} shards --args ...
+when ARGV[0]? == "shards"
+  # === {{CMD}} shards [--args ...]
   args = ARGV.clone
   args.shift
   DA::Crystal.shards args
@@ -68,9 +68,13 @@ when full_cmd == "watch"
   # === {{CMD}} watch
   DA::Dev.watch
 
-when full_cmd == "deps"
-  # === {{CMD}} deps
-  DA::Crystal.deps
+when full_cmd == "shards!"
+  # === {{CMD}} shards!
+  DA::Crystal.shards!
+
+when full_cmd == "shards cache clear"
+  # === {{CMD}} shards cache clear
+  DA::Crystal.shards_clear!
 
 when full_cmd == "bin compile"
   # === {{CMD}} bin compile [release]
@@ -113,7 +117,7 @@ when full_cmd == "generate release id"
 
 when full_cmd == "releases"
   # === {{CMD}} releases # Prints list of release in current working directory
-  DA.releases(Dir.current).each { |dir|
+  DA::Release.list(Dir.current).each { |dir|
     puts dir
   }
 
@@ -175,10 +179,8 @@ when "inspect" == ARGV[0]? && ARGV[1]? && !ARGV[2]?
 
   puts "name:       #{app.name}"
   puts "dir:        #{app.dir}"
-  puts "latest:     #{app.latest}"
-  puts "releases:   #{app.releases.size}"
-  puts "public dir: #{app.public_dir?}"
-  puts "sv dir:     #{app.public_dir?}"
+  puts "latest:     #{DA::Release.latest(app.dir).inspect}"
+  puts "releases:   #{DA::Release.list(app.dir).inspect}"
 
 when "#{ARGV[0]?} #{ARGV[1]?} #{ARGV[2]?}" == "upload binary to"
   # === {{CMD}} upload binary to remote_name
