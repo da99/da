@@ -6,19 +6,17 @@ require "da_spec"
 
 extend DA_SPEC
 
-DA.system! "mkdir -p /tmp/deploy/var/service"
-DA.system! "mkdir -p /tmp/deploy/etc/sv"
+def reset_file_system
+  `rm -rf   /tmp/specs_deploy`
+  `mkdir -p /tmp/specs_deploy/var/service`
+  `mkdir -p /tmp/specs_deploy/etc/sv`
+  Dir.cd("/tmp/specs_deploy") {
+    yield
+  }
+end # === def reset_file_system
 
-describe "DA" do
-  it "sets SHARDS_INSTALL_PATH" do
-    path = ENV["SHARDS_INSTALL_PATH"]? || ""
-    assert path[/\.shards\/\.install/]? == ".shards/.install"
-  end # === it "sets SHARDS_INSTALL_PATH"
 
-  it "sets CRYSTAL_PATH" do
-    path = ENV["CRYSTAL_PATH"]? || ""
-    assert path[/\.shards\/\.install/]? == ".shards/.install"
-  end # === it "sets CRYSTAL_PATH"
-end # === desc "DA_DEV"
-
+require "./DA"
 require "./Colorize"
+require "./Release"
+require "./App"

@@ -19,14 +19,14 @@ module DA
     def initialize(@name)
       @sv_dir = case
                 when DA.is_test?
-                  "/tmp/deploy/etc/sv/#{@name}"
+                  "/tmp/specs_deploy/etc/sv/#{@name}"
                 else
                   "/etc/sv/#{@name}"
                 end
 
       @service_dir = case
                      when DA.is_test?
-                       File.join("/tmp/deploy/var/service", @name)
+                       File.join("/tmp/specs_deploy/var/service", @name)
                      else
                        File.join("/var/service", @name)
                      end

@@ -10,8 +10,8 @@ module DA
       File.basename(dir)[/^\d{10}-[\da-zA-Z]{7}$/]?
     end
 
-    def list(dir : String)
-      Dir.glob("#{dir}/*/").sort.map { |dir|
+    def list(app : App)
+      Dir.glob("#{app.dir}/*").sort.map { |dir|
         next unless is?(dir)
         dir
       }.compact
@@ -29,8 +29,8 @@ module DA
       output.not_nil!
     end
 
-    def latest(dir : String)
-      list(dir).last?
+    def latest(app : App)
+      list(app).last?
     end # === def latest(dir : String)
 
     def latest!(dir : String)

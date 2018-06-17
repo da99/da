@@ -17,7 +17,7 @@ module DA
     def initialize(@name)
       @dir = case
              when DA.is_test?
-               File.join("/tmp/deploy", @name)
+               File.join("/tmp/specs_deploy", @name)
              when DA.is_development?
                File.join("/apps", @name)
              else
@@ -42,7 +42,17 @@ module DA
     end # === def dir
 
     def current
-      File.join app.dir(current)
+      File.join dir, "current"
+    end
+
+    def current!
+      latest = Release.latest(self)
+      if latest
+        DA.link_symbolic! latest, current
+        return true
+      else
+        DA.exit_with_error! "!!! Latest release for #{name} not found."
+      end
     end
 
   end # === struct App
