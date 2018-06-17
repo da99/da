@@ -18,15 +18,17 @@ module DA
     DA.system!("chmod o+rX -R #{public_dir}")
   end # === def public_dir_permissions
 
+  def symlink?(target : String)
+    File.info(target, follow_symlinks: false).symlink?
+  end
+
   def link_symbolic!(original, target)
     if !File.exists?(original)
       DA.exit_with_error! "Symbolic link origin does not exist: #{original}"
     end
 
-    if File.exists?(target)
-      if !Process.run("test", "-L #{target}".split).success?
+    if File.exists?(target) && !DA.symlink?(target)
         DA.exit_with_error! "Symbolic link target already exists: #{target}"
-      end
     end
 
     return true if DA.success?(DA.run("ln -sf #{original} #{target}"))
