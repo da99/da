@@ -3,7 +3,7 @@ module DA
   module Linux
     extend self
 
-    def useradd(user : String)
+    def useradd_system(user : String)
       id = `id -u #{user}`.strip
       if id.empty?
         DA.system!("sudo useradd --system #{user}")
@@ -21,7 +21,7 @@ module DA
     end # === def groupadd
 
     def add_user_to_group(user : String, group : String)
-      DA.system! "sudo useradd -g #{group} #{user}"
+      DA.system! "sudo usermod -a -G #{group} #{user}"
     end # === def add_user_to_group
 
   end # === module Linux

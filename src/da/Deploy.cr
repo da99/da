@@ -40,7 +40,7 @@ module DA
         return false
       end
 
-      Linux.useradd(pg.user)
+      Linux.useradd_system(pg.user)
       Linux.groupadd(pg.group_socket)
     end # === def pg
 
@@ -53,7 +53,7 @@ module DA
         return false
       end
 
-      useradd("www-#{sv.name}")
+      useradd_system("www-#{sv.name}")
 
       if sv.latest_linked?
         DA.orange! "=== Already installed: #{sv.service_link} -> #{`realpath #{sv.service_link}`}"
@@ -116,7 +116,7 @@ module DA
 
       init_ssh
 
-      Linux.useradd("da_cache")
+      Linux.useradd_system("da_cache")
       DA.system! "mkdir -p /deploy/da_cache"
       DA.system! "sudo chown da_cache:da_cache /deploy/da_cache"
       DA.system! "sudo chmod g+rXw /deploy/da_cache"
