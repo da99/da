@@ -28,22 +28,6 @@ when "-h --help help".split.includes?(ARGV.first)
     DA.print_help substring
   end
 
-when full_cmd == "crystal install"
-  # === {{CMD}} crystal install
-  DA::Crystal.install
-
-when ARGV[0]? == "crystal" && ARGV[1]?
-  # === {{CMD}} crystal --args ...
-  args = ARGV.clone
-  args.shift
-  DA::Crystal.crystal args
-
-when ARGV[0]? == "shards"
-  # === {{CMD}} shards [--args ...]
-  args = ARGV.clone
-  args.shift
-  DA::Crystal.shards args
-
 when "watch run" == "#{ARGV[0]?} #{ARGV[1]?}" && ARGV[2]?
   # === {{CMD}} watch run [file]
   DA::Dev.watch_run(ARGV[2])
@@ -68,13 +52,32 @@ when full_cmd == "watch"
   # === {{CMD}} watch
   DA::Dev.watch
 
-when full_cmd == "shards!"
-  # === {{CMD}} shards!
-  DA::Crystal.shards!
+# =============================================================================
+
+when full_cmd == "crystal install"
+  # === {{CMD}} crystal install
+  DA::Crystal.install
+
+when ARGV[0]? == "crystal" && ARGV[1]?
+  # === {{CMD}} crystal --args ...
+  args = ARGV.clone
+  args.shift
+  DA::Crystal.crystal args
+# =============================================================================
 
 when full_cmd == "shards cache clear"
   # === {{CMD}} shards cache clear
   DA::Crystal.shards_clear!
+
+when ARGV[0]? == "shards"
+  # === {{CMD}} shards [--args ...]
+  args = ARGV.clone
+  args.shift
+  DA::Crystal.shards args
+
+when full_cmd == "shards!"
+  # === {{CMD}} shards!
+  DA::Crystal.shards!
 
 when full_cmd == "bin compile"
   # === {{CMD}} bin compile [release]
