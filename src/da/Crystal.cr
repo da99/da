@@ -6,8 +6,12 @@ module DA
     BIN = "crystal"
     extend self
 
-    def crystal(*args)
-      DA.system! *args
+    def crystal(args : Array(String))
+      DA.system! "crystal", args
+    end
+
+    def shards(args : Array(String))
+      DA.system! "shards", args
     end
 
     def init

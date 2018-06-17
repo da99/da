@@ -35,7 +35,14 @@ when full_cmd == "crystal install"
 when ARGV[0]? == "crystal" && ARGV[1]?
   # === {{CMD}} crystal --args ...
   args = ARGV.clone
-  DA::Crystal.crystal args.shift, args
+  args.shift
+  DA::Crystal.crystal args
+
+when ARGV[0]? == "shards" && ARGV[1]?
+  # === {{CMD}} shards --args ...
+  args = ARGV.clone
+  args.shift
+  DA::Crystal.shards args
 
 when "watch run" == "#{ARGV[0]?} #{ARGV[1]?}" && ARGV[2]?
   # === {{CMD}} watch run [file]
