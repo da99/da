@@ -154,7 +154,7 @@ module DA
 
     def deps(run_bin_compile = true)
       if DA.is_development?
-        global_cache = File.join(ENV["HOME"], ".cache/crystal")
+        global_cache = File.join(ENV["HOME"], ".cache/shards")
         if File.directory?(global_cache)
           DA.system! "rm -rf #{global_cache}"
         end
