@@ -40,9 +40,10 @@ module DA
       return true
     end
 
-    return true if DA.success?(DA.run("ln -sf #{original} #{target}"))
+    cmd = "ln -s -f --no-dereference"
+    return true if DA.success?(DA.run("#{cmd} #{original} #{target}"))
 
-    DA.system!("sudo ln -sf #{original} #{target}")
+    DA.system!("sudo #{cmd} #{original} #{target}")
     true
   end # === def link_symbolic
 
