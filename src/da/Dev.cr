@@ -150,6 +150,11 @@ module DA
             kill_procs
             lines = File.read(file).split('\n')
             dir = lines.shift
+            if !File.directory?(dir)
+              DA.orange! "!!! {{Skipping file}} because directory, (BOLD{{#{dir}}}), does not exist: #{lines.join('\n')}"
+              FileUtils.rm file
+              next
+            end
             Dir.cd(dir) {
               DA.orange! "=== in {{#{dir}}} #{"-=" * 20}"
               result = lines.each_with_index { |cmd, i|
