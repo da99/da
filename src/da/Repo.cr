@@ -16,7 +16,7 @@ module DA
       all_names.each { |x|
         if found_current
           Dir.cd(x) {
-            return x if git_is_dirty?
+            return x if DA::Git.dirty?
           }
         else
           if x == name

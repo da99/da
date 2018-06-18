@@ -1,58 +1,43 @@
 require "file_utils"
 
-def run(raw : String)
-  DA_Process.success!(raw, output: Process::Redirect::Close)
-end
-
-def new_repo
-  name = "da_dev_git_specs"
-  Dir.cd("/tmp") {
-    FileUtils.rm_rf(name) if Dir.exists?(name)
+def reset_repo(name : String = "git_specs")
+  reset_file_system {
     Dir.mkdir_p name
     Dir.cd(name) {
-      run("git init")
+      DA.success!("git init")
       File.write(".gitignore", "/tmp/")
-      run("git add .gitignore")
-      run("git commit -m Init")
+      DA.success!("git add .gitignore")
+      DA.success!("git commit -m Init")
       yield
     }
-    FileUtils.rm_rf(name) if Dir.exists?(name)
-  }
+  } # reset_file_system
 end
 
-describe "Files.load_changes" do
-  it "works" do
-    new_repo {
-      DA_Dev::Git::Files.load_changes
-      assert true == true
-    }
-  end # === it "works"
-end # === desc "DA_Dev::Git::Files.load_changes"
 
-describe "Files.changed?" do
-  it "returns a Boolean" do
-    new_repo {
-      DA_Dev::Git::Files.load_changes
-      DA_Process.success! "touch .gitignore"
-      actual = DA_Dev::Git::Files.changed?(".gitignore")
-      assert actual == true
+describe "Git.clean?" do
+  it "returns true if no new files" do
+    reset_repo {
+      assert DA::Git.clean? == true
     }
-  end # === it "returns a Boolean"
+  end # === it "returns true is no new files"
 
-  it "returns false if file has not been changed" do
-    new_repo {
-      DA_Dev::Git::Files.update_log
-      actual = DA_Dev::Git::Files.changed?(".gitignore")
-      assert actual == false
+  it "returns false if new file" do
+    reset_repo {
+      DA.success! "touch a"
+      assert DA::Git.clean? == false
     }
-  end # === it "returns false if file has not been changed"
-end # === desc "DA_Dev::Git::Files.changed?"
+  end # === it "returns false if new file"
 
-describe "Files.update_log" do
-  it "works" do
-    new_repo {
-      DA_Dev::Git::Files.update_log
-      assert DA_Dev::Git::Files.changed.empty? == true
+  it "returns false if ahead of origin" do
+    reset_repo("origin_repo") {
+      Dir.cd(File.expand_path "..") {
+        DA.success! "git clone origin_repo new_repo"
+        Dir.cd "new_repo"
+        DA.success! "touch a"
+        DA.success! "git add a"
+        DA.success! "git commit -m new_file"
+        assert DA::Git.clean? == false
+      }
     }
-  end # === it "works"
-end # === desc "DA_Dev::Git::Files.update_log"
+  end # === it "returns false if ahead of origin"
+end # === desc ".clean?"

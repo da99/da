@@ -100,6 +100,7 @@ module DA
     if !success?(status)
       output.rewind
       error.rewind
+      DA.red! "=== {{Failed}}: BOLD{{#{cmd}}} #{args.join ' '}"
       STDOUT.puts(output) unless output.empty?
       STDERR.puts(error) unless error.empty?
       exit! status

@@ -20,3 +20,5 @@ require "./DA"
 require "./Colorize"
 require "./Release"
 require "./App"
+require "./Git"
+

@@ -33,10 +33,10 @@ module DA
       list(app).last?
     end # === def latest(dir : String)
 
-    def latest!(dir : String)
-      r = DA::Release.list(dir).last?
+    def latest!(app : App)
+      r = DA::Release.list(app).last?
       if !r
-        DA.exit_with_error!("!!! No latest release found for #{dir}")
+        DA.exit_with_error!("!!! No latest release found for #{app.dir}")
       end
       r
     end # === def self.latest_release

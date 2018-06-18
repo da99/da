@@ -10,6 +10,15 @@ Reference:
   DA.print_help substring_search
 ```
 
+Process:
+=======
+
+```
+  DA.system!(cmd)  # Prints output of cmd.
+  DA.success!(cmd) # Prints output of cmd only on failure and exits.
+  DA.run(cmd)      # Shows which command is running and returns status.
+```
+
 Links:
 ======
 

@@ -1,37 +1,42 @@
 
 module DA
 
-  # This is 'hack'-y for now.
-  def git_is_clean?
-    status = `git status`.strip
-    status["Your branch is up to date with 'origin/master'"]? &&
-      status["nothing to commit, working tree clean"]?
-  end # def git_is_clean
-
-  def git_is_dirty?
-    !git_is_clean?
-  end
-
-  def git_clone_or_pull(url : String)
-    name = File.basename(url, ".git")
-
-    if Dir.exists?(name)
-      Dir.cd(name) {
-        system("git pull")
-        success! $?
-      }
-    else
-      system("git clone --depth 1 #{url}")
-      success! $?
-    end
-  end
-
   module Git
     extend self
 
+    # This is a hacky implementation, but so far it works for me.
+    def clean?
+      status = `git status`.strip
+      is_committed = status["nothing to commit, working tree clean"]?
+      return false if !is_committed
+      has_origin = !`git remote -v`.strip.empty?
+      if has_origin
+        return !!status["Your branch is up to date with 'origin/master'"]?
+      end
+      true
+    end # def git_is_clean
+
+    def dirty?
+      !clean?
+    end
+
+    def clone_or_pull(url : String)
+      name = File.basename(url, ".git")
+
+      if Dir.exists?(name)
+        Dir.cd(name) {
+          system("git pull")
+          success! $?
+        }
+      else
+        system("git clone --depth 1 #{url}")
+        success! $?
+      end
+    end
+
     def development_checkpoint
       DA.success! "git add --all"
-      DA.success! "git", ["commit", "-m", "Development checkpoint."]
+      DA.success! "git commit -m Development checkpoint."
     end
 
     def update
@@ -84,12 +89,7 @@ module DA
     end
 
     def repo?
-      DA.success? Process.run("git", "rev-parse --is-inside-work-tree".split)
-    end
-
-    def clean?
-      p = DA.process_new("git status --porcelain")
-      p.success? && p.output.to_s.strip.empty?
+      DA.success?("git rev-parse --is-inside-work-tree")
     end
 
     def ahead_of_remote?
@@ -114,70 +114,7 @@ module DA
         prompt += "%{%k%F{red}%} "
       end
       prompt += ref
-    end
-
-    module Files
-
-      PATH = "tmp/out/changed.txt"
-      PATH_DO_COMPILE = "tmp/out/do_compile"
-      RECORDS = {} of String => Int64
-      CHANGED = {} of String => Int64
-
-      def self.load_changes
-        return if !RECORDS.empty?
-
-        Dir.mkdir_p(File.dirname(PATH))
-        File.touch(PATH)
-        File.each_line(PATH) { |line|
-          pieces = line.split('|')
-          RECORDS[pieces.first] = pieces.last.to_i64
-        }
-      end
-
-      def self.changed?(file_name)
-        # Check if file exists because it might be busy:
-        sleep 0.2 if !File.exists?(file_name)
-        return true if !File.exists?(file_name)
-
-        current_mtime = File.stat(file_name).mtime.epoch
-        result = !RECORDS[file_name]? || RECORDS[file_name] != current_mtime
-        RECORDS[file_name] = current_mtime
-        result
-      end
-
-      def self.update_log
-        %w[shard.yml].each { |file|
-          next if ! File.exists?(file)
-          RECORDS[file] = File.stat(file).mtime.epoch
-        }
-      end
-
-      def self.ls
-        DA_Process.output!("git ls-files --cached --others --exclude-standard")
-      end
-
-      def self.changed
-        files = [] of String
-        ls.each_line { |line|
-          if changed?(line)
-            files.push(line)
-          end
-        }
-        files
-      end
-
-      def self.compile
-        return false if !File.exists?(PATH_DO_COMPILE)
-        changed.each { |f| yield f }
-        yield "compile!"
-        File.delete(PATH_DO_COMPILE)
-        update_log
-
-        true
-      end # === def self.watch
-
-    end # === module Files
+    end # def
 
   end # === module Git
-
 end # === module DA

@@ -14,6 +14,11 @@ module DA
     getter name   : String
     getter dir    : String
 
+    def initialize
+      @dir  = Dir.current
+      @name = File.basename(@dir)
+    end # === def initialize
+
     def initialize(@name)
       @dir = case
              when DA.is_test?

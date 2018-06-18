@@ -144,13 +144,13 @@ when full_cmd == "generate release id"
 
 when full_cmd == "releases"
   # === {{CMD}} releases # Prints list of release in current working directory
-  DA::Release.list(Dir.current).each { |dir|
+  DA::Release.list(DA::App.new).each { |dir|
     puts dir
   }
 
 when full_cmd == "latest"
   # === {{CMD}} latest release
-  puts DA::Release.latest!(Dir.current)
+  puts DA::Release.latest!(DA::App.new)
 
 when full_cmd == "deploy init"
   # === {{CMD}} deploy init
@@ -206,8 +206,8 @@ when "inspect" == ARGV[0]? && ARGV[1]? && !ARGV[2]?
 
   puts "name:       #{app.name}"
   puts "dir:        #{app.dir}"
-  puts "latest:     #{DA::Release.latest(app.dir).inspect}"
-  puts "releases:   #{DA::Release.list(app.dir).inspect}"
+  puts "latest:     #{DA::Release.latest(app).inspect}"
+  puts "releases:   #{DA::Release.list(app).inspect}"
 
 when "#{ARGV[0]?} #{ARGV[1]?} #{ARGV[2]?}" == "upload binary to"
   # === {{CMD}} upload binary to remote_name
