@@ -169,7 +169,7 @@ when "#{ARGV[0]?} #{ARGV[1]?}" == "deploy Public" && ARGV[2]?
   DA::Deploy.public(ARGV[2])
 
 when full_cmd["upload shell config to "]?
-  # === {{CMD}} upload shell config
+  # === {{CMD}} upload shell config to app_name
   DA::Deploy.upload_shell_config_to(ARGV.last)
 
 # =============================================================================
