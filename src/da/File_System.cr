@@ -13,22 +13,17 @@ module DA
     File.exists?(s) && `file --mime #{s}`["text/plain"]?
   end
 
-  def public_dir!(public_dir : String)
-    temp = public_dir
-    default_msg = "chmod o+rX"
-    while temp.size > 1 # temp could be "/" or "."
+  def public_dir?(raw : String)
+    public_dir = temp = File.expand_path(raw)
+    return false if !File.directory?(public_dir)
+    while temp.size > 1
       perms = File.info(temp).permissions
-      if perms.other_write?
-        DA.exit! "!!! {{Directory writeable by others}}: BOLD{{#{dir}}} #{perms}"
-      end
-      if !perms.other_read?
-        DA.exit! "!!! {{Directory not-readable by others}}: BOLD{{#{dir}}} #{perms} (Run #{default_msg} #{dir})"
-      end
-      if !perms.other_execute?
-        DA.exit! "!!! {{Directory not-executable by others}}: BOLD{{#{dir}}} #{perms}"
+      if !(perms.other_read? && perms.other_execute?)
+        return false
       end
       temp = File.dirname(temp)
     end
+    true
   end # === def public_dir_permissions
 
   def symlink?(target : String)
