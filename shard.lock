@@ -1,0 +1,10 @@
+version: 1.0
+shards:
+  da_spec:
+    git: file:///apps/da_spec
+    version: 0.4.3
+
+  terminal_table:
+    github: benoist/terminal_table.cr
+    commit: a14e244219a6a7b804b3491bafcff73f4b74855e
+

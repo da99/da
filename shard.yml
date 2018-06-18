@@ -1,3 +1,6 @@
 ---
 name: da
 version: 3.2.3
+development_dependencies:
+  da_spec:
+    git: file:///apps/da_spec
