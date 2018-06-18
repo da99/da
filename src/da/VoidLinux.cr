@@ -39,7 +39,7 @@ module DA
 
       real_sv = `realpath #{sv}`.strip
       if !File.directory?(real_sv)
-        DA.exit_with_error! "!!! Directory not found: #{raw_dir}"
+        DA.exit! "!!! Directory not found: #{raw_dir}"
       end
 
       if File.exists?(service)
@@ -48,7 +48,7 @@ module DA
           DA.orange! "=== Already installed: #{sv} -> #{service}"
           return
         else
-          DA.exit_with_error! "!!! Service linked to another directory: #{real_sv} #{service}"
+          DA.exit! "!!! Service linked to another directory: #{real_sv} #{service}"
         end
       end
 

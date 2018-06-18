@@ -35,7 +35,7 @@ module DA
       } || ""
       href = raw.split('"')[1]
       if !href
-        DA.exit_with_error!("!!! Latest release not found: #{url}")
+        DA.exit!("!!! Latest release not found: #{url}")
       end
 
       init
@@ -167,7 +167,7 @@ module DA
       shard_lock = "shard.lock"
 
       if !File.exists?(shard_yml)
-        DA.exit_with_error! "!!! No #{shard_yml} file found."
+        DA.exit! "!!! No #{shard_yml} file found."
       end
 
       if File.exists?(shard_lock) && File.info(shard_yml).modification_time < File.info(shard_lock).modification_time
@@ -215,7 +215,7 @@ module DA
       if File.exists?(bin)
         mime = `file --mime #{bin}`.split[1].split("/").first?
         if mime != "application"
-          DA.exit_with_error! " Non-binary file {{already exists}}: #{bin}"
+          DA.exit! " Non-binary file {{already exists}}: #{bin}"
         end
       end
 

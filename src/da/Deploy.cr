@@ -69,7 +69,7 @@ module DA
         sv.down! if sv.run?
         sv.wait_pids
         if sv.any_pids_up?
-          DA.exit_with_error!("!!! Pids still up for #{sv.name}: #{sv.pids_up}")
+          DA.exit!("!!! Pids still up for #{sv.name}: #{sv.pids_up}")
         end
         DA.system!("sudo rm -f #{sv.service_link}")
       end
@@ -147,7 +147,7 @@ module DA
           next
         end
 
-        DA.exit_with_error!("!!! Invalid value for sshd_config: #{pieces.join ' '}")
+        DA.exit!("!!! Invalid value for sshd_config: #{pieces.join ' '}")
       }
 
       Dir.cd(ENV["HOME"]) {
@@ -155,7 +155,7 @@ module DA
         Dir.cd(".ssh") {
           contents = (File.exists?("authorized_keys") ? File.read("authorized_keys") : "").strip
           if contents.empty?
-            DA.exit_with_error!("!!! authorized_keys empty.")
+            DA.exit!("!!! authorized_keys empty.")
           else
             DA.system!("sudo sv restart sshd")
           end
@@ -190,7 +190,7 @@ module DA
       remote_dir = "/deploy/#{app_name}/#{release_id}"
 
       if DA.success?("ssh #{server_name} test -d #{remote_dir}")
-        DA.exit_with_error!("!!! Already exists on server: #{remote_dir}")
+        DA.exit!("!!! Already exists on server: #{remote_dir}")
       end
 
       path = Dir.current

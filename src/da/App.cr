@@ -35,7 +35,7 @@ module DA
       sv.down! if sv.run?
       sv.wait_pids
       if sv.any_pids_up?
-        DA.exit_with_error!("!!! Pids still up for #{name}: #{sv.pids_up.join ", "}")
+        DA.exit!("!!! Pids still up for #{name}: #{sv.pids_up.join ", "}")
       end
       if sv.linked?
         DA.system!("sudo rm -f #{sv.service_dir}")
@@ -56,7 +56,7 @@ module DA
         DA.link_symbolic! latest, current
         return true
       else
-        DA.exit_with_error! "!!! Latest release for #{name} not found."
+        DA.exit! "!!! Latest release for #{name} not found."
       end
     end
 

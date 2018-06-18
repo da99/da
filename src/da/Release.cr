@@ -36,7 +36,7 @@ module DA
     def latest!(app : App)
       r = DA::Release.list(app).last?
       if !r
-        DA.exit_with_error!("!!! No latest release found for #{app.dir}")
+        DA.exit!("!!! No latest release found for #{app.dir}")
       end
       r
     end # === def self.latest_release

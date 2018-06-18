@@ -74,7 +74,7 @@ module DA
 
     def up!
       if !down?
-        DA.exit_with_error!("Service is not in \"down\" state: #{service_dir} -> #{status}")
+        DA.exit!("Service is not in \"down\" state: #{service_dir} -> #{status}")
       end
 
       DA.system!("sudo sv up #{service_dir}")
@@ -87,7 +87,7 @@ module DA
       end
 
       if !run?
-        DA.exit_with_error!("Service is not in \"up\" state: #{service_dir} -> #{status}")
+        DA.exit!("Service is not in \"up\" state: #{service_dir} -> #{status}")
       end
       Runit.new(name, sv_dir, service_dir).pids.each { |pid|
         puts pid
@@ -96,7 +96,7 @@ module DA
 
     def down!
       if !run?
-        DA.exit_with_error!("Not running: #{service_dir}")
+        DA.exit!("Not running: #{service_dir}")
       end
 
       DA.orange! "PIDs: #{pids.join ' '}"

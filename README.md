@@ -3,9 +3,6 @@ Reference:
 ============
 
 ```crystal
-  DA.exit_with_error!(Int32, String)
-  DA.exit_with_error!(String)
-
   DA.print_help
   DA.print_help substring_search
 ```
@@ -13,7 +10,10 @@ Reference:
 Process:
 =======
 
-```
+```crystal
+  DA.exit!(Int32, String)
+  DA.exit!(String)
+
   DA.system!(cmd)  # Prints output of cmd.
   DA.success!(cmd) # Prints output of cmd only on failure and exits.
   DA.run(cmd)      # Shows which command is running and returns status.

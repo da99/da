@@ -54,7 +54,7 @@ module DA
       origin = DA.output!("git remote get-url --all origin").to_s.strip
 
       if origin.empty?
-        DA.exit_with_error!("!!! No origin found.")
+        DA.exit!("!!! No origin found.")
       end
 
       urls = [] of String

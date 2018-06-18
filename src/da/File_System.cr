@@ -28,11 +28,11 @@ module DA
 
   def link_symbolic!(original, target)
     if !File.exists?(original)
-      DA.exit_with_error! "Symbolic link origin does not exist: #{original}"
+      DA.exit! "Symbolic link origin does not exist: #{original}"
     end
 
     if File.exists?(target) && !DA.symlink?(target)
-        DA.exit_with_error! "Symbolic link target already exists: #{target}"
+        DA.exit! "Symbolic link target already exists: #{target}"
     end
 
     if File.exists?(original) && File.exists?(target) && `realpath #{original}` == `realpath #{target}`
