@@ -21,30 +21,46 @@ module DA
 
   # =============================================================================
 
-  def exit!(x : Int32, *args : String)
-    args.each { |msg| red! msg }
-    exit x
+  class Exit < Exception
+    getter exit_code : Int32 = 2
+
+    def initialize(@message)
+    end # === def initialize
+
+    def initialize(@exit_code)
+      @message = "FAILURE"
+    end # === def initialize
+
+    def initialize(@exit_code, @message)
+      if (@exit_code < 0 || @exit_code > 255)
+        # https://unix.stackexchange.com/questions/394639/why-do-high-exit-codes-on-linux-shells-256-not-work-as-expected
+        DA.red! "!!! Undefined exit code found: #{@exit_code} (Original message: #{@message})"
+        @exit_code = 1
+      end
+    end
+
+  end # class Exit
+
+  def exit!(x : Int32, msg : String)
+    raise DA::Exit.new(x, msg)
   end # === def exit!
 
   def exit!(msg : String)
-    exit!(2, msg)
+    DA.exit!(2, msg)
   end # === def self.error
 
-  def exit!(exit_code : Int32)
-    if exit_code >= 0 && exit_code <= 255
-      exit exit_code
-    end
-    red! "!!! Undefined exit code found: #{exit_code}"
-    red! "!!! Read more about it: https://unix.stackexchange.com/questions/394639/why-do-high-exit-codes-on-linux-shells-256-not-work-as-expected"
-    exit 1
+  def exit!(x : Int32)
+    raise DA::Exit.new(x)
   end # === def exit!(i : int32)
 
   def exit!(stat : Process::Status)
     return false if success?(stat)
-    red! "!!! {{Exit}}: BOLD{{#{stat.exit_code}}}"
-    red! "!!! {{Exit Signal}}: BOLD{{#{stat.exit_signal}}}" if stat.signal_exit?
-    exit stat.exit_code
-    true
+    io = IO::Memory.new
+    io << "!!! {{Exit}}: BOLD{{#{stat.exit_code}}}"
+    if stat.signal_exit?
+      io << " !!! {{Exit Signal}}: BOLD{{#{stat.exit_signal}}}"
+    end
+    DA.exit! stat.exit_code, io.to_s
   end
 
   # =============================================================================

@@ -21,4 +21,5 @@ require "./Colorize"
 require "./Release"
 require "./App"
 require "./Git"
+require "./Process"
 
