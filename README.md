@@ -25,10 +25,10 @@ Reference
     end
 
     it "fails" do
-      assert_raises(IndexError) do
+      assert_raises(IndexError) {
         a = [] of Int32
         a.pop
-      end
+      } # returns the error.
     end
 
   end # === describe

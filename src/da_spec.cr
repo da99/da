@@ -120,6 +120,7 @@ module DA_SPEC
           end
           exit 1
         end
+        e
       end
     end # === def assert_raises
 

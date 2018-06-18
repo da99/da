@@ -1,30 +1,35 @@
 
 if in_spec?
   describe("assert_raises") {
-    it "exists 0 when error is captured" do
+    it "exits 0 when error is captured" do
       result = run("assert_raises captures errors")
       assert result.exit_code == 0
     end # === it "exists 0 when errors is captured"
 
-    it "exists 0 when error pattern matches" do
+    it "exits 0 when error pattern matches" do
       result = run("assert_raises compares pattern message")
       assert result.exit_code == 0
     end # === it
 
-    it "exists 0 when error string matches" do
+    it "exits 0 when error string matches" do
       result = run("assert_raises compares string message")
       assert result.exit_code == 0
     end # === it
 
-    it "exists 1 when class mismatch" do
+    it "exits 1 when class mismatch" do
       result = run("assert_raises class mismatch")
       assert result.exit_code == 1
     end # === it "exists 1 when error is class mismatch
 
-    it "exists 1 when error message does not match string" do
+    it "exits 1 when error message does not match string" do
       result = run("assert_raises message string mismatch")
       assert result.exit_code == 1
     end # === it "exists 1 when error message does not match string"
+
+    it "exits 0 returns the error" do
+      result = run("assert_raises returns the error")
+      assert result.exit_code == 1
+    end # === it "returns the error"
   }
 else
   describe "assert_raises" do
@@ -72,5 +77,12 @@ else
       }
     end # === it "message pattern mismatch"
 
+    it "returns the error" do
+      e = assert_raises(IndexError) {
+        a = [] of Int32
+        a.pop
+      }
+      assert e.class.name == "nothing"
+    end
   end # === desc "assert_raises"
 end # === if
