@@ -153,12 +153,13 @@ module DA
     end
 
     def shards_clear!
-      global_cache = File.join(ENV["HOME"], ".cache/shards")
-      if File.directory?(global_cache)
-        DA.system! "rm -rf #{global_cache}"
-      else
-        DA.orange! "=== {{Not found}}: BOLD{{#{global_cache}}}"
-      end
+      [File.join(ENV["HOME"], ".cache/shards"), ".shards"].each { |dir|
+        if File.directory?(dir)
+          DA.system! "rm -rf #{dir}"
+        else
+          DA.orange! "=== {{Not found}}: BOLD{{#{dir}}}"
+        end
+      }
     end
 
     def shards!(run_bin_compile = true)

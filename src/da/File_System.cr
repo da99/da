@@ -35,6 +35,11 @@ module DA
         DA.exit_with_error! "Symbolic link target already exists: #{target}"
     end
 
+    if File.exists?(original) && File.exists?(target) && `realpath #{original}` == `realpath #{target}`
+      DA.orange! "=== Already linked: #{original} -> #{target}"
+      return true
+    end
+
     return true if DA.success?(DA.run("ln -sf #{original} #{target}"))
 
     DA.system!("sudo ln -sf #{original} #{target}")
