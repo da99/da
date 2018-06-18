@@ -15,7 +15,7 @@ module DA
 
   def public_dir_permissions(public_dir : String)
     temp = public_dir
-    while temp != "/"
+    while temp.size > 1 # temp could be "/" or "."
       DA.system!("chmod o+rX #{temp}")
       temp = File.dirname(temp)
     end
