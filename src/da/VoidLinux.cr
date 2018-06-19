@@ -55,5 +55,10 @@ module DA
       DA.system! "sudo ln -s #{sv} #{service}"
     end # === def service
 
+    def upgrade
+      DA.system! "sudo xbps-install -Su"
+      DA.system! "sudo xbps-remove --yes --clean-cache --remove-orphans --verbose"
+    end # === def upgrade
+
   end # === module VoidLinux
 end # === module DA
