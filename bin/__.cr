@@ -17,6 +17,7 @@ if 0 == ARGV.size
 end
 
 full_cmd = ARGV.map(&.strip).join(" ")
+begin
 case
 
 when "-h --help help".split.includes?(ARGV.first)
@@ -77,6 +78,20 @@ when ARGV[0]? == "exec"
   cmd = args.shift
   DA.orange! "{{#{cmd}}} BOLD{{#{args.join ' '}}}"
   Process.exec(cmd, args)
+
+when ARGV[0..1].join(' ') == "crystal rg"
+  # === {{CMD}} crystal rg -args ...
+  # === Search the Crystal source code.
+  DA::Crystal.rg ARGV[2..-1]
+
+when ARGV[0..1].join(' ') == "crystal docs"
+  # === {{CMD}} crystal doc partial_path ...
+  # === Search the Crystal docs code.
+  DA::Crystal.docs ARGV[2]
+
+when ARGV[0..1].join(' ') == "crystal src"
+  # === {{CMD}} crystal src
+  DA::Crystal.src(ARGV[2])
 
 when full_cmd == "crystal install"
   # === {{CMD}} crystal install
@@ -222,4 +237,8 @@ else
   DA.exit! 1, "!!! Invalid arguments: #{ARGV.map(&.inspect).join " "}"
 
 end # case
+rescue e : DA::Exit
+  DA.red!(e.message || "Failure")
+  exit e.exit_code
+end
 

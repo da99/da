@@ -2,9 +2,86 @@
 require "http/client"
 
 module DA
+  def fzf(stuff : Array(String))
+    r, w = IO.pipe
+    stuff.each { |str|
+      w.puts str
+    }
+    results = IO::Memory.new
+    Process.run("fzf", "--reverse --no-hscroll --ansi --tabstop=2 -i".split, output: results, input: r, error: STDERR)
+    results.to_s.strip
+  end
+
   module Crystal
     BIN = "crystal"
     extend self
+
+    def docs_dir
+      "/progs/crystal/current/share/doc/crystal"
+    end
+
+    def src_dir
+      "/progs/crystal/current/share/crystal/src"
+    end
+
+    def rg(args : Array(String))
+      Dir.cd src_dir
+      if args.includes?("-l") || args.includes?("--files-with-matches")
+        files = DA.output("rg", args).strip
+        if files.empty?
+          DA.orange! "=== No files found."
+          return
+        else
+          file = DA.fzf(files.split('\n'))
+          if File.file?(file)
+            Process.exec("nvim", ["-R", file])
+          else
+            return
+          end
+        end
+      else
+        Process.exec("rg", args)
+      end
+      # realpath $PWD | grep -P 'crystal-[\d\.\-]+' --color=always
+    end # === def docs
+
+    def src(search : String)
+      Dir.cd DA::Crystal.src_dir
+      file = if File.file?(search)
+               search
+             else
+               "#{search}.cr"
+             end
+      Process.exec "nvim", ["-R",file]
+    end # def
+
+
+    def docs(path)
+      Dir.cd docs_dir
+      files = `find . -type f -ipath '*#{path}*'`.strip.split('\n').reject { |x| x.strip.empty? }
+      file = if files.size > 1
+               DA.success! "which fzf"
+               r, w = IO.pipe
+               files.each { |f|
+                 w.puts f
+               }
+               results = IO::Memory.new
+               Process.run("fzf", "--reverse --no-hscroll --ansi --tabstop=2 -i".split, output: results, input: r, error: STDERR)
+               results.to_s.strip
+             else
+               files.first
+             end
+
+      if File.file?(file)
+        Process.exec "xdg-open", [file]
+      end
+
+      puts Dir.current.inspect
+      puts file.inspect
+      puts File.expand_path(file).inspect
+      DA.exit! 1, "File not found: #{path} -> #{file}"
+      exit 1
+    end # def docs
 
     def crystal(args : Array(String))
       DA.system! "crystal", args
@@ -213,8 +290,10 @@ module DA
       Dir.mkdir_p "tmp/out"
 
       if File.exists?(bin)
-        mime = `file --mime #{bin}`.split[1].split("/").first?
-        if mime != "application"
+        raw = `file --mime #{bin}`.strip
+        mime = raw.split[1].split("/").first?
+        executable = raw[" executable, "]?
+        if mime != "application" && !executable
           DA.exit! " Non-binary file {{already exists}}: #{bin}"
         end
       end
