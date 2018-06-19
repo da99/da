@@ -3,9 +3,9 @@ module DA
 
   struct Cache
     DIR = if DA.is_development?
-            "/deploy/da_cache"
-          else
             "/tmp/da_cache"
+          else
+            "/deploy/da_cache"
           end
 
     getter prefix : String
