@@ -24,7 +24,29 @@ module DA
       "/progs/crystal/current/share/crystal/src"
     end
 
-    def rg(args : Array(String))
+    def src_file(partial : String)
+      if partial.strip.empty?
+        DA.exit! 1, "Empty search string: #{partial.inspect}"
+      end
+
+      Dir.cd "/progs/crystal/current/share"
+      files = `find . -type f -ipath '*#{partial}*'`.strip.split('\n').reject { |x| x.strip.empty? }
+      if files.empty?
+        DA.exit! "No files found for:  #{partial.inspect}"
+      end
+      file = if files.size > 1
+               DA.fzf(files)
+             else
+               files.first
+             end
+      if file[".html"]?
+        DA.success! "xdg-open", [file]
+      else
+        Process.exec "nvim", ["-R", file]
+      end
+    end # === def src_file
+
+    def src(args : Array(String))
       Dir.cd src_dir
       if args.includes?("-l") || args.includes?("--files-with-matches")
         files = DA.output("rg", args).strip
@@ -42,17 +64,6 @@ module DA
       else
         Process.exec("rg", args)
       end
-      # realpath $PWD | grep -P 'crystal-[\d\.\-]+' --color=always
-    end # === def docs
-
-    def src(search : String)
-      Dir.cd DA::Crystal.src_dir
-      file = if File.file?(search)
-               search
-             else
-               "#{search}.cr"
-             end
-      Process.exec "nvim", ["-R",file]
     end # def
 
 
