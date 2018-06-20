@@ -28,7 +28,7 @@ if in_spec?
 
     it "exits 0 returns the error" do
       result = run("assert_raises returns the error")
-      assert result.exit_code == 1
+      assert result.exit_code == 0
     end # === it "returns the error"
   }
 else

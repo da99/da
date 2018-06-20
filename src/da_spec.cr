@@ -5,6 +5,15 @@ require "terminal_table"
 module DA_SPEC
 
   @@pattern : String | Symbol | Regex | Nil = nil
+  @@run_count = 0
+
+  def self.run_count
+    @@run_count
+  end
+
+  def self.increate_run_count
+    @@run_count += 1
+  end
 
   def self.pattern
     @@pattern
@@ -97,6 +106,7 @@ module DA_SPEC
     end # === def print_fail
 
     def assert_raises(error_class, msg : Nil | String | Regex = nil)
+      DA_SPEC.increate_run_count
       describe.puts_header
       begin
         yield
@@ -152,6 +162,7 @@ module DA_SPEC
   end
 
   macro assert(func_call)
+    DA_SPEC.increate_run_count
     %origin   = {{func_call.stringify}}
     %a        = {{func_call.receiver}}
     %b        = {{func_call.args.first}}
@@ -171,4 +182,11 @@ module DA_SPEC
   end # === macro assert
 
 end # === module DA_SPEC
+
+at_exit {
+  if DA_SPEC.run_count == 0
+    STDERR.puts "!!! No assertions were run."
+    exit 1
+  end
+}
 

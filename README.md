@@ -13,8 +13,8 @@ Reference
 
   require "da_spec"
 
-  Describe.pattern "name of test"
-  Describe.pattern /name of test/
+  DA_Spec.pattern "name of test"
+  DA_Spec.pattern /name of test/
 
   extend DA_SPEC
 

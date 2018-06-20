@@ -10,6 +10,7 @@ class Result
 
   getter exit_code : Int32
   getter output : String
+
   def initialize(@exit_code, @output)
   end # === def initialize
 
@@ -33,7 +34,5 @@ if !in_spec?
 end
 
 require "./specs/*"
-
-
 
 
