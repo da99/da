@@ -144,8 +144,16 @@ module DA
       }
 
       spawn {
+        pattern = "tmp/out/run-*.txt"
+        Dir.glob(pattern).each { |f|
+          if File.file?(f)
+            DA.orange! "=== Ignoring previous file: #{File.read(f).split('\n').first?} (#{f})"
+            FileUtils.rm(f)
+          end
+        }
+
         loop {
-          Dir.glob("tmp/out/run-*.txt").each { |file|
+          Dir.glob(pattern).each { |file|
             next if !File.file?(file)
             kill_procs
             lines = File.read(file).split('\n')

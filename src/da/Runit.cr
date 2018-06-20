@@ -6,9 +6,23 @@ module DA
     # Struct:
     # =============================================================================
 
+    def self.find(dir : Runit)
+      Dir.cd(dir) {
+        raw = DA.output "find", ". -path */supervise* -prune -o -print".split)
+        return raw.strip.split('\n').reject(&.empty?).sort
+      }
+    end
+
     # =============================================================================
     # Instance:
     # =============================================================================
+
+    SCRIPTS = %w[
+      run
+      log/run
+      check
+      finish
+    ]
 
     getter name        : String
     getter sv_dir      : String
@@ -47,14 +61,20 @@ module DA
       end
     end
 
-    def linked?
-      service_dir? && File.exists?(sv_dir) && `realpath #{sv_dir}` == `realpath #{service_dir}`
-    end
+    def install!
+      obsolete = (Runit.find(service_dir) - Runit.find(sv_dir))
 
-    def link!
-      if sv_dir != service_dir && !linked?
-        DA.system!("sudo ln -sf #{sv_dir} #{service_dir}")
+      if !obsolete.empty?
+        raise DA::Exit.new(1, "Files in service dir, not in sv dir: #{obsolete.join ', '}")
       end
+
+      sudo = if File.info(File.dirname(service_dir)).owner != `id -u #{`whoami`.strip}`.strip.to_ui32
+               sudo = "sudo"
+             else
+               ""
+             end
+
+      "#{sudo} rsync --checksum --recursive --executability --human-readable --chmod=o-wX #{sv_dir}/ #{service_dir}/"
     end # === def install!
 
     # Checkes if service_dir exists

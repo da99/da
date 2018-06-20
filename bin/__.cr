@@ -88,7 +88,7 @@ when ARGV[0..1].join(' ') == "crystal docs"
 when ARGV[0..1].join(' ') == "crystal src"
   # === {{CMD}} crystal src -args to rg
   # === Search the Crystal source code using ripgrep (rg).
-  DA::Crystal.src(ARGV)
+  DA::Crystal.src(ARGV[2..-1])
 
 when ARGV[0..1].join(' ') == "crystal file"
   # === {{CMD}} crystal file search_path

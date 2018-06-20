@@ -153,8 +153,7 @@ module DA
 
     status = Process.run(*args, output: output, error: STDERR)
     if !success?(status)
-      DA.red! "!!! BOLD{{Failed}}: {{#{args.join ' '}}}"
-      exit! status
+      DA.exit! "!!! BOLD{{Failed}}: {{#{args.join ' '}}}"
     end
 
     output.rewind
