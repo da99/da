@@ -2,7 +2,7 @@
 module DA
 
   module File_System
-    class Exception < ::Exception
+    class Exception < ::DA::Exception
     end
   end
 

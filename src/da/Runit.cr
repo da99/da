@@ -2,7 +2,7 @@
 module DA
   struct Runit
 
-    class Exception < ::Exception
+    class Exception < ::DA::Exception
     end
 
     # =============================================================================

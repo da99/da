@@ -1,18 +1,19 @@
 
-require "./da/Process"
-_temp = DA.process_new("which", ["crystal"]).output.to_s.strip
-if !_temp.empty?
-  _dir = File.dirname(File.dirname(_temp))
+{%begin%}
+  %dir = "/progs/crystal/current"
   ENV["SHARDS_INSTALL_PATH"] = File.join(Dir.current, "/.shards/.install")
-  ENV["CRYSTAL_PATH"] = "#{_dir}/share/crystal/src:#{Dir.current}/.shards/.install"
-end
+  ENV["CRYSTAL_PATH"] = "#{%dir}/share/crystal/src:#{Dir.current}/.shards/.install"
+{%end%}
 
 require "file_utils"
 
 module DA
   extend self
+  class Exception < ::Exception
+  end
 end # === module DA
 
+require "./da/Process"
 require "./da/Inspect"
 require "./da/Crystal"
 require "./da/Dev"

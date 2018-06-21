@@ -21,7 +21,7 @@ module DA
 
   # =============================================================================
 
-  class Exit < Exception
+  class Exit < ::DA::Exception
     getter exit_code : Int32 = 2
 
     def initialize(@message)
