@@ -18,4 +18,20 @@ describe "Runit#install!" do
     }
   end # === it "copies files to service_dir"
 
+  it "does not create a sub-folder if already installed: service/name/name" do
+    reset_file_system {
+      name = "test_1"
+      Dir.mkdir_p "#{name}/log"
+      Dir.mkdir_p "service"
+      runit = DA::Runit.new(name, Dir.current, "#{Dir.current}/service")
+
+      runit.install!
+      runit.install!
+      runit.install!
+
+      assert File.exists?("service/#{name}") == true
+      assert File.exists?("service/#{name}/#{name}") == false
+    }
+  end # === it
+
 end # === desc "Runit#install!"
