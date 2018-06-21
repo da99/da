@@ -2,13 +2,31 @@
 module DA
   struct Runit
 
+    class Exception < ::Exception
+    end
+
     # =============================================================================
     # Struct:
     # =============================================================================
 
-    def self.find(dir : Runit)
+    def self.valid_name!(raw : String)
+      if !raw[/^[a-zA-Z0-9\-\.\_]+$/]?
+        raise Runit::Exception.new("Invalid service name: #{raw.inspect}")
+      end
+      raw
+    end # === def self.valid_name!
+
+    def self.resolved_path!(dir : String)
+      if dir.index('/') != 0
+        raise Runit::Exception.new("Real paths are required: #{dir}")
+      end
+      dir
+    end # === def self.real_path
+
+    def self.find(dir : String) : Array(String)
+      return [] of String if !File.exists?(dir)
       Dir.cd(dir) {
-        raw = DA.output "find", ". -path */supervise* -prune -o -print".split)
+        raw = DA.output("find", ". -path */supervise* -prune -o -print".split)
         return raw.strip.split('\n').reject(&.empty?).sort
       }
     end
@@ -30,51 +48,54 @@ module DA
 
     @pids : Array(Int32) = [] of Int32
 
-    def initialize(@name)
-      @sv_dir = case
-                when DA.is_test?
-                  "/tmp/specs_deploy/etc/sv/#{@name}"
-                else
-                  "/etc/sv/#{@name}"
-                end
-
-      @service_dir = case
-                     when DA.is_test?
-                       File.join("/tmp/specs_deploy/var/service", @name)
-                     else
-                       File.join("/var/service", @name)
-                     end
+    def initialize(raw_name)
+      @name        = self.class.valid_name!(raw_name)
+      @sv_dir      = "/etc/sv/#{@name}"
+      @service_dir = "/var/service/#{@name}"
     end # === def initialize(name : String)
 
-    def initialize(@name, @sv_dir, @service_dir)
+    def initialize(raw_name, raw_sv, raw_service)
+      @name        = self.class.valid_name!(raw_name)
+      @sv_dir      = File.join Runit.resolved_path!(raw_sv), @name
+      @service_dir = File.join Runit.resolved_path!(raw_service), @name
     end # === def initialize(name : String)
 
     def remove!
-      if service_dir?
-        if pids.size > 1
-          DA.orange! "=== {{Found multiple pids}}: #{pids.join ", "}"
-        else
-          DA.orange! "=== {{PIDS}}: #{pids.join ", "} ==="
-        end
-        DA.system! "sudo rm -f #{service_dir}"
-        wait_pids
+      if !File.exists?(service_dir?)
+        return
       end
+
+      if pids.size > 1
+        DA.orange! "=== {{Found multiple pids}}: #{pids.join ", "}"
+      else
+        DA.orange! "=== {{PIDS}}: #{pids.join ", "} ==="
+      end
+
+      cmd = "rm -r #{service_dir}"
+      if !DA.success?(cmd)
+        DA.success! "sudo #{cmd}"
+      end
+
+      wait_pids
     end
+
+    # Creates a link from sv dir to service dir.
+    def link!
+      DA.symlink!(sv_dir, service_dir)
+    end # def link!
 
     def install!
       obsolete = (Runit.find(service_dir) - Runit.find(sv_dir))
 
       if !obsolete.empty?
-        raise DA::Exit.new(1, "Files in service dir, not in sv dir: #{obsolete.join ', '}")
+        raise DA::Exit.new(1, "Files in service dir, not in sv dir: #{obsolete.join ", "}")
       end
 
-      sudo = if File.info(File.dirname(service_dir)).owner != `id -u #{`whoami`.strip}`.strip.to_ui32
-               sudo = "sudo"
-             else
-               ""
-             end
-
-      "#{sudo} rsync --checksum --recursive --executability --human-readable --chmod=o-wX #{sv_dir}/ #{service_dir}/"
+      # Trailing slash tip : http://qdosmsq.dunbar-it.co.uk/blog/2013/02/rsync-to-slash-or-not-to-slash/
+      cmd = "rsync --checksum --recursive --executability --human-readable --chmod=o-wX #{sv_dir}/ #{service_dir}"
+      if !DA.success?(cmd)
+        DA.success! "sudo #{cmd}"
+      end
     end # === def install!
 
     # Checkes if service_dir exists

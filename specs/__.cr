@@ -6,6 +6,11 @@ require "da_spec"
 
 extend DA_SPEC
 
+if !ARGV.empty?
+  DA_SPEC.pattern /#{ARGV.join ' '}/
+  DA.orange! "=== {{Pattern}}: #{DA_SPEC.pattern.inspect}"
+end
+
 def reset_file_system
   `rm -rf   /tmp/specs_deploy`
   `mkdir -p /tmp/specs_deploy/var/service`
@@ -23,4 +28,6 @@ require "./App"
 require "./Git"
 require "./Process"
 require "./File_System"
+require "./Runit.install"
+require "./Runit.link"
 

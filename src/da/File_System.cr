@@ -1,6 +1,11 @@
 
 module DA
 
+  module File_System
+    class Exception < ::Exception
+    end
+  end
+
   def is_development?
     ENV["IS_DEVELOPMENT"]? || ENV["IS_DEV"]?
   end # === def is_development?
@@ -12,6 +17,7 @@ module DA
   def text_file?(s : String)
     File.exists?(s) && `file --mime #{s}`["text/plain"]?
   end
+
 
   def public_dir?(raw : String)
     public_dir = temp = File.expand_path(raw)
@@ -26,29 +32,29 @@ module DA
     true
   end # === def public_dir_permissions
 
-  def symlink?(target : String)
-    File.info(target, follow_symlinks: false).symlink?
-  end
-
-  def link_symbolic!(original, target)
+  def symlink!(original, target)
     if !File.exists?(original)
-      DA.exit! "Symbolic link origin does not exist: #{original}"
+      raise File_System::Exception.new "Symbolic link origin does not exist: #{original}"
     end
 
-    if File.exists?(target) && !DA.symlink?(target)
-        DA.exit! "Symbolic link target already exists: #{target}"
+    if File.symlink?(target) && !File.exists?(target)
+      DA.orange! "Link exists, but is broken: #{target} -> #{File.real_path target}"
     end
 
-    if File.exists?(original) && File.exists?(target) && `realpath #{original}` == `realpath #{target}`
+    if File.exists?(target) && !File.symlink?(target)
+      raise File_System::Exception.new("Symbolic link target already exists: #{target}")
+    end
+
+    if File.symlink?(target) && File.real_path(original) == File.real_path(target)
       DA.orange! "=== Already linked: #{original} -> #{target}"
       return true
     end
 
-    cmd = "ln -s -f --no-dereference"
-    return true if DA.success?(DA.run("#{cmd} #{original} #{target}"))
+    cmd = "ln -s -f --no-dereference #{original} #{target}"
+    return true if DA.success?(cmd)
 
-    DA.system!("sudo #{cmd} #{original} #{target}")
+    DA.system!("sudo #{cmd}")
     true
-  end # === def link_symbolic
+  end # === def symlink!
 
 end # === module DA

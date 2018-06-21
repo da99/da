@@ -26,7 +26,7 @@ module DA
 
     def current!(app : App)
       latest = Release.latest(app)
-      DA.link_symbolic! app.current, latest
+      DA.symlink! app.current, latest
     end # === def current!
 
     def public(app_name : String)

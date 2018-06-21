@@ -53,7 +53,7 @@ module DA
     def current!
       latest = Release.latest(self)
       if latest
-        DA.link_symbolic! latest, current
+        DA.symlink! latest, current
         return true
       else
         DA.exit! "!!! Latest release for #{name} not found."
