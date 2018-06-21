@@ -37,9 +37,7 @@ module DA
       if sv.any_pids_up?
         DA.exit!("!!! Pids still up for #{name}: #{sv.pids_up.join ", "}")
       end
-      if sv.linked?
-        DA.system!("sudo rm -f #{sv.service_dir}")
-      end
+      sv.remove!
     end # === def remove
 
     def dir(*args)

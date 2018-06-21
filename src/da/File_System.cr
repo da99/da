@@ -38,14 +38,14 @@ module DA
     end
 
     if File.symlink?(target) && !File.exists?(target)
-      DA.orange! "Link exists, but is broken: #{target} -> #{File.real_path target}"
+      DA.orange!("Link exists, but is broken: #{target}")
     end
 
     if File.exists?(target) && !File.symlink?(target)
       raise File_System::Exception.new("Symbolic link target already exists: #{target}")
     end
 
-    if File.symlink?(target) && File.real_path(original) == File.real_path(target)
+    if File.symlink?(target) && File.exists?(target) && File.real_path(original) == File.real_path(target)
       DA.orange! "=== Already linked: #{original} -> #{target}"
       return true
     end

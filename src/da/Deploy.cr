@@ -116,7 +116,7 @@ module DA
 
       "3 4 5 6".split.each { |x|
         service = Runit.new("agetty-tty#{x}")
-        service.remove! if service.service_dir?
+        service.remove! if File.symlink?(service.service_dir)
       }
 
       init_ssh

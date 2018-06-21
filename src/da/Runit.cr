@@ -61,7 +61,7 @@ module DA
     end # === def initialize(name : String)
 
     def remove!
-      if !File.exists?(service_dir?)
+      if !File.exists?(service_dir)
         return
       end
 
@@ -97,11 +97,6 @@ module DA
         DA.success! "sudo #{cmd}"
       end
     end # === def install!
-
-    # Checkes if service_dir exists
-    def service_dir?
-      File.exists?(service_dir)
-    end
 
     {% for x in "run down exit".split %}
       def {{x.id}}?
