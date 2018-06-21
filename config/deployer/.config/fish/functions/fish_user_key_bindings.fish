@@ -4,14 +4,16 @@ function fish_user_key_bindings
   #
 
   # Ctrl-{h,j,k,l}
-  bind \ch backward-word
   bind \cj down-or-search
   bind \ck up-or-search
-  bind \cl da_forward
+  bind \e\ch backward-word
+  bind \e\cl da_forward
 
   # Ctrl-Alt-{h,l}
   # bind \e\ch backward-char
-  bind \e\cl forward-char
+  #
+  bind \b beginning-of-line
+  bind \cl end-of-line
 
   bind --erase \cd
   bind \cw kill-word
