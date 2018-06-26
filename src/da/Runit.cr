@@ -32,6 +32,13 @@ module DA
       dir
     end # === def self.real_path
 
+    def self.directory!(dir : String)
+      if !File.directory?(dir)
+        raise Runit::Exception.new("Directory does not exist: #{dir}")
+      end
+      dir
+    end # === def
+
     def self.find(dir : String) : Array(String)
       return [] of String if !File.exists?(dir)
       Dir.cd(dir) {
@@ -88,6 +95,9 @@ module DA
     end # def link!
 
     def install!
+      Runit.directory! sv_dir
+      Runit.directory! File.dirname(service_dir)
+
       obsolete = (Runit.find(service_dir) - Runit.find(sv_dir))
 
       if !obsolete.empty?
