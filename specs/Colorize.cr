@@ -25,6 +25,14 @@ describe ".orange" do
 
 end # === desc ".red"
 
+describe ".orange! exception" do
+  it "prints a backtrace" do
+    e = Exception.new("random error")
+    actual = DA.orange! e
+    assert actual == e
+  end # === it
+end # === desc ".orange! exception"
+
 describe ".green" do
 
   it "uses a bold, green color" do

@@ -53,7 +53,22 @@ module DA
       colorize(raw, :yellow)
     end
 
-    def orange!(*args)
+    def orange!(e : ::Exception)
+      msg = e.message
+      if msg
+        DA.orange! "#{e.class}: #{msg}"
+      else
+        DA.orange! "#{e.class}: #{msg.inspect}"
+      end
+      if e.backtrace?
+        e.backtrace.each { |l|
+          DA.orange! l.to_s
+        }
+      end
+      e
+    end # === def
+
+    def orange!(*args : String)
       if STDERR.tty?
         STDERR.puts orange(*args)
       else
