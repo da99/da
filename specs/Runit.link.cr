@@ -45,4 +45,32 @@ describe "Runit#link!" do
     }
   end # === it
 
+  it "raises DA::Runit::Exception if sv dir does not exist" do
+    reset_file_system {
+      name = "name_3"
+      Dir.mkdir_p "service/#{name}"
+      r = DA::Runit.new(name, sv: "#{Dir.current}/sv", service: "#{Dir.current}/service/#{name}")
+      e = assert_raises(DA::Runit::Exception) {
+        r.link!
+      }
+      actual = e.message || ""
+      msg = "#{Dir.current}/sv/#{name}"
+      assert actual[msg]? == msg
+    }
+  end # === it
+
+  it "raises DA::Runit::Exception if parent service dir does not exist" do
+    reset_file_system {
+      name = "name_3"
+      Dir.mkdir_p "sv/#{name}"
+      r = DA::Runit.new(name, sv: "#{Dir.current}/sv", service: "#{Dir.current}/service/#{name}")
+      e = assert_raises(DA::Runit::Exception) {
+        r.link!
+      }
+      actual = e.message || ""
+      msg = "#{Dir.current}/service"
+      assert actual[msg]? == msg
+    }
+  end # === it
+
 end # === desc "Runit#link!"

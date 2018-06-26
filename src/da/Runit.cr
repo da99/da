@@ -91,6 +91,8 @@ module DA
 
     # Creates a link from sv dir to service dir.
     def link!
+      Runit.directory! sv_dir
+      Runit.directory! File.dirname(service_dir)
       DA.symlink!(sv_dir, service_dir)
     end # def link!
 
