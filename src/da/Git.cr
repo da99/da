@@ -4,6 +4,22 @@ module DA
   module Git
     extend self
 
+    def commit(args : Array(String))
+      if clean?
+        raise DA::Exit.new(1, "Nothing to commit. Directory is clean: #{Dir.current}")
+      end
+
+      if !File.directory?(".git")
+        raise DA::Exit.new(1, "Not a git directory: #{Dir.current}")
+      end
+
+      if File.exists?("bin/__.cr")
+        DA::Crystal.bin_compile
+      end
+      DA.success! "git add bin/#{File.basename Dir.current}"
+      DA.success! "git", ["commit"].concat(args)
+    end
+
     # This is a hacky implementation, but so far it works for me.
     def clean?
       status = `git status`.strip

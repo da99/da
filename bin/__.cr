@@ -49,6 +49,11 @@ when full_cmd == "development checkpoint"
   # === {{CMD}} development checkpoint
   DA::Git.development_checkpoint
 
+when full_cmd[/commit .+/]?
+  # === {{CMD}} commit ...args
+  ARGV.shift
+  DA::Git.commit ARGV
+
 when full_cmd == "watch"
   # === {{CMD}} watch
   DA::Dev.watch
