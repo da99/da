@@ -16,8 +16,8 @@ module DA
       if File.exists?("bin/__.cr")
         DA::Crystal.bin_compile
       end
-      DA.success! "git add bin/#{File.basename Dir.current}"
-      DA.success! "git", ["commit"].concat(args)
+      DA.system! "git add bin/#{File.basename Dir.current}"
+      DA.system! "git", ["commit"].concat(args)
     end
 
     # This is a hacky implementation, but so far it works for me.
