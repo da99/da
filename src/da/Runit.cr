@@ -16,10 +16,19 @@ module DA
       raw
     end # === def self.valid_name!
 
-    def self.resolved_path!(dir : String)
+    def self.resolved_path!(dir : String, name : String)
       if dir.index('/') != 0
         raise Runit::Exception.new("Real paths are required: #{dir}")
       end
+
+      if File.basename(dir) != name
+        dir = File.join(dir, name)
+      end
+
+      if !dir[/^\/[a-zA-Z\d\_\-\.\/]+$/]?
+        raise Runit::Exception.new("Invalid name for directory: #{dir.inspect}")
+      end
+
       dir
     end # === def self.real_path
 
@@ -48,16 +57,10 @@ module DA
 
     @pids : Array(Int32) = [] of Int32
 
-    def initialize(raw_name)
+    def initialize(raw_name : String, sv : String = "/etc/sv", service : String = "/var/service")
       @name        = self.class.valid_name!(raw_name)
-      @sv_dir      = "/etc/sv/#{@name}"
-      @service_dir = "/var/service/#{@name}"
-    end # === def initialize(name : String)
-
-    def initialize(raw_name, raw_sv, raw_service)
-      @name        = self.class.valid_name!(raw_name)
-      @sv_dir      = File.join Runit.resolved_path!(raw_sv), @name
-      @service_dir = File.join Runit.resolved_path!(raw_service), @name
+      @sv_dir      = Runit.resolved_path!(sv, name)
+      @service_dir = Runit.resolved_path!(service, name)
     end # === def initialize(name : String)
 
     def remove!

@@ -28,6 +28,7 @@ require "./App"
 require "./Git"
 require "./Process"
 require "./File_System"
+require "./Runit"
 require "./Runit.install"
 require "./Runit.link"
 
