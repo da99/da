@@ -92,7 +92,7 @@ module DA
       end
 
       # Trailing slash tip : http://qdosmsq.dunbar-it.co.uk/blog/2013/02/rsync-to-slash-or-not-to-slash/
-      cmd = "rsync --checksum --recursive --executability --human-readable --chmod=o-wX #{sv_dir}/ #{service_dir}"
+      cmd = "rsync --checksum --verbose --recursive --executability --human-readable --chmod=o-wX #{sv_dir}/ #{service_dir}"
       if !DA.success?(cmd)
         DA.success! "sudo #{cmd}"
       end
