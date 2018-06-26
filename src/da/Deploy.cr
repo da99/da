@@ -89,7 +89,7 @@ module DA
     def init
       user = ENV["USER"]
 
-      if DA.is_development?
+      if DA.development?
         STDERR.puts "!!! Not a production machine."
         Process.exit 1
       end

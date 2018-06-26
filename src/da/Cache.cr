@@ -2,7 +2,7 @@
 module DA
 
   struct Cache
-    DIR = if DA.is_development?
+    DIR = if DA.development?
             "/tmp/da_cache"
           else
             "/deploy/da_cache"

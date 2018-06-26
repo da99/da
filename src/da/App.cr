@@ -23,7 +23,7 @@ module DA
       @dir = case
              when DA.is_test?
                File.join("/tmp/specs_deploy", @name)
-             when DA.is_development?
+             when DA.development?
                File.join("/apps", @name)
              else
                File.join("/deploy", @name)

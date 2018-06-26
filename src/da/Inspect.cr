@@ -2,7 +2,7 @@
 module DA
 
   def inspect!(*args)
-    if is_development?
+    if development?
       STDERR.puts args.map(&.inspect).join(", ")
       return true
     end
