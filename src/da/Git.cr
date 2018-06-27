@@ -4,6 +4,10 @@ module DA
   module Git
     extend self
 
+    def commit_pending?
+      !DA.output!("git status")["nothing to commit, working tree clean"]?
+    end # def
+
     def commit(args : Array(String))
       if clean?
         raise DA::Exit.new(1, "Nothing to commit. Directory is clean: #{Dir.current}")

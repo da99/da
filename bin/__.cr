@@ -45,6 +45,14 @@ when full_cmd == "status"
   # === {{CMD}} status
   DA::Git.status
 
+when full_cmd == "commit pending"
+  # === {{CMD}} commit pending
+  if DA::Git.commit_pending?
+    exit 0
+  else
+    exit 1
+  end
+
 when full_cmd == "development checkpoint"
   # === {{CMD}} development checkpoint
   DA::Git.development_checkpoint
