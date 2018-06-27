@@ -1,6 +1,10 @@
 
 module DA
 
+  # This is meant to be used on desktop/clients.
+  # For security reasons, don't use on servers,
+  #   because then you have to deal with file permissions
+  #   between processes.
   struct Cache
     DIR = if DA.development?
             "/tmp/da_cache"
