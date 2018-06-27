@@ -100,12 +100,6 @@ module DA
       Runit.directory! sv_dir
       Runit.directory! File.dirname(service_dir)
 
-      obsolete = (Runit.find(service_dir) - Runit.find(sv_dir))
-
-      if !obsolete.empty?
-        raise DA::Exit.new(1, "Files in service dir, not in sv dir: #{obsolete.join ", "}")
-      end
-
       # Trailing slash tip : http://qdosmsq.dunbar-it.co.uk/blog/2013/02/rsync-to-slash-or-not-to-slash/
       cmd = "rsync --checksum --verbose --recursive --executability --human-readable --chmod=o-wX #{sv_dir}/ #{service_dir}"
       if !DA.success?(cmd)
