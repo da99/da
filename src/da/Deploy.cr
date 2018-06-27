@@ -51,38 +51,38 @@ module DA
 
     def sv(app_name : String)
       sv = Runit.new(app_name)
-      Dir.cd(sv.app_dir)
-
-      if !sv.latest?
-        DA.orange!("=== No service found for: {{#{sv.name}}}")
-        return false
-      end
-
-      useradd_system("www-#{sv.name}")
-
-      if sv.latest_linked?
-        DA.orange! "=== Already installed: #{sv.service_link} -> #{`realpath #{sv.service_link}`}"
-        return false
-      end
-
-      if sv.linked?
-        sv.down! if sv.run?
-        sv.wait_pids
-        if sv.any_pids_up?
-          DA.exit!("!!! Pids still up for #{sv.name}: #{sv.pids_up}")
+      Dir.cd(sv.app_dir) {
+        if !sv.latest?
+          DA.orange!("=== No service found for: {{#{sv.name}}}")
+          return false
         end
-        DA.system!("sudo rm -f #{sv.service_link}")
-      end
 
-      sv.link!
+        useradd_system("www-#{sv.name}")
 
-      new_service = Runit.new(sv.name)
-      sleep 5
-      wait(5) { new_service.run?  }
-      puts Runit.status(new_service.service_link)
-      if !new_service.run?
-        Process.exit 1
-      end
+        if sv.latest_linked?
+          DA.orange! "=== Already installed: #{sv.service_link} -> #{`realpath #{sv.service_link}`}"
+          return false
+        end
+
+        if sv.linked?
+          sv.down! if sv.run?
+          sv.wait_pids
+          if sv.any_pids_up?
+            DA.exit!("!!! Pids still up for #{sv.name}: #{sv.pids_up}")
+          end
+          DA.system!("sudo rm -f #{sv.service_link}")
+        end
+
+        sv.link!
+
+        new_service = Runit.new(sv.name)
+        sleep 5
+        wait(5) { new_service.run?  }
+        puts Runit.status(new_service.service_link)
+        if !new_service.run?
+          Process.exit 1
+        end
+      } # Dir.cd
     end # === def deploy_public
 
     # Run this on the remote server you want to setup.
@@ -168,9 +168,9 @@ module DA
       app_dir = File.join(
         File.dirname(File.dirname(bin_path))
       )
-      Dir.cd(app_dir)
-      Dir.cd("config/deployer/")
-      DA.system!("rsync -v -e ssh --relative --recursive .config/fish #{server_name}:/home/deployer/")
+      Dir.cd(File.join app_dir, "config/deployer/") {
+        DA.system!("rsync -v -e ssh --relative --recursive .config/fish #{server_name}:/home/deployer/")
+      }
     end # === def upload_shell_config
 
     # Push the bin/da_deploy binary to /tmp on the remote server
