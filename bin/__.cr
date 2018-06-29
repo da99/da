@@ -255,6 +255,15 @@ when "#{ARGV[0]?} #{ARGV[1]?} #{ARGV[2]?}" == "upload commit to"
   # === {{CMD}} upload commit to remote_name
   DA::Deploy.upload_commit_to_remote ARGV[3]
 
+when full_cmd[/^psql .*\-f.+$/]?
+  # === {{CMD}} psql ... -f|--file=...
+  args = ARGV.clone
+  args.shift
+  DA.psql args
+
+when full_cmd[/^pg migrate .+/]?
+  # === {{CMD}} pg migrate [args to psql --] dir
+  DA.pg_migrate ARGV[2..-1]
 
 else
   DA.exit! 1, "!!! Invalid arguments: #{ARGV.map(&.inspect).join " "}"
