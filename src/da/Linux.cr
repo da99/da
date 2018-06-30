@@ -6,7 +6,7 @@ module DA
     def useradd_system(user : String)
       id = `id -u #{user}`.strip
       if id.empty?
-        DA.system!("sudo useradd --system #{user}")
+        DA.system!("sudo useradd --shell /bin/no-login --no-create-home --system #{user}")
       else
         DA.orange! "=== User already exists: #{user}"
       end

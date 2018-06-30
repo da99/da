@@ -40,16 +40,16 @@ module DA
              [] of String
            end
 
-    dirs.each { |dir|
+    dirs.map { |dir|
       raise DA::Exit.new(1, "Directory not found: #{dir.inspect}") if !File.directory?(dir)
-      Dir.glob(File.join dir, "*.sql").sort.each { |f|
-        contents = File.read(f)
-        if File.read(f)[PGSQL_SEPARATOR]?
+      Dir.glob(File.join dir, "*.sql").sort
+    }.flatten.sort { |a, b| File.basename(a) <=> File.basename(b) }.each { |f|
+      contents = File.read(f)
+      if File.read(f)[PGSQL_SEPARATOR]?
           psql(([] of String).concat(psql_args).concat(["-f", f]))
-        else
-          DA.system! "psql", psql_default_args.concat(psql_args).concat(["-f", f])
-        end
-      }
+      else
+        DA.system! "psql", psql_default_args.concat(psql_args).concat(["-f", f])
+      end
     }
   end # === def
 

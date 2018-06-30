@@ -92,6 +92,10 @@ when ARGV[0]? == "exec"
   DA.orange! "{{#{cmd}}} BOLD{{#{args.join ' '}}}"
   Process.exec(cmd, args)
 
+# =============================================================================
+when full_cmd[/void install .+/]?
+  # === {{CMD}} void install ...packages...
+  DA::VoidLinux.install ARGV[2..-1]
 
 when ARGV[0..1].join(' ') == "crystal docs"
   # === {{CMD}} crystal doc partial_path ...
@@ -202,6 +206,13 @@ when "#{ARGV[0]?} #{ARGV[1]?}" == "deploy Public" && ARGV[2]?
 when full_cmd["upload shell config to "]?
   # === {{CMD}} upload shell config to app_name
   DA::Deploy.upload_shell_config_to(ARGV.last)
+
+# =============================================================================
+# Linux:
+# =============================================================================
+when full_cmd[/^create system user .+$/]?
+  # === {{CMD}} create system user ...
+  DA::Linux.useradd_system(ARGV.last)
 
 # =============================================================================
 # Void Linux:
