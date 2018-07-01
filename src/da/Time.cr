@@ -69,8 +69,10 @@ module DA
     words << "1 min." if mins == 1
     words << "#{mins} mins." if mins > 1
 
-    words << "1 sec." if secs == 1
-    words << "#{secs} secs." if secs > 1
+    if days == hrs == mins == 0
+      words << "1 sec." if secs == 1
+      words << "#{secs} secs." if secs > 1
+    end
 
     words
   end # === def
