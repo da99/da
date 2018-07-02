@@ -4,6 +4,10 @@ ENV["IS_TEST"] = "yes"
 require "../src/da"
 require "da_spec"
 
+# the da binary needs to be up-to-date for certain specs,
+#   like "da is dev"
+DA::Crystal.bin_compile
+
 extend DA_SPEC
 
 if !ARGV.empty?
