@@ -7,7 +7,7 @@ module DA
   end
 
   def development?
-    ENV["IS_DEVELOPMENT"]? || ENV["IS_DEV"]?
+    !(ENV["IS_DEVELOPMENT"]? || ENV["IS_DEV"]? || "").empty?
   end # === def
 
   def is_test?

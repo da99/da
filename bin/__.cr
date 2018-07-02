@@ -75,6 +75,14 @@ when ARGV[0..2].join(' ') == "specs compile run"
 
 # === File_System =============================================================
 
+when ["is development", "is dev"].includes?(full_cmd)
+  # === {{CMD}} is development
+  if DA.development?
+    exit 0
+  else
+    exit 1
+  end
+
 when ARGV[0..1].join(' ') == "link symbolic!" && ARGV[2]? && ARGV[3]? && !ARGV[4]?
   # === {{CMD}} link symbolic
   DA.symlink!(ARGV[2], ARGV[3])
