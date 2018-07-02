@@ -113,11 +113,16 @@ module DA
 
   def system!(cmd : String, args : Array(String))
     if STDOUT.tty?
-      orange!("=== {{Running}}: BOLD{{#{cmd}}} #{args.join ' '}")
+      orange!("=== {{Running}}: BOLD{{#{cmd}}} #{args.map(&.inspect).join ' '}")
     end
 
-    system(cmd, args)
-    success! $?
+    success! Process.run(
+      cmd,
+      args,
+      input: Process::Redirect::Inherit,
+      output: Process::Redirect::Inherit,
+      error: Process::Redirect::Inherit
+    )
   end
 
   # =============================================================================

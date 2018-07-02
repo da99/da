@@ -11,6 +11,10 @@ module DA
 
     psql_args = args
 
+    if dirs.empty?
+      raise DA::Exit.new(1, "No valid dirs found at the end of argument list: #{args.join ' '}")
+    end # if
+
     dirs.map { |dir|
       raise DA::Exit.new(1, "Directory not found: #{dir.inspect}") if !File.directory?(dir)
       Dir.glob(File.join dir, "*.sql").sort
@@ -35,18 +39,28 @@ module DA
     run        = blocks.run
     always_run = blocks.always_run
 
-    if condition && run
-      result = DA.output!("psql", final_args + ["-c", condition]).strip
-      if result.to_i != 0
-        DA.orange! "=== {{Skipping}}: #{file} (#{result})"
-      else
-        DA.system!("psql", final_args + ["-c", run])
-      end
-    end # if condition
+    temp_file = "/tmp/#{Time.now.epoch}.#{File.basename(file)}.sql"
 
-    if always_run
-      DA.system!("psql", final_args + ["-c", always_run])
+    begin
+      if condition && run
+        File.write(temp_file, condition)
+        result = DA.output!("psql", final_args + ["-f", temp_file]).strip
+        if result.to_i != 0
+          DA.orange! "=== {{Skipping}}: #{file} (#{result})"
+        else
+          File.write(temp_file, run)
+          DA.system!("psql", final_args + ["-f", temp_file])
+        end
+      end # if condition
+
+      if always_run
+        File.write(temp_file, always_run)
+        DA.system!("psql", final_args + ["-f", temp_file])
+      end
+    ensure
+      FileUtils.rm(temp_file) if File.exists?(temp_file)
     end
+
   end # === def
 
 end # === module DA
