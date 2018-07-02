@@ -3,96 +3,49 @@ module DA
 
   PGSQL_SEPARATOR = /\n\s*\#\s*\-+\n/
 
-  def psql_default_args
-    %w[
-      --dbname=template1
-      --tuples-only
-      --no-align
-      --set ON_ERROR_STOP=on
-      --set AUTOCOMMIT=off
-    ]
-  end # === def
-
   def pg_migrate(args : Array(String))
-    head = [] of String
-    tail = [] of String
-    dashes_found = false
-    args.each { |x|
-      case
-      when x == "--"
-        dashes_found = true
-      when dashes_found
-        tail.push x
-      else
-        head.push x
-      end
-    }
+    dirs = [] of String
+    while args.last? && File.directory?(args.last?.not_nil!)
+      dirs.unshift args.pop
+    end # while
 
-    dirs = if dashes_found
-             tail
-           else
-             head
-           end
-
-    psql_args = if dashes_found
-             head
-           else
-             [] of String
-           end
+    psql_args = args
 
     dirs.map { |dir|
       raise DA::Exit.new(1, "Directory not found: #{dir.inspect}") if !File.directory?(dir)
       Dir.glob(File.join dir, "*.sql").sort
     }.flatten.sort { |a, b| File.basename(a) <=> File.basename(b) }.each { |f|
       contents = File.read(f)
-      if File.read(f)[PGSQL_SEPARATOR]?
-          psql(([] of String).concat(psql_args).concat(["-f", f]))
-      else
-        DA.system! "psql", psql_default_args.concat(psql_args).concat(["-f", f])
-      end
+      psql(psql_args, f)
     }
   end # === def
 
-  def psql(args : Array(String))
-    file_found = false
-    file = nil
-    args = args.map { |x|
-      case
-      when x == "-f"
-        file_found = true
-        nil
-      when x["--file="]?
-        file = x.sub("--file=", "")
-        nil
-      when file_found
-        file = x
-        nil
+  def psql(args : Array(String), file : String)
+    final_args = %w[
+      --dbname=template1
+      --tuples-only
+      --no-align
+      --set ON_ERROR_STOP=on
+      --set AUTOCOMMIT=off
+    ].concat(args)
+
+    blocks = DA::SQL_Sections.new( File.read(file) )
+
+    condition  = blocks.condition
+    run        = blocks.run
+    always_run = blocks.always_run
+
+    if condition && run
+      result = DA.output!("psql", final_args + ["-c", condition]).strip
+      if result.to_i != 0
+        DA.orange! "=== {{Skipping}}: #{file} (#{result})"
       else
-        x
+        DA.system!("psql", final_args + ["-c", run])
       end
-    }.compact
+    end # if condition
 
-    final_args = psql_default_args.concat(args)
-    if !file
-      raise DA::Exit.new(1, "File not found.")
-    end
-
-    if !File.exists?(file)
-      raise DA::Exit.new(1, "File does not exist: #{file.inspect}")
-    end
-
-    blocks = File.read(file).split(PGSQL_SEPARATOR)
-    if blocks.size != 2
-      raise DA::Exit.new(1, "Invalid number of blocks in file, #{file}: #{blocks.size}")
-    end
-
-    cond = blocks.first
-    sql = blocks.last
-    result = DA.output!("psql", final_args + ["-c", cond]).strip
-    if result == "1"
-      DA.orange! "=== {{Skipping}}: #{file}"
-    else
-      DA.system!("psql", final_args + ["-c", sql])
+    if always_run
+      DA.system!("psql", final_args + ["-c", always_run])
     end
   end # === def
 

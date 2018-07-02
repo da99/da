@@ -2,90 +2,152 @@
 require "colorize"
 
 module DA
-    PATTERN = /\{\{([^\}]+)\}\}/
-    BOLD_PATTERN = /BOLD{{([^\}]+)}}/
-
-    def highlight_exception(e : Exception) : String
-      msg = e.message || "[#{e.class}]"
-      msg = msg.sub(/[^\:]+\: /) { |x| "{{#{x.sub(": ", "")}}}: " }
-      "!!! #{msg}"
+  module SQL
+    class Exception < Exception
     end
+  end # === module SQL
 
-    def bold(raw : String)
-      raw.gsub(PATTERN) { |raw, match|
-        match.captures.first.not_nil!.colorize.mode(:bold)
-      }.gsub(BOLD_PATTERN) { |raw, match|
-        match.captures.first.not_nil!.colorize.mode(:bold)
+  PATTERN = /\{\{([^\}]+)\}\}/
+  BOLD_PATTERN = /BOLD{{([^\}]+)}}/
+
+  def highlight_exception(e : Exception) : String
+    msg = e.message || "[#{e.class}]"
+    msg = msg.sub(/[^\:]+\: /) { |x| "{{#{x.sub(": ", "")}}}: " }
+    "!!! #{msg}"
+  end
+
+  def bold(raw : String)
+    raw.gsub(PATTERN) { |raw, match|
+      match.captures.first.not_nil!.colorize.mode(:bold)
+    }.gsub(BOLD_PATTERN) { |raw, match|
+      match.captures.first.not_nil!.colorize.mode(:bold)
+    }
+  end
+
+  def bold!(*args)
+    if STDOUT.tty?
+      STDOUT.puts bold(*args)
+    else
+      STDOUT.puts *args
+    end
+  end # === def bold!
+
+  def colorize(raw : String, color : Symbol)
+    raw
+      .gsub(BOLD_PATTERN) { |raw, match|
+      match.captures.first.not_nil!.colorize.mode(:bold)
+    }
+      .gsub(PATTERN) { |raw, match|
+      match.captures.first.not_nil!.colorize.fore(color).mode(:bold)
+    }
+  end
+
+  def red(raw : String)
+    colorize(raw, :red)
+  end
+
+  def red!(*args)
+    if STDERR.tty?
+      STDERR.puts red(*args)
+    else
+      STDERR.puts(*args)
+    end
+  end
+
+  def orange(raw : String)
+    colorize(raw, :yellow)
+  end
+
+  def orange!(e : ::Exception)
+    msg = e.message
+    if msg
+      DA.orange! "#{e.class}: #{msg}"
+    else
+      DA.orange! "#{e.class}: #{msg.inspect}"
+    end
+    if e.backtrace?
+      e.backtrace.each { |l|
+        DA.orange! l.to_s
       }
     end
+    e
+  end # === def
 
-    def bold!(*args)
-      if STDOUT.tty?
-        STDOUT.puts bold(*args)
-      else
-        STDOUT.puts *args
-      end
-    end # === def bold!
+  def orange!(*args : String)
+    if STDERR.tty?
+      STDERR.puts orange(*args)
+    else
+      STDERR.puts(*args)
+    end
+  end # === def orange!
 
-    def colorize(raw : String, color : Symbol)
-      raw
-        .gsub(BOLD_PATTERN) { |raw, match|
-        match.captures.first.not_nil!.colorize.mode(:bold)
+  def green(raw : String)
+    colorize(raw, :green)
+  end # === def green
+
+  def green!(*args)
+    if STDOUT.tty?
+      STDOUT.puts green(*args)
+    else
+      STDOUT.puts(*args)
+    end
+  end # === def green
+
+  def sections(content : String, pattern)
+    pieces = content.split(pattern).map(&.strip).reject(&.empty?)
+    case
+    when pieces.size == 0
+      return content
+    when pieces.size == 1
+      return content
+    when !pieces.size.even?
+      return content
+    else
+      fin = {} of String => String
+      pieces.each_with_index { |v, i|
+        case
+        when i.even? || i == 0
+          fin[v] = pieces[i+1]
+        end
       }
-        .gsub(PATTERN) { |raw, match|
-        match.captures.first.not_nil!.colorize.fore(color).mode(:bold)
+      fin
+    end # case
+  end # === def
+
+  struct SQL_Sections
+
+    getter condition  : String? = nil
+    getter run        : String? = nil
+    getter always_run : String? = nil
+
+    def initialize(raw : String, pattern = /^\s*--\s+([^\:]+):\s*[\s\-]+$/m)
+      sections = DA.sections(raw, pattern)
+      groups = if sections.is_a?(String)
+                 {"ALWAYS RUN" => sections }
+               elsif sections.is_a?(Hash(String, String))
+                 sections
+               else
+                 raise DA::SQL::Exception.new("Invalid SQL sections: #{raw.inspect}")
+               end
+
+      groups.each { |k, v|
+        case k
+        when "CONDITION", "RUN", "ALWAYS RUN"
+          next
+        else
+          raise DA::SQL::Exception.new("Invalid SQL section: #{k.inspect}")
+        end
       }
-    end
 
-    def red(raw : String)
-      colorize(raw, :red)
-    end
-
-    def red!(*args)
-      if STDERR.tty?
-        STDERR.puts red(*args)
-      else
-        STDERR.puts(*args)
+      if groups["CONDITION"]? && !groups["RUN"]?
+        raise DA::SQL::Exception.new("Missing RUN section for CONDITION: #{groups["CONDITION"]}")
       end
-    end
 
-    def orange(raw : String)
-      colorize(raw, :yellow)
-    end
-
-    def orange!(e : ::Exception)
-      msg = e.message
-      if msg
-        DA.orange! "#{e.class}: #{msg}"
-      else
-        DA.orange! "#{e.class}: #{msg.inspect}"
-      end
-      if e.backtrace?
-        e.backtrace.each { |l|
-          DA.orange! l.to_s
-        }
-      end
-      e
+      @condition  = groups["CONDITION"]?
+      @run        = groups["RUN"]?
+      @always_run = groups["ALWAYS RUN"]?
     end # === def
 
-    def orange!(*args : String)
-      if STDERR.tty?
-        STDERR.puts orange(*args)
-      else
-        STDERR.puts(*args)
-      end
-    end # === def orange!
-
-    def green(raw : String)
-      colorize(raw, :green)
-    end # === def green
-
-    def green!(*args)
-      if STDOUT.tty?
-        STDOUT.puts green(*args)
-      else
-        STDOUT.puts(*args)
-      end
-    end # === def green
+  end # === struct SQL_Sections
 
 end # === module DA
