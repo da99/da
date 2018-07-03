@@ -120,7 +120,7 @@ module DA
     getter run        : String? = nil
     getter always_run : String? = nil
 
-    def initialize(raw : String, pattern = /^\s*--\s+([^\:]+):\s*[\s\-]+$/m)
+    def initialize(raw : String, pattern = /^\s*--\s+([^\n\:]+):\s*[\s\-]+$/m)
       sections = DA.sections(raw, pattern)
       groups = if sections.is_a?(String)
                  {"ALWAYS RUN" => sections }
