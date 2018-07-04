@@ -6,6 +6,47 @@ module DA
   module SQL
     class Exception < Exception
     end
+
+    def self.split(s : String)
+      sections = {"PREPEND" => [] of String}
+      current  = "PREPEND"
+
+      s.each_line(chomp: true) { |l|
+        case
+        when l =~ /^-- ([a-zA-Z0-9\_\-\ ]{3,25}):\ +\-+$/
+          old = current
+          current = $~[1].strip
+          case current
+          when old
+            next
+          when "PREPEND", "ALWAYS RUN", "RUN", "CONDITION"
+            sections[current] = [] of String
+          else
+            raise Exception.new("Invalid section named: #{current}")
+          end
+
+        when l[/^--.+/]? # SQL comment. Ignore.
+          next
+
+        else
+          sections[current].push l
+        end
+      }
+
+      fin = {} of String => String
+      sections.each { |k, v|
+        next if v.empty?
+        content = v.join('\n').strip
+        next if content.empty?
+        fin[k] = content
+      }
+
+      if sections.keys.size == 1 && sections["PREPEND"]?
+        return {"ALWAYS RUN" => fin["PREPEND"]}
+      end
+
+      fin
+    end # def
   end # === module SQL
 
   struct SQL_Sections
@@ -15,24 +56,8 @@ module DA
     getter always_run : String? = nil
     getter prepend    : String? = nil
 
-    def initialize(raw : String, pattern = /^\s*--\s+([^\n\:]+):\s*[\s\-]+$/m)
-      sections = DA.sections(raw, pattern)
-      groups = if sections.is_a?(String)
-                 {"ALWAYS RUN" => sections }
-               elsif sections.is_a?(Hash(String, String))
-                 sections
-               else
-                 raise DA::SQL::Exception.new("Invalid SQL sections: #{raw.inspect}")
-               end
-
-      groups.each { |k, v|
-        case k
-        when "CONDITION", "RUN", "ALWAYS RUN", "PREPEND"
-          next
-        else
-          raise DA::SQL::Exception.new("Invalid SQL section: #{k.inspect}")
-        end
-      }
+    def initialize(raw : String, pattern = /^\s*--\s+([^\n\:]+):\s*[\-]{2,}$/m)
+      groups = SQL.split(raw)
 
       if groups["CONDITION"]? && !groups["RUN"]?
         raise DA::SQL::Exception.new("Missing RUN section for CONDITION: #{groups["CONDITION"]}")
@@ -224,20 +249,45 @@ module DA
       }
 
       if result.to_i != 0
-        DA.orange! "=== {{Skipping}}: #{file} (#{result})"
+        DA.orange! "=== {{Skipping}}: #{file} (Result was: #{result.inspect})"
       else
         sql_temp_file(prepend, file, run) { |temp_file|
-          DA.system!("psql", final_args + ["-f", temp_file])
+          system("psql", final_args + ["-f", temp_file])
+          stat = $?
+          if !DA.success?(stat)
+            puts File.read(temp_file)
+            raise DA::Exit.new(stat.exit_code, "Failed psql call.")
+          end
         }
       end
     end # if condition
 
     if always_run
       sql_temp_file(prepend, file, always_run) { |temp_file|
-        DA.system!("psql", final_args + ["-f", temp_file])
+        system("psql", final_args + ["-f", temp_file])
+        stat = $?
+        if !DA.success?(stat)
+          puts File.read(temp_file)
+          raise DA::Exit.new(stat.exit_code, "Failed psql call.")
+        end
       }
     end # if
 
   end # === def
 
+  def sql_inspect(file : String)
+    contents = File.read(file)
+    blocks = SQL_Sections.new( contents )
+    {% for x in %w[prepend condition run always_run] %}
+      puts "<< {{x.id}} >>>>>>>>>>>>"
+      code = blocks.{{x.id}}
+      if !code
+        puts "[nil]"
+      else
+        puts code
+      end
+    {% end %}
+  end # === def
+
 end # === module DA_Dev
+

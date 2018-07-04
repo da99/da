@@ -278,6 +278,10 @@ when full_cmd[/^pg migrate .+/]?
   # === {{CMD}} pg migrate [-args to psql] dir
   DA.pg_migrate ARGV[2..-1]
 
+when full_cmd[/^sql inspect .+/]? && ARGV.size == 3
+  # === {{CMD}} sql inspect file.sql
+  DA.sql_inspect(ARGV.last)
+
 else
   DA.exit! 1, "!!! Invalid arguments: #{ARGV.map(&.inspect).join " "}"
 
