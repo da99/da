@@ -245,15 +245,16 @@ module DA
 
     if condition && run
       result = sql_temp_file(prepend, file, condition) { |temp_file|
-        DA.output!("psql", final_args + ["-f", temp_file]).strip
+        o = DA.output!("psql", final_args + ["--quiet", "-f", temp_file]).strip
+        o = "0" if o.empty?
+        o
       }
 
       if result.to_i != 0
         DA.orange! "=== {{Skipping}}: #{file} (Result was: #{result.inspect})"
       else
         sql_temp_file(prepend, file, run) { |temp_file|
-          system("psql", final_args + ["-f", temp_file])
-          stat = $?
+          stat = DA.run("psql", final_args + ["-f", temp_file])
           if !DA.success?(stat)
             puts File.read(temp_file)
             raise DA::Exit.new(stat.exit_code, "Failed psql call.")
@@ -264,8 +265,7 @@ module DA
 
     if always_run
       sql_temp_file(prepend, file, always_run) { |temp_file|
-        system("psql", final_args + ["-f", temp_file])
-        stat = $?
+        stat = DA.run("psql", final_args + ["-f", temp_file])
         if !DA.success?(stat)
           puts File.read(temp_file)
           raise DA::Exit.new(stat.exit_code, "Failed psql call.")

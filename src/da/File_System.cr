@@ -7,7 +7,7 @@ module DA
   end
 
   def development?
-    !(ENV["IS_DEVELOPMENT"]? || ENV["IS_DEV"]? || "").empty?
+    !(ENV["IS_DEVELOPMENT"]? || ENV["IS_DEV"]? || "").empty? || File.exists?("/apps/is_dev.txt")
   end # === def
 
   def is_test?
