@@ -2,10 +2,6 @@
 require "colorize"
 
 module DA
-  module SQL
-    class Exception < Exception
-    end
-  end # === module SQL
 
   PATTERN = /\{\{([^\}]+)\}\}/
   BOLD_PATTERN = /BOLD{{([^\}]+)}}/
@@ -113,41 +109,5 @@ module DA
       fin
     end # case
   end # === def
-
-  struct SQL_Sections
-
-    getter condition  : String? = nil
-    getter run        : String? = nil
-    getter always_run : String? = nil
-
-    def initialize(raw : String, pattern = /^\s*--\s+([^\n\:]+):\s*[\s\-]+$/m)
-      sections = DA.sections(raw, pattern)
-      groups = if sections.is_a?(String)
-                 {"ALWAYS RUN" => sections }
-               elsif sections.is_a?(Hash(String, String))
-                 sections
-               else
-                 raise DA::SQL::Exception.new("Invalid SQL sections: #{raw.inspect}")
-               end
-
-      groups.each { |k, v|
-        case k
-        when "CONDITION", "RUN", "ALWAYS RUN"
-          next
-        else
-          raise DA::SQL::Exception.new("Invalid SQL section: #{k.inspect}")
-        end
-      }
-
-      if groups["CONDITION"]? && !groups["RUN"]?
-        raise DA::SQL::Exception.new("Missing RUN section for CONDITION: #{groups["CONDITION"]}")
-      end
-
-      @condition  = groups["CONDITION"]?
-      @run        = groups["RUN"]?
-      @always_run = groups["ALWAYS RUN"]?
-    end # === def
-
-  end # === struct SQL_Sections
 
 end # === module DA

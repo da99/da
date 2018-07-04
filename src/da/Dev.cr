@@ -25,23 +25,13 @@ module DA
 
     def run_cmd(args : Array(String)) : Bool
       da_cmd = args.shift
-      full_cmd = if args.empty?
-                   da_cmd
-                 else
-                   args.join(' ')
-                 end
-      cmd = args.shift? || da_cmd
+      full_cmd = args.join(' ').strip
+      cmd = args.shift?
 
       case
 
       when da_cmd == "#"
         DA.orange! "=== {{Skipping}}: #{full_cmd}"
-
-      # when cmd == "reload" && args.empty?
-      #   kill_procs
-      #   run_process_status
-      #   File.delete(pid_file) if File.exists?(pid_file)
-      #   Process.exec(bin_path, ARGV)
 
       when da_cmd == "proc"
         DA.orange! "=== {{Process}}: BOLD{{#{full_cmd}}}"
@@ -52,10 +42,10 @@ module DA
         x
 
       when da_cmd == "PING" && args.empty?
-        DA.orange! "=== {{Running}}: #{cmd} ==="
+        DA.orange! "=== {{Running}}: #{da_cmd} ==="
         DA.green! "=== PONG ==="
 
-      when da_cmd == "run" && !args.empty?
+      when da_cmd == "run" && !full_cmd.empty? && cmd
         DA.bold! "=== {{#{full_cmd}}} (#{time})"
 
         # Only show progress output on error:
@@ -67,7 +57,7 @@ module DA
         end
 
       else
-        DA.red! "=== {{Unknown command}}: BOLD{{#{full_cmd}}} ==="
+        DA.red! "=== {{Unknown command}}: (#{da_cmd}) BOLD{{#{full_cmd}}} ==="
         return false
 
       end # case

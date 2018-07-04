@@ -3,6 +3,49 @@ module DA
 
   PGSQL_SEPARATOR = /\n\s*\#\s*\-+\n/
 
+  module SQL
+    class Exception < Exception
+    end
+  end # === module SQL
+
+  struct SQL_Sections
+
+    getter condition  : String? = nil
+    getter run        : String? = nil
+    getter always_run : String? = nil
+    getter prepend    : String? = nil
+
+    def initialize(raw : String, pattern = /^\s*--\s+([^\n\:]+):\s*[\s\-]+$/m)
+      sections = DA.sections(raw, pattern)
+      groups = if sections.is_a?(String)
+                 {"ALWAYS RUN" => sections }
+               elsif sections.is_a?(Hash(String, String))
+                 sections
+               else
+                 raise DA::SQL::Exception.new("Invalid SQL sections: #{raw.inspect}")
+               end
+
+      groups.each { |k, v|
+        case k
+        when "CONDITION", "RUN", "ALWAYS RUN", "PREPEND"
+          next
+        else
+          raise DA::SQL::Exception.new("Invalid SQL section: #{k.inspect}")
+        end
+      }
+
+      if groups["CONDITION"]? && !groups["RUN"]?
+        raise DA::SQL::Exception.new("Missing RUN section for CONDITION: #{groups["CONDITION"]}")
+      end
+
+      @condition  = groups["CONDITION"]?
+      @run        = groups["RUN"]?
+      @always_run = groups["ALWAYS RUN"]?
+      @prepend    = groups["PREPEND"]?
+    end # === def
+
+  end # === struct SQL_Sections
+
   module Postgres
 
     extend self
@@ -135,7 +178,7 @@ module DA
     }
   end # === def
 
-  def sql_temp_file(filename : String, content : String)
+  def sql_temp_file(prepend : String?, filename : String, content : String)
     dir = File.dirname(filename)
     prepends = [
       File.expand_path(File.join dir, "../prepend.sql"),
@@ -143,6 +186,10 @@ module DA
     ].map { |f|
       File.read(f) if File.exists?(f)
     }.compact
+
+    if prepend.is_a?(String)
+      prepends.push prepend
+    end # if
 
     full_script = (prepends + [content]).join('\n')
     temp_file = "/tmp/#{Time.now.epoch}.#{File.basename(filename)}.#{full_script.size}.sql"
@@ -164,28 +211,29 @@ module DA
       --set AUTOCOMMIT=off
     ].concat(args)
 
-    blocks = DA::SQL_Sections.new( File.read(file) )
+    blocks = SQL_Sections.new( File.read(file) )
 
     condition  = blocks.condition
     run        = blocks.run
     always_run = blocks.always_run
+    prepend    = blocks.prepend
 
     if condition && run
-      result = sql_temp_file(file, condition) { |temp_file|
+      result = sql_temp_file(prepend, file, condition) { |temp_file|
         DA.output!("psql", final_args + ["-f", temp_file]).strip
       }
 
       if result.to_i != 0
         DA.orange! "=== {{Skipping}}: #{file} (#{result})"
       else
-        sql_temp_file(file, run) { |temp_file|
+        sql_temp_file(prepend, file, run) { |temp_file|
           DA.system!("psql", final_args + ["-f", temp_file])
         }
       end
     end # if condition
 
     if always_run
-      sql_temp_file(file, always_run) { |temp_file|
+      sql_temp_file(prepend, file, always_run) { |temp_file|
         DA.system!("psql", final_args + ["-f", temp_file])
       }
     end # if
