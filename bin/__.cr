@@ -68,6 +68,10 @@ when full_cmd == "watch"
 
 # =============================================================================
 
+when full_cmd == "specs compile"
+  # === {{CMD}} specs compile
+  DA::Specs.compile
+
 when ARGV[0..2].join(' ') == "specs compile run"
   # === {{CMD}} specs compile run
   DA::Specs.compile
