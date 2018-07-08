@@ -12,11 +12,12 @@ module DA
     end
 
     def bin
-      "/tmp/specs/#{app_name}"
+      "tmp/out/#{app_name}"
     end
 
     def compile
       Dir.mkdir_p(File.dirname bin)
+      DA.system!("mkdir -p tmp/out")
       DA.system!("crystal build #{src} -o #{bin}")
     end
 
