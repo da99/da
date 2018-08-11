@@ -286,6 +286,11 @@ when full_cmd[/^sql inspect .+/]? && ARGV.size == 3
   # === {{CMD}} sql inspect file.sql
   DA.sql_inspect(ARGV.last)
 
+when full_cmd[/^script run .+/]? && ARGV.size == 3
+  # === {{CMD}} script run file
+  file = ARGV.last
+  DA::Script.new(file).run
+
 else
   DA.exit! 1, "!!! Invalid arguments: #{ARGV.map(&.inspect).join " "}"
 

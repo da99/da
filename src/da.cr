@@ -37,5 +37,7 @@ require "./da/Public_Dir"
 require "./da/Postgresql"
 require "./da/Time"
 
+require "./da/Script"
+
 require "./da/Specs"
 

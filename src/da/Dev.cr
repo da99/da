@@ -6,7 +6,9 @@ module DA
     CMD_ERRORS = [] of Int32 | String
 
     MTIMES    = {} of String => Int64
-    PROCESSES = {} of Int32 => Process
+    PROCESSES = {} of String => Process
+    SCRIPTS   = {} of String => ::DA::Script
+    SCRIPTS_STATUS = {} of String => Bool
 
     def time
       `date +"%r"`.strip
@@ -66,32 +68,36 @@ module DA
     end # === def run
 
     def run_process_status
-      PROCESSES.each { |pid, x|
-        if defunct?(pid)
-          STDERR.puts "=== Process defunct: #{pid}"
-          PROCESSES.delete pid
+      PROCESSES.each { |file, x|
+        if defunct?(x.pid)
+          STDERR.puts "=== Process defunct: #{x.pid}"
+          PROCESSES.delete file
         end
         if x.terminated?
-          STDERR.puts "=== Process terminated: #{pid}"
-          PROCESSES.delete pid
+          STDERR.puts "=== Process terminated: #{x.pid}"
+          PROCESSES.delete file
         end
       }
     end # === def run_process_status
 
-    def watch_run(raw_file : String)
+    def watch_run(raw_path : String)
       app_dir = Dir.current
-      run_file = File.expand_path(raw_file)
+      file_path = File.expand_path(raw_path)
       Dir.cd da_dir
-      new_file = "tmp/out/run-#{Time.now.epoch}.txt"
-      if File.exists?(run_file)
-        run_contents = [app_dir,File.read(run_file)].join('\n')
-        if run_contents.empty?
-          File.write(new_file, "run echo empty contents: #{raw_file}")
-        else
-          File.write(new_file, run_contents)
-        end
+      new_file = "tmp/out/#{app_dir.gsub('/', "__")}.sh"
+      if !File.exists?(file_path)
+        File.write(new_file, "echo File does not exist: #{raw_path}; exit 1")
+        return false
+      end
+
+      run_contents = File.read(file_path)
+      if run_contents.strip.empty?
+        File.write(new_file, "echo empty contents: #{raw_path}; exit 1")
       else
-        File.write(new_file, "run echo File does not exist: #{raw_file}")
+        File.write(new_file, %<
+          #{app_dir}
+          #{file_path}
+        >.strip)
       end
     end # === def watch_run
 
@@ -106,6 +112,13 @@ module DA
     end # def
 
     def watch
+      Signal::TERM.trap do
+        kill_scripts
+        Signal::TERM.reset
+        STDERR.puts "--- TERM ---"
+        Process.kill(Signal::TERM, Process.pid)
+      end
+
       Dir.cd da_dir
       pid_file = "tmp/out/watch_pid.txt"
       Dir.mkdir_p File.dirname(pid_file)
@@ -124,17 +137,24 @@ module DA
 
       system("reset")
 
-      DA.orange!("-=-= BOLD{{Watching}}: #{File.basename Dir.current} {{@}} #{time} #{"-=" * 15}")
+      puts "=== #{Process.pid}"
+      DA.orange!("-=-= BOLD{{Watching}}: #{File.basename Dir.current} {{@}} #{time} #{"-=" * 10}")
 
       spawn {
         loop {
-          run_process_status
-          sleep 1
-        }
-      }
+          SCRIPTS.each { |file, script|
+            if !SCRIPTS_STATUS[file]? && script.done?
+              SCRIPTS_STATUS[file] = true
+              STDERR.puts DA.green("=== {{DONE}}: #{file} ===")
+            end
+          } # scripts
+          sleep 0.3
+        } # loop
+      } # spawn
 
       spawn {
-        pattern = "tmp/out/run-*.txt"
+        pattern = "tmp/out/__*.sh"
+
         Dir.glob(pattern).each { |f|
           if File.file?(f)
             DA.orange! "=== Ignoring previous file: #{File.read(f).split('\n').first?} (#{f})"
@@ -145,31 +165,25 @@ module DA
         loop {
           Dir.glob(pattern).each { |file|
             next if !File.file?(file)
-            kill_procs
-            lines = File.read(file).split('\n')
-            dir = lines.shift
-            if !File.directory?(dir)
-              DA.orange! "!!! {{Skipping file}} because directory, (BOLD{{#{dir}}}), does not exist: #{lines.join('\n')}"
-              FileUtils.rm file
-              next
-            end
-            Dir.cd(dir) {
-              DA.orange! "=== in {{#{dir}}} #{"-=" * 20}"
-              result = lines.each_with_index { |cmd, i|
-                next if cmd.strip.empty?
-                if !CMD_ERRORS.empty?
-                  STDERR.puts "=== Skipping #{cmd} because of previous errors."
-                  next
-                end
-                break if run_cmd(cmd.split) != true
-                true
-              }
-              DA.orange!("-=" * 28)
-            } # Dir.cd
-            CMD_ERRORS.clear
+            DA.orange! "=== Running: {{#{file}}} #{"-=" * 10}"
 
+            script = SCRIPTS[file]?
+            if script && script.running?
+              STDERR.puts "=== Killing: #{file}"
+              script.kill
+            end
+
+            dir, script_file = File.read(file).strip.split('\n').map(&.strip)
+            key = dir
+
+            script = SCRIPTS[key] = Script.new(dir, script_file)
+            SCRIPTS_STATUS.delete(key)
             FileUtils.rm(file)
-            puts ""
+            begin
+              script.run
+            rescue e
+              DA.inspect! e
+            end
           } # files.each
           sleep 0.5
         } # loop
@@ -182,30 +196,18 @@ module DA
       File.stat(file).mtime
     end # === def mtime
 
+    def kill_scripts
+      SCRIPTS.each { |x, script| script.kill }
+    end
+
     def kill_procs
-      PROCESSES.each { |pid, x|
-        if process_exists?(pid)
-          STDERR.puts "=== Killing: #{pid}"
-          x.kill
+      PROCESSES.each { |file_name, x|
+        if process_exists?(x.pid)
+          STDERR.puts "=== kill -INT #{x.pid}"
+          x.kill(Signal::INT)
+          STDERR.puts "--- send INT signal #{x.pid}"
         else
-          STDERR.puts "=== Killed: #{pid}"
-        end
-      }
-
-      3.times { |x|
-        break if !process_still_running?
-        sleep 1
-      }
-
-      PROCESSES.each { |pid, x|
-        if defunct?(pid)
-          STDERR.puts "!!! DEFUNCT: #{pid}"
-        end
-        if process_exists?(pid)
-          STDERR.puts "!!! Still running: #{pid}"
-        end
-        if !Process.exists?(pid)
-          STDERR.puts "=== Terminated: #{pid}"
+          STDERR.puts "=== no exit #{x.pid}"
         end
       }
     end
@@ -226,7 +228,7 @@ module DA
 
     def process_still_running?
       return false if PROCESSES.empty?
-      PROCESSES.any? { |pid, x| process_exists?(pid) }
+      PROCESSES.any? { |file, x| process_exists?(x.pid) }
     end
 
   end # === module Watch
