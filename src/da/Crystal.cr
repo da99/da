@@ -309,16 +309,11 @@ module DA
         end
       end
 
-      if args.size == 1 && args.first == "release"
-        args[0] = "--release"
-      end
-      is_tmp = args.size == 1 && args.first == "tmp" && args.shift
-      args = "build #{src} -o #{tmp}".split.concat(args)
-      fin_bin = is_tmp ? tmp : bin
-      DA.orange! "=== {{Compiling}}: #{Crystal::BIN} #{args.join " "} --> BOLD{{#{fin_bin}}}"
+      args = ["build", src, "-o", tmp].concat(args)
+      DA.orange! "=== {{Compiling}}: #{Crystal::BIN} #{args.join " "} --> BOLD{{#{tmp}}}"
       DA.system!(Crystal::BIN, args)
 
-      File.rename(tmp, bin) unless is_tmp
+      File.rename(tmp, bin)
       DA.green! "=== {{Done}}: #{bin}"
     end # === def bin_compile
   end # === module Crystal

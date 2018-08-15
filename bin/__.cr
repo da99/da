@@ -150,11 +150,9 @@ when full_cmd == "shards!"
   # === {{CMD}} shards!
   DA::Crystal.shards!
 
-when full_cmd == "bin compile"
-  # === {{CMD}} bin compile [release]
-  DA::Crystal.bin_compile
-when full_cmd == "bin compile release"
-  DA::Crystal.bin_compile(["release"])
+when full_cmd =~ /^bin compile( .+)?$/
+  # === {{CMD}} bin compile [args to compile]
+  DA::Crystal.bin_compile(ARGV[2..-1])
 
 when full_cmd == "first-repo"
   # === {{CMD}} first-repo

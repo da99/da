@@ -8,7 +8,6 @@ module DA
     MTIMES    = {} of String => Int64
     PROCESSES = {} of String => Process
     SCRIPTS   = {} of String => ::DA::Script
-    SCRIPTS_STATUS = {} of String => Bool
 
     def time
       `date +"%r"`.strip
@@ -140,44 +139,32 @@ module DA
       puts "=== #{Process.pid}"
       DA.orange!("-=-= BOLD{{Watching}}: #{File.basename Dir.current} {{@}} #{time} #{"-=" * 10}")
 
-      spawn {
-        loop {
-          SCRIPTS.each { |file, script|
-            if !SCRIPTS_STATUS[file]? && script.done?
-              SCRIPTS_STATUS[file] = true
-              STDERR.puts DA.green("=== {{DONE}}: #{file} ===")
-            end
-          } # scripts
-          sleep 0.3
-        } # loop
-      } # spawn
+      pattern = "tmp/out/__*.sh"
+      Dir.glob(pattern).each { |f|
+        if File.file?(f)
+          DA.orange! "=== Ignoring previous file: #{File.read(f).split('\n').first?} (#{f})"
+          FileUtils.rm(f)
+        end
+      }
 
       spawn {
-        pattern = "tmp/out/__*.sh"
-
-        Dir.glob(pattern).each { |f|
-          if File.file?(f)
-            DA.orange! "=== Ignoring previous file: #{File.read(f).split('\n').first?} (#{f})"
-            FileUtils.rm(f)
-          end
-        }
-
         loop {
           Dir.glob(pattern).each { |file|
             next if !File.file?(file)
             DA.orange! "=== Running: {{#{file}}} #{"-=" * 10}"
 
-            script = SCRIPTS[file]?
-            if script && script.running?
-              STDERR.puts "=== Killing: #{file}"
-              script.kill
-            end
-
             dir, script_file = File.read(file).strip.split('\n').map(&.strip)
             key = dir
 
+            # Kill previous script:
+            script = SCRIPTS[key]?
+            if script && script.running?
+              STDERR.puts "=== Killing: #{key}"
+              script.kill
+            end
+
+            # Setup new script:
             script = SCRIPTS[key] = Script.new(dir, script_file)
-            SCRIPTS_STATUS.delete(key)
             FileUtils.rm(file)
             begin
               script.run

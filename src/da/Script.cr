@@ -32,11 +32,11 @@ module DA
       @debug
     end
 
-    def kill
+    def kill(sig = Signal::TERM)
       @procs.each { |proc|
         if !proc.terminated?
           STDERR.puts "::: Killing #{proc.pid}" if debug?
-          proc.kill
+          proc.kill(sig)
         end
       }
       @running = false
