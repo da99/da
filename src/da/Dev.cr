@@ -149,28 +149,34 @@ module DA
 
       spawn {
         loop {
-          Dir.glob(pattern).each { |file|
+          Dir.glob(pattern).each { |raw_file|
+            file = File.expand_path(raw_file)
             next if !File.file?(file)
-            DA.orange! "=== Running: {{#{file}}} #{"-=" * 10}"
+            DA.orange! "=== Running: {{#{file}}} in {{#{Dir.current}}} #{"-=" * 6}"
 
             dir, script_file = File.read(file).strip.split('\n').map(&.strip)
             key = dir
 
-            # Kill previous script:
-            script = SCRIPTS[key]?
-            if script && script.running?
-              STDERR.puts "=== Killing: #{key}"
-              script.kill
-            end
+            Dir.cd(dir) {
+              # Kill previous script:
+              script = SCRIPTS[key]?
+              if script && script.running?
+                STDERR.puts "=== Killing: #{key}"
+                script.kill
+                sleep 0.5
+              end
 
-            # Setup new script:
-            script = SCRIPTS[key] = Script.new(dir, script_file)
-            FileUtils.rm(file)
-            begin
-              script.run
-            rescue e
-              DA.inspect! e
-            end
+              # Setup new script:
+              script = SCRIPTS[key] = Script.new(dir, script_file)
+              DA.orange!("=== removing: {{#{file}}}") if script && script.debug?
+              FileUtils.rm(file)
+
+              begin
+                script.run
+              rescue e
+                DA.inspect! e
+              end
+            } # Dir.cd
           } # files.each
           sleep 0.5
         } # loop

@@ -8,16 +8,19 @@ module DA
     @running : Bool = false
     @done    : Bool = false
 
+    getter owner : String
     getter procs : Deque(Process) = Deque(Process).new
 
     def initialize(raw_dir : String, raw_file : String)
       @dir  = File.expand_path(raw_dir)
       @file = File.expand_path(raw_file)
+      @owner = `whoami`.strip
     end # === def
 
     def initialize(raw_file : String)
       @dir  = Dir.current
       @file = File.expand_path(raw_file)
+      @owner = `whoami`.strip
     end # === def
 
     def done?
@@ -33,10 +36,19 @@ module DA
     end
 
     def kill(sig = Signal::TERM)
+      script_owner = owner
       @procs.each { |proc|
-        if !proc.terminated?
-          STDERR.puts "::: Killing #{proc.pid}" if debug?
-          proc.kill(sig)
+        proc_owner = `ps -o user= -p #{proc.pid}`.strip
+        proc_still_running = !proc_owner.empty?
+        if proc_still_running
+          sleep 1
+          if proc_owner == script_owner
+            STDERR.puts "::: Killing #{proc.pid}" if debug?
+            proc.kill(sig)
+          else
+            STDERR.puts "::: Killing as root: #{proc.pid}" if debug?
+            DA.success! "sudo", "kill -#{sig} #{proc.pid}".split
+          end
         end
       }
       @running = false
@@ -91,13 +103,18 @@ module DA
 
         when cmd == "process"
           raise Exception.new("No arguments for process.") if tokens.size < 1
+          bin = tokens.shift
+          args = tokens
           process = Process.new(
-            tokens.shift,
-            tokens,
+            bin,
+            args,
             input:  Process::Redirect::Inherit,
             output: Process::Redirect::Inherit,
             error:  Process::Redirect::Inherit
           )
+          if debug?
+            DA.orange! "=== PROCESS BOLD{{#{process.pid}}}: {{#{bin}}} BOLD{{#{args.join ' '}}}"
+          end
           @procs.push(process)
 
         when cmd == "cd"
