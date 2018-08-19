@@ -1,6 +1,24 @@
 
 module DA
+
+  # This is for the commands used in "DA::Dev.watch", not regular shell scripts.
+  # Example: run.1.sh
+  #   my custom command
+  #   process my command
+  #   my other custom command
   class Script
+
+    # =============================================================================
+    # Class:
+    # =============================================================================
+
+    def self.process_exists?(pid : String | Int)
+      !`ps -o user= -p #{pid}`.strip.empty?
+    end
+
+    # =============================================================================
+    # Instance:
+    # =============================================================================
 
     @dir     : String
     @file    : String
@@ -39,16 +57,37 @@ module DA
       script_owner = owner
       @procs.each { |proc|
         proc_owner = `ps -o user= -p #{proc.pid}`.strip
-        proc_still_running = !proc_owner.empty?
-        if proc_still_running
-          sleep 1
-          if proc_owner == script_owner
-            STDERR.puts "::: Killing #{proc.pid}" if debug?
-            proc.kill(sig)
-          else
-            STDERR.puts "::: Killing as root: #{proc.pid}" if debug?
-            DA.success! "sudo", "kill -#{sig} #{proc.pid}".split
+        next if proc_owner.empty?
+
+        if proc_owner == script_owner
+          STDERR.puts "::: Killing #{proc.pid}" if debug?
+          proc.kill(sig)
+          next
+        end
+
+        # SUDO processes act differently than other processes.
+        # Sometimes (depending on the version of the installed sudo executable)
+        #   the child processes have to be sent the INT signal.
+        #   Below, we are sending the INT signal to both the parent process
+        #   and child process (if the parent process won't stop).
+        proc_cmd = `ps --no-header -o cmd --pid #{proc.pid}`.split.first?
+        if Script.process_exists?(proc.pid)
+          DA.orange! "::: Killing: {{sudo}} BOLD{{kill -#{sig} #{proc.pid}}}" if debug?
+          system "sudo", "/bin/kill -#{sig} #{proc.pid}".split
+          break if !DA.success?($?)
+          sleep 0.5
+
+          if proc_cmd == "sudo" && Script.process_exists?(proc.pid)
+            `pgrep -P #{proc.pid}`.split.each { |x|
+              DA.orange! "::: Killing child process of sudo: {{sudo}} BOLD{{kill -#{sig} #{x}}}" if debug?
+              system "sudo", "/bin/kill -#{sig} #{x}".split
+              sleep 0.5
+            }
           end
+        end
+
+        if Script.process_exists?(proc.pid)
+          DA.red! "!!! {{Process still running}}: BOLD{{#{proc.pid}}}"
         end
       }
       @running = false

@@ -162,7 +162,7 @@ module DA
               script = SCRIPTS[key]?
               if script && script.running?
                 STDERR.puts "=== Killing: #{key}"
-                script.kill
+                script.kill(Signal::INT)
                 sleep 0.5
               end
 
