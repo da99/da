@@ -22,12 +22,13 @@ case
 
 when "-h --help help".split.includes?(ARGV.first)
   # === {{CMD}} -h|--help|help
-  substring = (ARGV[1]? || "").strip
-  if substring.empty?
-    DA.print_help
-  else
-    DA.print_help substring
-  end
+  DA::CLI.print_doc
+  # substring = (ARGV[1]? || "").strip
+  # if substring.empty?
+  #   DA.print_help
+  # else
+  #   DA.print_help substring
+  # end
 
 
 when full_cmd[/^run .+/]?
@@ -236,7 +237,7 @@ when full_cmd[/^create system user .+$/]?
 # Void Linux:
 # =============================================================================
 when full_cmd == "voidlinux upgrade"
-  # === {{CMD} voidlinux upgrade
+  # === {{CMD}} voidlinux upgrade
   DA::VoidLinux.upgrade
 
 # =============================================================================

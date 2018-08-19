@@ -1,6 +1,10 @@
 
 module DA
 
+  def bin_name : String
+    File.basename(Process.executable_path.not_nil!)
+  end # === def
+
   def app_dir : String
     exec_path = Process.executable_path
     if exec_path
