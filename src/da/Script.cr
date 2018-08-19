@@ -79,6 +79,7 @@ module DA
 
           if proc_cmd == "sudo" && Script.process_exists?(proc.pid)
             `pgrep -P #{proc.pid}`.split.each { |x|
+              next if x && x.strip.empty?
               DA.orange! "::: Killing child process of sudo: {{sudo}} BOLD{{kill -#{sig} #{x}}}" if debug?
               system "sudo", "/bin/kill -#{sig} #{x}".split
               sleep 0.5
