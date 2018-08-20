@@ -126,6 +126,13 @@ module DA
           STDOUT << '\n'
           STDOUT.flush
 
+        when cmd == "sleep"
+          if tokens.size != 1
+            raise Exception.new("Invalid value for sleep: #{tokens.inspect}")
+          end
+          STDERR.puts("::: sleep #{tokens.first}") if debug?
+          sleep tokens.first.not_nil!.to_i
+
         when cmd == "debug"
           setting = tokens.first?
           if tokens.size != 1
