@@ -14,7 +14,6 @@ module DA
 end # === module DA
 
 require "./da/Process"
-require "./da/Inspect"
 require "./da/Crystal"
 require "./da/Dev"
 require "./da/Backup"

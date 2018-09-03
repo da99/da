@@ -1,5 +1,25 @@
 
 module DA
+
+  def test?
+    ENV["IS_TEST"]?
+  end
+
+  def debug?
+    ENV["IS_DEBUG"]?
+  end
+
+  def development?
+    !(ENV["IS_DEVELOPMENT"]? || ENV["IS_DEV"]? || "").empty? || File.exists?("/apps/is_dev.txt")
+  end # === def
+
+  def inspect!(*args)
+    return false unless debug?
+
+    STDERR.puts args.map(&.inspect).join(", ")
+    true
+  end # === def inspect!
+
   module Dev
     extend self
 
@@ -8,6 +28,7 @@ module DA
     MTIMES    = {} of String => Int64
     PROCESSES = {} of String => Process
     SCRIPTS   = {} of String => ::DA::Script
+
 
     def time
       `date +"%r"`.strip

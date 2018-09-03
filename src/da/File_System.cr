@@ -6,18 +6,9 @@ module DA
     end
   end
 
-  def development?
-    !(ENV["IS_DEVELOPMENT"]? || ENV["IS_DEV"]? || "").empty? || File.exists?("/apps/is_dev.txt")
-  end # === def
-
-  def is_test?
-    ENV["IS_TEST"]?
-  end
-
   def text_file?(s : String)
     File.exists?(s) && `file --mime #{s}`["text/plain"]?
   end
-
 
   def public_dir?(raw : String)
     public_dir = temp = File.expand_path(raw)

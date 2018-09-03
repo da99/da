@@ -21,7 +21,7 @@ module DA
 
     def initialize(@name)
       @dir = case
-             when DA.is_test?
+             when DA.test?
                File.join("/tmp/specs_deploy", @name)
              when DA.development?
                File.join("/apps", @name)
