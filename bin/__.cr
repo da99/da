@@ -22,13 +22,7 @@ case
 
 when "-h --help help".split.includes?(ARGV.first)
   # === {{CMD}} -h|--help|help
-  DA::CLI.print_doc
-  # substring = (ARGV[1]? || "").strip
-  # if substring.empty?
-  #   DA.print_help
-  # else
-  #   DA.print_help substring
-  # end
+  DA.print_help
 
 
 when full_cmd[/^run .+/]?
@@ -120,18 +114,18 @@ when full_cmd[/void install .+/]?
 
 when ARGV[0..1].join(' ') == "crystal docs"
   # === {{CMD}} crystal doc partial_path ...
-  # === View a Crystal docs HTML file in the browser.
+  # View a Crystal docs HTML file in the browser.
   DA::Crystal.docs ARGV[2]
 
 when ARGV[0..1].join(' ') == "crystal src"
   # === {{CMD}} crystal src -args to rg
-  # === Search the Crystal source code using ripgrep (rg).
+  # Search the Crystal source code using ripgrep (rg).
   DA::Crystal.src(ARGV[2..-1])
 
 when ARGV[0..1].join(' ') == "crystal file"
   # === {{CMD}} crystal file search_path
-  # === Search for a Crystal source file or a doc HTML file
-  # ===   using find . -type f -ipath '*#{YOUR_STRING}*'
+  # Search for a Crystal source file or a doc HTML file
+  #   using find . -type f -ipath '*#{YOUR_STRING}*'
   DA::Crystal.src_file(ARGV[2])
 
 when full_cmd == "crystal install"

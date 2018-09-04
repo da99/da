@@ -1,5 +1,13 @@
 
 module DA
+
+  macro print_help
+    {% begin %}
+      _x = {{ system("cat bin/__.cr").lines }}
+      DA::Help.print("bin/__.cr", _x, ARGV[1..-1])
+    {% end %}
+  end # macro print_help
+
   module Help
     extend self
 
@@ -45,7 +53,7 @@ module DA
         fin.push "\n"
       end
       fin
-    end # === def print_help
+    end # === def extract_documentation
 
     def files
       arr = [] of String
@@ -75,16 +83,53 @@ module DA
       arr
     end # def files
 
-    def print(*substring)
-      files.each { |f|
-        extract_documentation(f, *substring).map { |l| puts "  #{l}" }
-      }
+    def comment?(l : String)
+      l =~ /^\ *# / && !(l =~ /={3,}$/)
+    end
+
+    def doc_line?(l : String)
+      l =~ /^\ *# === / && !(l =~ /={3,}$/)
+    end
+
+    def print(file_name, lines, args)
+      # doc_string = {{ system("cat bin/__.cr").lines.select { |x| x =~ /^\ *# === / && !(x =~ /={3,}$/) } }}
+      delim      = '{'
+      delim_end  = '}'
+      bin_name   = "#{delim}#{delim}#{DA.bin_name}#{delim_end}#{delim_end}"
+      groups = [] of Deque(String)
+
+      while !lines.empty?
+        if doc_line?(lines.first)
+          group = Deque(String).new
+          while !lines.empty? && comment?(lines.first)
+            group << lines.shift
+          end
+          groups << group
+        else
+          lines.shift
+        end
+      end # while
+
+      if !args.empty?
+        groups = groups.select { |g| g.first[args.first]? }
+        if groups.empty?
+          DA.red! "!!! No help found for: #{args.first.inspect}"
+          Process.exit 1
+        end
+      end
+
+      puts groups.map { |group|
+        group.map { |x|
+          DA.bold(
+            x
+            .gsub("#{delim}#{delim}CMD#{delim_end}#{delim_end}", bin_name)
+            .gsub(/^\ *# === /, "  ")
+            .gsub(/^\ *# /, "    ")
+          )
+        }.join('\n')
+      }.join('\n')
     end
 
   end # === module Documentation
-
-  def print_help(*substring)
-    Help.print(*substring)
-  end
 
 end # === module DA_Dev
