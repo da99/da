@@ -6,7 +6,7 @@ html = File.read("extra/sample.html")
 
 module DA_HTML
 
-  alias Node = Node
+  alias Node = Text | Tag
   alias Attribute_Value = Int32 | Int64 | String
 
   extend self
@@ -240,6 +240,31 @@ module DA_HTML
     end
   end # === struct Cleaner
 
+  struct Collection_Options
+
+    getter name : String
+    getter origin : Tag
+    @as : String? = nil
+    getter vars = [] of String
+
+    def initialize(x)
+      @origin = x
+      pieces = x.attributes.keys.join(' ').split(/[\ ,]+/)
+      @name = pieces.shift
+      @as = (pieces.first? == "as") ? pieces.shift : nil
+      @vars = pieces
+    end # def
+
+    def has_vars
+      @as
+    end
+
+    def invalid!
+      raise Exception.new("Invalid: <#{origin.tag_name} #{origin.attributes.keys.join ' '}> #{vars.inspect}")
+    end # === def
+
+  end # === struct Collection_Options
+
   struct JS_Template
 
     getter tags   : Tags
@@ -293,72 +318,165 @@ module DA_HTML
       io
     end # === def
 
+    def print_children(x)
+      x.children.each { |y|
+        print_x(y)
+      }
+    end # === def
+
+    def print_block(s : String)
+      print "#{s} {\n"
+      indent {
+        yield
+      }
+      print "} // #{s}\n"
+    end
+
     def print_x(x)
       case x
+
       when DA_HTML::Text
         return if x.empty?
         append_to_io x.tag_text.inspect
         return
-      end
 
-      if x.tag_name == "var"
-        var_name = x.attributes.keys.join(' ')
-        append_to_io "#{var_name}.toString()"
-        return
-      end
-
-      if x.tag_name == "object"
-        raw_attrs = x.attributes.keys.join(' ').split(/[\ |,]+/)
-        coll_name = raw_attrs.shift
-        if !(raw_attrs.shift == "as")
-          raise Exception.new("Invalid: <object #{x.attributes.keys.join ' '}>")
+      when DA_HTML::Tag
+        if x.tag_name == "var"
+          var_name = x.attributes.keys.join(' ')
+          append_to_io "#{var_name}.toString()"
+          return
         end
 
-        case raw_attrs.size
-        when 2
-          key_name, var_name = raw_attrs
-        when 1
-          key_name = "#{coll_name}_k"
-          var_name = var(raw_attrs.last)
-        else
-          raise Exception.new("Invalid: <object #{x.attributes.keys.join ' '}>")
-        end # case
+        # =============================================================================
+        # Attribute Options:
+        # =============================================================================
 
-        print "for (let #{key_name} in #{coll_name}) {\n"
+        options = Collection_Options.new(x)
+
+        if x.tag_name == "object"
+          coll_name = options.name
+
+          case options.vars.size
+          when 2
+            key_name, var_name = options.vars
+          when 1
+            key_name = "#{coll_name}_k"
+            var_name = options.vars.last
+          else
+            options.invalid!
+          end # case
+
+          print "for (let #{key_name} in #{coll_name}) {\n"
+          indent {
+            print "let #{var_name} = #{coll_name}[#{key_name}];\n"
+            x.children.each { |y| print_x(y) }
+          }
+          print "}\n"
+          return
+        end # if x.tag_name == "object"
+
+        if x.tag_name == "negative"
+          case options.vars.size
+          when 0, 1
+            print_block "if (#{options.name} < 0)" do
+              if options.vars.size > 0
+                let(options.vars.first, "#{options.name}")
+              end
+              print_children(x)
+            end
+          else
+            options.invalid!
+          end
+          return
+        end # if negative
+
+        if x.tag_name == "zero"
+          case options.vars.size
+          when 0, 1
+            print_block "if (#{options.name} === 0)" do
+              if options.vars.size > 0
+                let(options.vars.first, "#{options.name}")
+              end
+              print_children(x)
+            end
+          else
+            options.invalid!
+          end
+          return
+        end # if zero
+
+        if x.tag_name == "positive"
+          case options.vars.size
+          when 0,1
+            print_block "if (#{options.name} > 0)" do
+              if options.vars.size > 0
+                let(options.vars.first, "#{options.name}")
+              end
+              print_children(x)
+            end
+          else
+            options.invalid!
+          end
+          return
+        end # if positive
+
+        if x.tag_name == "empty"
+          case options.vars.size
+          when 0,1
+            print_block "if (#{options.name}.length === 0)" do
+              if options.vars.size > 0
+                let(options.vars.first, "#{options.name}")
+              end
+              print_children(x)
+            end
+          else
+            options.invalid!
+          end
+          return
+        end # if empty
+
+        if x.tag_name == "not-empty"
+          case options.vars.size
+          when 0,1
+            print_block "if (#{options.name}.length > 0)" do
+              if options.vars.size > 0
+                let(options.vars.first, "#{options.name}")
+              end
+              print_children(x)
+            end
+          else
+            options.invalid!
+          end
+          return
+        end # if empty
+
+        if x.tag_name == "array"
+          coll = x.attributes.keys.first
+          var_name = x.attributes.keys.last
+          length = var(coll) + "_length"
+          i = var(coll) + "_i"
+          let length, "#{coll}.length"
+          print "for(let #{i} = 0; #{i} < #{length}; ++#{i}) {\n"
+          indent {
+            let var_name, "#{coll}[#{i}]"
+            x.children.each { |y| print_x(y) }
+          }
+          print "}\n"
+          return
+        end
+
+        append_to_io "<#{x.tag_name} #{x.attributes.map { |k, v| "#{k}=\"#{v}\"" }.join ' '}>".inspect
         indent {
-          print "let #{var_name} = #{coll_name}[#{key_name}];\n"
-          x.children.each { |y| print_x(y) }
+          x.children.each { |y|
+            print_x(y)
+          }
         }
-        print "}\n"
+        if x.end_tag?
+          append_to_io "</#{x.tag_name}>".inspect
+        end
+      end # case
 
-        return
-      end # if x.tag_name == "object"
-
-      if x.tag_name == "array"
-        coll = x.attributes.keys.first
-        var_name = x.attributes.keys.last
-        length = var(coll) + "_length"
-        i = var(coll) + "_i"
-        let length, "#{coll}.length"
-        print "for(let #{i} = 0; #{i} < #{length}; ++#{i}) {\n"
-        indent {
-          let var_name, "#{coll}[#{i}]"
-          x.children.each { |y| print_x(y) }
-        }
-        print "}\n"
-        return
-      end
-
-      append_to_io "<#{x.tag_name} #{x.attributes.map { |k, v| "#{k}=\"#{v}\"" }.join ' '}>".inspect
-      indent {
-        x.children.each { |y|
-          print_x(y)
-        }
-      }
-      if x.end_tag?
-        append_to_io "</#{x.tag_name}>".inspect
-      end
-    end
+    end # def print_x
 
     def to_js
       return io.to_s unless io.empty?
@@ -412,13 +530,20 @@ tags.map_walk! { |n|
 }
 
 js_template = DA_HTML::JS_Template.new(tags)
-# puts js_template.to_js
+puts js_template.to_js
 File.write(
   "tmp/a.js",
   <<-JS
     #{js_template.to_js}
     {
-      let data = {persons : [{name: "Phil", addresses: [{location: "Mongo City", planet: "Main Mongo"}, {location: "Star City", planet: "Earth"}]}]};
+      let data = {
+        persons : [{name: "Phil", addresses: [{location: "Mongo City", planet: "Main Mongo"}, {location: "Star City", planet: "Earth"}]}],
+        minus_3: -3,
+        positive: 5,
+        negative: -5,
+        zero: 0,
+        empty_array: [],
+        };
       let s = template(data);
       console.log(data);
       console.log(s);
