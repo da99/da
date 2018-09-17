@@ -6,43 +6,48 @@ html = File.read("extra/sample.html")
 
 module DA_HTML
 
+  alias Node = Node
+  alias Attribute_Value = Int32 | Int64 | String
+
   extend self
 
   def text?(x : Myhtml::Node)
     x.tag_name == "-text"
   end
 
-  def to_tag(n : Myhtml::Node, index = 0) : Text | Tag
+  def to_tag(n : Myhtml::Node, parent : Tag?, index : Int32) : Node
     if text?(n)
-      Text.new(n, index: index)
-    else
-      a = {} of String => Int32 | Int64 | String
-      c = [] of Tag | Text
-      n.attributes.each { |k, v|
-        case v
-        when Int32 | Int64 | String
-          a[k] = v
-        else
-          raise Exception.new("Unknown attribute for #{n.tag_name}: #{k.inspect}=#{v.inspect}")
-        end
-      }
-      n.children.each_with_index { |y, i|
-        c.push DA_HTML.to_tag(y, index: i)
-      }
-      Tag.new(n.tag_name, a, children: c, index: index)
+      return Text.new(n, parent: nil, index: index)
     end
-  end
 
-  struct Text
+    a = {} of String => Attribute_Value
+    n.attributes.each { |k, v|
+      case v
+      when Attribute_Value
+        a[k] = v
+      else
+        raise Exception.new("Unknown attribute for #{n.tag_name}: #{k.inspect}=#{v.inspect}")
+      end
+    }
+    t = Tag.new(n.tag_name, index: index, attributes: a)
+
+    n.children.each_with_index { |y, i|
+      t.children.push DA_HTML.to_tag(y, parent: t, index: i)
+    }
+    t
+  end # def
+
+  class Text
 
     getter tag_text : String
     getter index = 0
+    getter parent : Tag? = nil
 
-    def initialize(n : Myhtml::Node, @index = 0)
+    def initialize(n : Myhtml::Node, @parent, @index)
       @tag_text = n.tag_text
     end # === def
 
-    def initialize(@tag_text, @index = 0)
+    def initialize(@tag_text, @parent, @index)
     end # === def
 
     def empty?
@@ -61,22 +66,23 @@ module DA_HTML
       @tag_text = s
     end
 
-    def map_walk!(&blok : Text | Tag -> Text | Tag | Nil)
+    def map_walk!(&blok : Node -> Node | Nil)
       blok.call self
     end # === def
 
   end # === struct Text
 
-  struct Tag
+  class Tag
 
     # =============================================================================
     # Instance:
     # =============================================================================
 
     getter tag_name : String
-    getter attributes = {} of String => Int32 | Int64 | String
-    getter children   = [] of Tag | Text
+    getter parent   : Tag? = nil
     getter index      = 0
+    getter attributes = {} of String => Attribute_Value
+    getter children   = [] of Tag | Text
 
     @end_tag : Bool
 
@@ -89,10 +95,17 @@ module DA_HTML
                    true
                  end
       node.attributes.each { |k, v| @attributes[k] = v }
-      node.children.each { |c| @children.push DA_HTML.to_tag(c) }
+      node.children.each_with_index { |c, i| @children.push DA_HTML.to_tag(c, parent: self, index: i) }
     end # === def
 
-    def initialize(@tag_name : String, attributes, children : Array(Tag | Text)? = nil, end_tag : Bool? = true, text : String? = nil, @index = 0)
+    def initialize(
+      @tag_name : String,
+      @index,
+      attributes,
+      children : Array(Tag | Text) = [] of Tag | Text,
+      @end_tag : Bool = true,
+      text : String? = nil,
+    )
       if attributes
         attributes.each { |k, v| @attributes[k] = v }
       end
@@ -102,11 +115,33 @@ module DA_HTML
       end
 
       if text
-        @children.push Text.new(text)
+        @children.push Text.new(text, parent: self, index: children.size)
       end
-
-      @end_tag = end_tag
     end # === def
+
+    def attributes(x)
+      @attributes = {} of String => Attribute_Value
+      x.each { |k, v|
+        @attributes[k] = v
+      }
+      @attributes
+    end # === def
+
+    def tag_text
+      if children.empty?
+        nil
+      else
+        children.first.tag_text
+      end
+    end
+
+    def tag_text(s : String)
+      if children.size == 1
+        children.pop
+      end
+      children.push Text.new(s, parent: self, index: children.size)
+      @children
+    end # def
 
     def end_tag?
       @end_tag
@@ -120,11 +155,11 @@ module DA_HTML
       false
     end
 
-    def map_walk!(&blok : Text | Tag -> Text | Tag | Nil)
+    def map_walk!(&blok : Node -> Node | Nil)
       result = blok.call(self)
       case result
       when Tag
-        new_children = [] of Text | Tag
+        new_children = [] of Node
         result.children.each { |c|
           r = c.map_walk!(&blok)
           case r
@@ -174,8 +209,8 @@ module DA_HTML
       @raw = raw.gsub(/\<=([\ a-zA-Z0-9\.\_\-]+)\>/) { |x, y|
         "<var #{y[1]}></var>"
       }
-      Myhtml::Parser.new(@raw).body!.children.each { |node|
-        tags.push DA_HTML.to_tag(node)
+      Myhtml::Parser.new(@raw).body!.children.each_with_index { |node, i|
+        tags.push DA_HTML.to_tag(node, parent: nil, index: i)
       }
     end # === def
 
@@ -183,7 +218,7 @@ module DA_HTML
       tags.each { |x| yield x }
     end
 
-    def map_walk!(&blok : Text | Tag -> Text | Tag | Nil)
+    def map_walk!(&blok : Node -> Node | Nil)
       new_tags = [] of Tag | Text
       tags.each { |t|
         result = t.map_walk! { |t2| blok.call(t2) }
@@ -347,7 +382,9 @@ module Upcase_HREF
   def clean(t)
     case
     when t.is_a?(DA_HTML::Tag) && t.tag_name == "a"
-      return DA_HTML::Tag.new(tag_name: "a", attributes: {"href"=>"/UPCASE"}, text: "done")
+      t.attributes({"href"=>"/UPCASE"})
+      t.tag_text "#{t.tag_text} done"
+      return t
     end
     return t
   end
