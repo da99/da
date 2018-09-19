@@ -15,9 +15,13 @@ module DA_HTML
     x.tag_name == "-text"
   end
 
+  def comment?(n : Myhtml::Node)
+    n.tag_name == "_comment"
+  end
+
   def to_tag(n : Myhtml::Node, parent : Tag?, index : Int32) : Node
-    if text?(n)
-      return Text.new(n, parent: nil, index: index)
+    if text?(n) || comment?(n)
+      return Text.new(n, parent: parent, index: index)
     end
 
     a = {} of String => Attribute_Value
@@ -40,14 +44,16 @@ module DA_HTML
   class Text
 
     getter tag_text : String
-    getter index = 0
-    getter parent : Tag? = nil
+    getter index    = 0
+    getter parent   : Tag? = nil
+    @is_comment = false
 
     def initialize(n : Myhtml::Node, @parent, @index)
+      @is_comment = n.tag_name == "_comment"
       @tag_text = n.tag_text
     end # === def
 
-    def initialize(@tag_text, @parent, @index)
+    def initialize(@tag_text, @parent, @index, @is_comment)
     end # === def
 
     def empty?
@@ -60,6 +66,10 @@ module DA_HTML
 
     def text?
       true
+    end
+
+    def comment?
+      @is_comment
     end
 
     def tag_text(s : String)
@@ -139,7 +149,7 @@ module DA_HTML
       if children.size == 1
         children.pop
       end
-      children.push Text.new(s, parent: self, index: children.size)
+      children.push Text.new(s, parent: self, index: children.size, is_comment: false)
       @children
     end # def
 
@@ -152,6 +162,10 @@ module DA_HTML
     end
 
     def text?
+      false
+    end
+
+    def comment?
       false
     end
 
@@ -190,7 +204,7 @@ module DA_HTML
 
   end # === struct Tag
 
-  class Tags
+  class Nodes
 
     def self.walk(t)
       yield t
@@ -201,8 +215,8 @@ module DA_HTML
       end
     end # === def
 
-    getter raw    : String
-    getter tags  = [] of Tag | Text
+    getter raw  : String
+    getter nodes = [] of Node
     include Enumerable(DA_HTML::Tag | DA_HTML::Text)
 
     def initialize(raw : String)
@@ -210,29 +224,29 @@ module DA_HTML
         "<var #{y[1]}></var>"
       }
       Myhtml::Parser.new(@raw).body!.children.each_with_index { |node, i|
-        tags.push DA_HTML.to_tag(node, parent: nil, index: i)
+        nodes.push DA_HTML.to_tag(node, parent: nil, index: i)
       }
     end # === def
 
     def each
-      tags.each { |x| yield x }
+      nodes.each { |x| yield x }
     end
 
     def map_walk!(&blok : Node -> Node | Nil)
-      new_tags = [] of Tag | Text
-      tags.each { |t|
+      new_nodes = [] of Node
+      nodes.each { |t|
         result = t.map_walk! { |t2| blok.call(t2) }
         case
         when result.is_a?(Tag) || result.is_a?(Text)
-          new_tags.push result
+          new_nodes.push result
         when result == :remove
           nil
         end
       }
-      @tags = new_tags
+      @nodes = new_nodes
     end
 
-  end # === class Tags
+  end # === class Nodes
 
   module Cleaner
     def clean(x) : Tag | Symbol
@@ -242,46 +256,119 @@ module DA_HTML
 
   struct Collection_Options
 
-    getter name : String
-    getter origin : Tag
-    @as : String? = nil
-    getter vars = [] of String
+    COLLECTION_PATTERN = /^([a-zA-Z\.\_\-0-9]+)\ +:\ +(\[(\ *[a-z\_0-9]+\ *)?\]\ +.+)$/
+    AS_PATTERN         = /^([a-zA-Z\.\_\-0-9]+) as\ +([a-z0-9\_\,\ ]+)(:\ +(.+))?$/
+    getter name     : String  = ""
+    getter as_name  : String? = nil
+    getter cr_type  : String? = nil
+    getter key_name : String? = nil
+    getter origin   : Tag
 
-    def initialize(x)
-      @origin = x
-      pieces = x.attributes.keys.join(' ').split(/[\ ,]+/)
-      @name = pieces.shift
-      @as = (pieces.first? == "as") ? pieces.shift : nil
-      @vars = pieces
+    def initialize(@origin)
+      str = @origin.attributes["data-cr"].not_nil!.to_s
+      is_valid = str.match(COLLECTION_PATTERN)
+
+      if is_valid
+        is_valid = is_valid.to_a.map { |x| (x.nil?) ? x : x.strip }
+        @name    = is_valid[1].not_nil!
+        @as_name = is_valid[3]?
+        @cr_type = is_valid[2].not_nil!.sub("[#{as_name}]", "[]")
+        return
+      end
+
+      is_valid = str.match(AS_PATTERN)
+
+      if is_valid
+        is_valid = is_valid.to_a.map { |x| (x.nil?) ? x : x.strip }
+
+        @name    = is_valid[1].not_nil!
+        pieces   = is_valid[2].not_nil!.split(/\ *,\ */).compact.map(&.strip)
+        if is_valid[4]?
+          @cr_type = is_valid[4]
+        end
+
+        case pieces.size
+        when 2
+          @key_name = pieces.first
+          @as_name = pieces.last
+        when 1
+          @as_name = pieces.last
+        else
+          raise Exception.new("Invalid option: <#{origin.tag_name} #{str.inspect}")
+        end
+        return
+      end # if
+
+      raise Exception.new("Invalid option: <#{origin.tag_name} #{str.inspect}")
     end # def
 
-    def has_vars
-      @as
-    end
+    def raw
+      "<#{origin.tag_name} #{origin.attributes.map { |k, v| "#{k}=#{v.inspect}" }.join ' '}>"
+    end # === def
 
-    def invalid!
-      raise Exception.new("Invalid: <#{origin.tag_name} #{origin.attributes.keys.join ' '}> #{vars.inspect}")
+    {% for x in "key_name as_name cr_type".split %}
+      def {{x.id}}?
+        !@{{x.id}}.nil?
+      end
+
+      def {{x.id}}!
+        @{{x.id}}.not_nil!
+      end
+    {% end %}
+
+    def invalid!(m : String)
+      raise Exception.new("#{m}: <#{origin.tag_name} #{origin.attributes.inspect}> ")
     end # === def
 
   end # === struct Collection_Options
 
   struct JS_Template
 
-    getter tags   : Tags
-    getter io     : IO::Memory = IO::Memory.new
+    getter nodes  : Nodes
+    getter js_io  : IO::Memory = IO::Memory.new
+    getter cr_io  : IO::Memory = IO::Memory.new
     getter pieces : Deque(String) = Deque(String).new
     getter levels : Deque(Int32) = Deque(Int32).new
 
     def initialize(x : String)
-      @tags = Tags.new(x)
+      @nodes = Nodes.new(x)
     end # def
 
-    def initialize(@tags)
+    def initialize(@nodes)
     end # === def
 
-    def append_to_io(x : String)
-      io << spaces << "io += " << x << ";\n"
-      io
+    def javascript
+      convert
+      @js_io.to_s
+    end
+
+    def crystal
+      convert
+      @cr_io.to_s
+    end
+
+    def to_crystal(o : Collection_Options)
+      o.invalid!("Missing Crystal Type") if !o.cr_type?
+      meth_name = "type_check"
+      s = <<-Crystal
+
+        def #{meth_name}(#{o.as_name || "x"} : #{o.cr_type!})
+          #{o.as_name || "x"}
+        end
+
+        def #{meth_name}(#{o.as_name || "x"} : T) forall T
+          {% raise "got \#{T}, expected #{o.cr_type}: " + #{o.raw.inspect} %}
+        end
+        #{meth_name}(#{o.name})
+        # (->(#{o.as_name || "x"} : #{o.cr_type!}) { #{o.as_name || "x"} }).call(#{o.name})
+      Crystal
+      cr_io << s
+      s
+    end
+
+    def append_to_js(x : String)
+      js_io << spaces << "io += " << x << ";\n"
+      js_io
     end # === def
 
     def indent
@@ -294,33 +381,23 @@ module DA_HTML
       "  " * levels.size
     end # === def
 
-    def var(x : String)
+    def var_name(x : String)
       x.gsub(/[^a-zA-Z0-9\-]/, "_")
     end
 
-    def print_var(x : String, y : String)
-      io << spaces << "var " << var(x) << " = " << y << ";\n"
-      io
-    end # === def
-
     def let(x : String, y : String)
-      io << spaces << "let " << var(x) << " = " << y << ";\n"
-      io
+      js_io << spaces << "let " << var_name(x) << " = " << y << ";\n"
+      js_io
     end # === def
-
-    def print(x : String)
-      io << spaces << x
-      io
-    end
 
     def print_line(x : String)
-      io << spaces << x << ";\n"
-      io
+      js_io << spaces << x << ";\n"
+      js_io
     end # === def
 
     def print_children(x)
       x.children.each { |y|
-        print_x(y)
+        print(y)
       }
     end # === def
 
@@ -332,18 +409,29 @@ module DA_HTML
       print "} // #{s}\n"
     end
 
-    def print_x(x)
+    def print(x : String)
+      js_io << spaces << x
+      js_io
+    end
+
+    def print(x : Node)
       case x
 
       when DA_HTML::Text
         return if x.empty?
-        append_to_io x.tag_text.inspect
+        append_to_js x.tag_text.inspect
         return
 
       when DA_HTML::Tag
         if x.tag_name == "var"
           var_name = x.attributes.keys.join(' ')
-          append_to_io "#{var_name}.toString()"
+          append_to_js "#{var_name}.toString()"
+          return
+        end
+
+        if x.tag_name == "crystal"
+          txt = x.children.find { |y| y.comment? }.not_nil!.tag_text.not_nil!.strip
+           cr_io << txt
           return
         end
 
@@ -351,145 +439,115 @@ module DA_HTML
         # Attribute Options:
         # =============================================================================
 
-        options = Collection_Options.new(x)
-
         if x.tag_name == "object"
+          options   = Collection_Options.new(x)
           coll_name = options.name
+          var_name  = options.as_name.not_nil!
 
-          case options.vars.size
-          when 2
-            key_name, var_name = options.vars
-          when 1
-            key_name = "#{coll_name}_k"
-            var_name = options.vars.last
-          else
-            options.invalid!
-          end # case
+          key_name = if options.key_name?
+                       options.key_name.not_nil!
+                     else
+                       "#{coll_name}_k"
+                     end
 
-          print "for (let #{key_name} in #{coll_name}) {\n"
-          indent {
-            print "let #{var_name} = #{coll_name}[#{key_name}];\n"
-            x.children.each { |y| print_x(y) }
+          print_block("for (let #{key_name} in #{coll_name})") {
+            let var_name, "#{coll_name}[#{key_name}]"
+            print_children(x)
           }
-          print "}\n"
           return
         end # if x.tag_name == "object"
 
         if x.tag_name == "negative"
-          case options.vars.size
-          when 0, 1
-            print_block "if (#{options.name} < 0)" do
-              if options.vars.size > 0
-                let(options.vars.first, "#{options.name}")
-              end
-              print_children(x)
+          options = Collection_Options.new(x)
+          to_crystal(options)
+          print_block("if (#{options.name} < 0)") {
+            if options.as_name?
+              let(options.as_name.not_nil!, "#{options.name}")
             end
-          else
-            options.invalid!
-          end
+            print_children(x)
+          }
           return
         end # if negative
 
         if x.tag_name == "zero"
-          case options.vars.size
-          when 0, 1
-            print_block "if (#{options.name} === 0)" do
-              if options.vars.size > 0
-                let(options.vars.first, "#{options.name}")
-              end
-              print_children(x)
+          options = Collection_Options.new(x)
+          to_crystal(options)
+          print_block("if (#{options.name} === 0)") {
+            if options.as_name?
+              let(options.as_name.not_nil!, options.name)
             end
-          else
-            options.invalid!
-          end
+            print_children(x)
+          }
           return
         end # if zero
 
         if x.tag_name == "positive"
-          case options.vars.size
-          when 0,1
-            print_block "if (#{options.name} > 0)" do
-              if options.vars.size > 0
-                let(options.vars.first, "#{options.name}")
-              end
-              print_children(x)
+          options = Collection_Options.new(x)
+          to_crystal(options)
+          print_block("if (#{options.name} > 0)") {
+            if options.as_name?
+              let(options.as_name.not_nil!, options.name)
             end
-          else
-            options.invalid!
-          end
+            print_children(x)
+          }
           return
         end # if positive
 
         if x.tag_name == "empty"
-          case options.vars.size
-          when 0,1
-            print_block "if (#{options.name}.length === 0)" do
-              if options.vars.size > 0
-                let(options.vars.first, "#{options.name}")
-              end
-              print_children(x)
+          options = Collection_Options.new(x)
+          print_block("if (#{options.name}.length === 0)") {
+            if options.as_name?
+              let(options.as_name.not_nil!, options.name)
             end
-          else
-            options.invalid!
-          end
+            print_children(x)
+          }
           return
         end # if empty
 
         if x.tag_name == "not-empty"
-          case options.vars.size
-          when 0,1
-            print_block "if (#{options.name}.length > 0)" do
-              if options.vars.size > 0
-                let(options.vars.first, "#{options.name}")
-              end
-              print_children(x)
+          options = Collection_Options.new(x)
+          print_block("if (#{options.name}.length > 0)") {
+            if options.as_name?
+              let(options.as_name.not_nil!, options.name)
             end
-          else
-            options.invalid!
-          end
+            print_children(x)
+          }
           return
         end # if empty
 
         if x.tag_name == "array"
-          coll = x.attributes.keys.first
-          var_name = x.attributes.keys.last
-          length = var(coll) + "_length"
-          i = var(coll) + "_i"
+          options = Collection_Options.new(x)
+          coll     = options.name
+          var_name = options.as_name.not_nil!
+          length   = var_name(coll) + "_length"
+          i        = var_name(coll) + "_i"
           let length, "#{coll}.length"
-          print "for(let #{i} = 0; #{i} < #{length}; ++#{i}) {\n"
-          indent {
+          print_block("for(let #{i} = 0; #{i} < #{length}; ++#{i})") {
             let var_name, "#{coll}[#{i}]"
-            x.children.each { |y| print_x(y) }
+            print_children(x)
           }
-          print "}\n"
           return
-        end
+        end # if x.tag_name == "array"
 
-        append_to_io "<#{x.tag_name} #{x.attributes.map { |k, v| "#{k}=\"#{v}\"" }.join ' '}>".inspect
+        append_to_js "<#{x.tag_name} #{x.attributes.map { |k, v| "#{k}=\"#{v}\"" }.join ' '}>".inspect
         indent {
-          x.children.each { |y|
-            print_x(y)
-          }
+          print_children(x)
         }
-        if x.end_tag?
-          append_to_io "</#{x.tag_name}>".inspect
-        end
+        append_to_js("</#{x.tag_name}>".inspect) if x.end_tag?
       end # case
 
-    end # def print_x
+    end # def print
 
-    def to_js
-      return io.to_s unless io.empty?
-      io << "function template(data) {\n"
-      indent {
-        let "io", "\"\""
-        tags.each { |x|
-          print_x(x)
+    def convert
+      return self if !js_io.empty? || !cr_io.empty?
+      print_block("function template(data)") {
+        indent {
+          let "io", "\"\""
+          nodes.each { |x| print(x) }
+          print "return io;\n"
         }
-        print "return io;\n"
       }
-      io << "}\n"
-      to_js
+      self
     end # === def
 
   end # === struct JS_Template
@@ -520,8 +578,8 @@ module Clean_First_Text
   end # === def
 end # === module Clean_First_Text
 
-tags = DA_HTML::Tags.new(html)
-tags.map_walk! { |n|
+nodes = DA_HTML::Nodes.new(html)
+nodes.map_walk! { |n|
   Upcase_HREF.clean(
     Clean_First_Text.clean(
       n
@@ -529,26 +587,29 @@ tags.map_walk! { |n|
   )
 }
 
-js_template = DA_HTML::JS_Template.new(tags)
-puts js_template.to_js
-File.write(
-  "tmp/a.js",
-  <<-JS
-    #{js_template.to_js}
-    {
-      let data = {
-        persons : [{name: "Phil", addresses: [{location: "Mongo City", planet: "Main Mongo"}, {location: "Star City", planet: "Earth"}]}],
-        minus_3: -3,
-        positive: 5,
-        negative: -5,
-        zero: 0,
-        empty_array: [],
-        };
-      let s = template(data);
-      console.log(data);
-      console.log(s);
-    }
-  JS
-)
-Process.exec("node", "tmp/a.js".split)
+js_template = DA_HTML::JS_Template.new(nodes)
+# puts js_template.javascript
+puts js_template.crystal
+File.write("tmp/html.cr", js_template.crystal)
+Process.exec("crystal", "build tmp/html.cr -o tmp/html.cr.run".split)
+# File.write(
+#   "tmp/a.js",
+#   <<-JS
+#     #{js_template.javascript}
+#     {
+#       let data = {
+#         persons : [{name: "Phil", addresses: [{location: "Mongo City", planet: "Main Mongo"}, {location: "Star City", planet: "Earth"}]}],
+#         minus_3: -3,
+#         positive: 5,
+#         negative: -5,
+#         zero: 0,
+#         empty_array: [],
+#         };
+#       let s = template(data);
+#       // console.log(data);
+#       console.log(s);
+#     }
+#   JS
+# )
+# Process.exec("node", "tmp/a.js".split)
 

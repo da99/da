@@ -1,37 +1,57 @@
 
+<crystal>
+<!--
+  struct Sample
+    def minus_3
+    2
+    end
+
+    def zero
+    0
+    end
+
+    def positive
+    3.to_s
+    end
+  end
+
+  data = Sample.new
+
+-->
+</crystal>
+
 <div id="t1" class="red">
   <a href="/local">O_o</a>
-  <p>
-    1 2
-    <span>3</span>
-  </p>
+  <p> 1 2 <span>3</span> </p>
 </div>
+
 <div id="t2"></div>
+
 <div id="compiled">
-  <negative data.minus_3 as y>
+  <negative data-cr="data.minus_3 as y : Int32 | Int64">
     <p>This is negative: <=y></p>
   </negative>
-  <zero data.zero as x>
+  <zero data-cr="data.zero as x : Int32">
     <p>This is zero: <=x></p>
   </zero>
-  <positive data.positive as x>
+  <positive data-cr="data.positive as x : Int32">
     <p>This is positive: <=x></p>
   </positive>
 
-  <empty data.empty_array>
+  <empty data-cr="data.empty_array : [] of Int32">
     <p>This is empty: data.empty_array</p>
   </empty>
 
-  <not-empty data.persons as y>
+  <not-empty data-cr="data.persons as y : Int32">
     <p>This is not empty?: <=y.length></p>
   </not-empty>
 
-  <array data.persons as p>
+  <array data-cr="data.persons as p : Person">
     <p class="name">
       <=p.name>
     </p>
-    <array p.addresses as addr>
-      <object addr as k,v>
+    <array data-cr="p.addresses : [addr] of Addr">
+      <object data-cr="addr as k, v">
         <p class="addr">
           <=k>: <=v>
         </p>
