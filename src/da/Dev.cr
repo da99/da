@@ -106,7 +106,7 @@ module DA
       Dir.cd da_dir
       new_file = "tmp/out/#{app_dir.gsub('/', "__")}.sh"
       if !File.exists?(file_path)
-        File.write(new_file, "echo File does not exist: #{raw_path}; exit 1")
+        File.write(new_file, "ERROR: File does not exist: #{file_path}")
         return false
       end
 
@@ -175,7 +175,15 @@ module DA
             next if !File.file?(file)
             DA.orange! "=== Running: {{#{file}}} in {{#{Dir.current}}} #{"-=" * 6}"
 
-            dir, script_file = File.read(file).strip.split('\n').map(&.strip)
+            raw = File.read(file).strip
+            if raw[/Error: /i]?
+              DA.red! raw
+              FileUtils.rm(file)
+              next
+            end
+
+            raw_lines = raw.split('\n').map(&.strip)
+            dir, script_file = raw_lines
             key = dir
 
             Dir.cd(dir) {
