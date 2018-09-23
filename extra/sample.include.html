@@ -1,0 +1,79 @@
+
+<crystal>
+<!--
+  struct Person
+    getter name : String
+    def initialize(@name)
+    end
+
+    def addresses
+      [{"k"=>"v"}, {"k2"=>"v2"}]
+    end
+  end
+
+  struct Sample
+    def minus_3
+    2
+    end
+
+    def zero
+    0
+    end
+
+    def positive
+    3
+    end
+
+    def empty_array
+     [] of Int32
+    end
+
+    def persons
+      [Person.new("Bob"), Person.new("Alice")]
+    end
+  end
+
+  data = Sample.new
+
+-->
+</crystal>
+
+<div id="t1" class="red">
+  <a href="/local">O_o</a>
+  <p> 1 2 <span>3</span> </p>
+</div>
+
+<div id="t2"></div>
+
+<div id="compiled">
+  <negative data.minus_3 AS y>
+    <p>This is negative: <=y></p>
+  </negative>
+  <zero data.zero AS x>
+    <p>This is zero: <=x></p>
+  </zero>
+  <positive data.positive AS x>
+    <p>This is positive: <=x></p>
+  </positive>
+
+  <empty data.empty_array>
+    <p>This is empty: data.empty_array</p>
+  </empty>
+
+  <not-empty data.persons AS y>
+    <p>This is not empty?: <=y.length></p>
+  </not-empty>
+
+  <each data.persons AS p>
+    <p class="name">
+      <=p.name>
+    </p>
+    <each p.addresses AS addr>
+      <each addr AS k, v>
+        <p class="addr">
+          <=k>: <=v>
+        </p>
+      </each>
+    </each>
+  </each>
+</div>

@@ -1,49 +1,112 @@
 
 module DA_HTML
 
-  struct Tag
+  class Tag
 
-    getter page : DA_HTML::Base
-    getter tag_name : Symbol
-    getter id       : Deque(Char)
-    getter _class   : Deque(Char)
-    getter attrs    : String
-    getter single_attrs = Deque(Symbol).new
+    # =============================================================================
+    # Instance:
+    # =============================================================================
 
-    def initialize(@page, @tag_name, *args, **attrs)
-      args.each { |x|
-        case x
-        when String
-          id_class = page.split_id_class(x)
-          @id = id_class.first
-          @_class = id_class.last
-        when Symbol
-          single_attrs.push
-        else
-          raise Invalid_Attr_Value.new("#{@tag_name.inspect} #{x.inspect}")
-        end
-      }
-      @attrs = attrs
-    end # === def initialize
+    getter tag_name : String
+    getter parent   : Tag? = nil
+    getter index      = 0
+    getter attributes = {} of String => Attribute_Value
+    getter children   = [] of Tag | Text
 
-    def to_s(io)
-      io << '<'
-      page.write_tag(tag_name)
-      unless @id.empty?
-        io << " id=\""
-        @id.each { |x| io << x }
-        io << "\""
+    @end_tag : Bool
+
+    def initialize(node : Myhtml::Node, @index = 0)
+      @tag_name = node.tag_name
+      @end_tag = case @tag_name
+                 when "input"
+                   false
+                 else
+                   true
+                 end
+      node.attributes.each { |k, v| @attributes[k] = v }
+      node.children.each_with_index { |c, i| @children.push DA_HTML.to_tag(c, parent: self, index: i) }
+    end # === def
+
+    def initialize(
+      @tag_name : String,
+      @index,
+      attributes,
+      children : Array(Tag | Text) = [] of Tag | Text,
+      @end_tag : Bool = true,
+      text : String? = nil,
+    )
+      if attributes
+        attributes.each { |k, v| @attributes[k] = v }
       end
-      unless @_class.empty?
-        io << " class=\""
-        @id.each { |x| io << x }
-        io << "\""
+
+      if children
+        children.each { |c| @children.push c }
       end
-      attrs.each { |k, v|
-        page.write_attr k, v
+
+      if text
+        @children.push Text.new(text, parent: self, index: children.size)
+      end
+    end # === def
+
+    def attributes(x)
+      @attributes = {} of String => Attribute_Value
+      x.each { |k, v|
+        @attributes[k] = v
       }
-      io << '>'
-    end # === def to_s
+      @attributes
+    end # === def
+
+    def tag_text
+      if children.empty?
+        nil
+      else
+        children.first.tag_text
+      end
+    end
+
+    def tag_text(s : String)
+      if children.size == 1
+        children.pop
+      end
+      children.push Text.new(s, parent: self, index: children.size, is_comment: false)
+      @children
+    end # def
+
+    def end_tag?
+      @end_tag
+    end
+
+    def empty?
+      children.empty?
+    end
+
+    def text?
+      false
+    end
+
+    def comment?
+      false
+    end
+
+    def map_walk!(&blok : Node -> Node | Nil)
+      result = blok.call(self)
+      case result
+      when Tag
+        new_children = [] of Node
+        result.children.each { |c|
+          r = c.map_walk!(&blok)
+          case r
+          when Tag, Text
+            new_children.push r
+          end
+        }
+        @tag_name = result.tag_name
+        @attributes = result.attributes
+        @children = new_children
+        return self
+      end
+      result
+    end # === def
 
   end # === struct Tag
 
