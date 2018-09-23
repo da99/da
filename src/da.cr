@@ -38,5 +38,7 @@ require "./da/Time"
 
 require "./da/Script"
 
+require "./da/Utility"
+
 require "./da/Specs"
 

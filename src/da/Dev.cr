@@ -10,7 +10,7 @@ module DA
   end
 
   def development?
-    !(ENV["IS_DEVELOPMENT"]? || ENV["IS_DEV"]? || "").empty? || File.exists?("/apps/is_dev.txt")
+    !(ENV["IS_DEVELOPMENT"]? || "").empty?
   end # === def
 
   def inspect!(*args)
