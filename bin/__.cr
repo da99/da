@@ -1,6 +1,4 @@
 
-require "myhtml"
-require "da"
 require "../src/da_html"
 
 html = File.read("extra/sample.html")
@@ -51,6 +49,7 @@ doc.map_walk! { |n|
 
 # puts da_html.javascript
 puts doc.html
+puts doc.raw
 # puts doc.crystal
 # puts doc.javascript
 File.write("tmp/html.cr", doc.crystal)

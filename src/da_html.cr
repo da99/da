@@ -1,25 +1,13 @@
 
+require "myhtml"
+require "da"
+
 module DA_HTML
 
   extend self
 
-  alias Node = Text | Tag
+  alias Node = Text | Tag | Comment
   alias Attribute_Value = Int32 | Int64 | String
-
-  def html5_prepend
-    <<-HTML5
-    <!doctype html>
-    <html lang="en">
-    HTML5
-  end
-
-  def close_custom_tags(s : String)
-    s
-      .sub(/<html>/, html5_prepend)
-      .gsub(/\<=([\ a-zA-Z0-9\.\_\-]+)\>/) { |x, y| "<var #{y[1]}></var>" }
-      .gsub(/\<include\ +"?([^"\>]+)"?\>/) { |x, y| File.read(y[1]) }
-      .gsub(/\<template\ +"?([^"\>]+)"?\>/) { |x, y| %[<template>#{y[1]}</template>] }
-  end # === def
 
   def text?(x : Myhtml::Node)
     x.tag_name == "-text"
@@ -29,9 +17,12 @@ module DA_HTML
     n.tag_name == "_comment"
   end
 
-  def to_tag(n : Myhtml::Node, parent : Tag?, index : Int32) : Node
-    if text?(n) || comment?(n)
-      return Text.new(n, parent: parent, index: index)
+  def to_tag(n : Myhtml::Node, index : Int32) : Node
+    case n.tag_name
+    when "_comment"
+      return Comment.new(n, index: index)
+    when "-text"
+      return Text.new(n, index: index)
     end
 
     a = {} of String => Attribute_Value
@@ -46,7 +37,7 @@ module DA_HTML
     t = Tag.new(n.tag_name, index: index, attributes: a)
 
     n.children.each_with_index { |y, i|
-      t.children.push DA_HTML.to_tag(y, parent: t, index: i)
+      t.children.push DA_HTML.to_tag(y, index: i)
     }
     t
   end # def
@@ -67,10 +58,12 @@ module DA_HTML
 
 end # === module DA_HTML
 
+require "./da_html/Comment"
 require "./da_html/Tag"
 require "./da_html/Text"
 require "./da_html/Document"
 require "./da_html/Tag_Options"
 require "./da_html/To_HTML"
-require "./da_html/To_JS"
+require "./da_html/To_Javascript"
+require "./da_html/Each_Node"
 

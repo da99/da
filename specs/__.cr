@@ -16,7 +16,9 @@ end
 DA_SPEC.pattern(ARGV.join(" ")) unless ARGV.empty?
 extend DA_SPEC
 
-require "../examples/*"
-require "./dsl/*"
+require "./compiler/Each_Node"
+require "./compiler/Document"
+# require "../examples/*"
+# require "./dsl/*"
 
 

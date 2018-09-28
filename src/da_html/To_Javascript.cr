@@ -1,11 +1,10 @@
 
 module DA_HTML
-  struct To_JS
+  class To_Javascript
 
     getter document : Document
-    getter js_io   : IO::Memory    = IO::Memory.new
-    getter cr_io   : IO::Memory    = IO::Memory.new
-    getter levels  : Deque(Int32)  = Deque(Int32).new
+    getter js_io   : IO::Memory   = IO::Memory.new
+    getter levels  : Deque(Int32) = Deque(Int32).new
 
     def initialize(@document)
     end # def
@@ -85,78 +84,53 @@ module DA_HTML
     end
 
     def print(x : Node)
-      case x
+      case
 
-      when DA_HTML::Text
+      when x.is_a?(DA_HTML::Text)
         return if x.empty?
         append_to_js x.tag_text.inspect
         return
 
-      when DA_HTML::Tag
-        if x.tag_name == "var"
+      when x.tag_name == "var"
           var_name = x.attributes.keys.join(' ')
           append_to_js "#{var_name}.toString()"
           return
+
+      when x.tag_name == "crystal"
+        if cr_io.empty?
+          @cr_io << <<-Crystal
+
+            def js_negative(x : Int32 | Int64)
+              x
+            end
+            def js_positive(x : Int32 | Int64)
+              x
+            end
+            def js_zero(x : Int32 | Int64)
+              x
+            end
+            def js_empty(x : Array(T)) forall T
+              x
+            end
+            def js_not_empty(x : Array(T)) forall T
+              x
+            end
+            def js_each(x : Array(T)) forall T
+              x
+            end
+            def js_each(x : Hash(K,V)) forall K,V
+              x
+            end
+
+          Crystal
         end
 
-        if x.tag_name == "crystal"
+        txt = x.children.find { |y| y.comment? }.not_nil!.tag_text.not_nil!.strip
+         cr_io << txt
+        return
 
-          if cr_io.empty?
-            @cr_io << <<-Crystal
+      when x.tag_name == "negative"
 
-              def js_negative(x : Int32 | Int64)
-                x
-              end
-              def js_positive(x : Int32 | Int64)
-                x
-              end
-              def js_zero(x : Int32 | Int64)
-                x
-              end
-              def js_empty(x : Array(T)) forall T
-                x
-              end
-              def js_not_empty(x : Array(T)) forall T
-                x
-              end
-              def js_each(x : Array(T)) forall T
-                x
-              end
-              def js_each(x : Hash(K,V)) forall K,V
-                x
-              end
-
-            Crystal
-          end
-
-          txt = x.children.find { |y| y.comment? }.not_nil!.tag_text.not_nil!.strip
-           cr_io << txt
-          return
-        end
-
-        # =============================================================================
-        # Attribute Options:
-        # =============================================================================
-
-        if x.tag_name == "object"
-          options   = Tag_Options.new(x)
-          coll_name = options.name
-          var_name  = options.as_name.not_nil!
-
-          key_name = if options.key_name?
-                       options.key_name.not_nil!
-                     else
-                       "#{coll_name}_k"
-                     end
-
-          print_block("for (let #{key_name} in #{coll_name})") {
-            let var_name, "#{coll_name}[#{key_name}]"
-            print_children(x)
-          }
-          return
-        end # if x.tag_name == "object"
-
-        if x.tag_name == "negative"
           options = Tag_Options.new(x)
           to_crystal("negative", options)
           print_block("if (#{options.name} < 0)") {
@@ -166,9 +140,9 @@ module DA_HTML
             print_children(x)
           }
           return
-        end # if negative
 
-        if x.tag_name == "zero"
+      when x.tag_name == "zero"
+
           options = Tag_Options.new(x)
           to_crystal("zero", options)
           print_block("if (#{options.name} === 0)") {
@@ -178,9 +152,9 @@ module DA_HTML
             print_children(x)
           }
           return
-        end # if zero
 
-        if x.tag_name == "positive"
+      when x.tag_name == "positive"
+
           options = Tag_Options.new(x)
           to_crystal("positive", options)
           print_block("if (#{options.name} > 0)") {
@@ -190,9 +164,8 @@ module DA_HTML
             print_children(x)
           }
           return
-        end # if positive
 
-        if x.tag_name == "empty"
+      when x.tag_name == "empty"
           options = Tag_Options.new(x)
           to_crystal("empty", options)
           print_block("if (#{options.name}.length === 0)") {
@@ -202,9 +175,8 @@ module DA_HTML
             print_children(x)
           }
           return
-        end # if empty
 
-        if x.tag_name == "not-empty"
+      when x.tag_name == "not-empty"
           options = Tag_Options.new(x)
           to_crystal("not-empty", options)
           print_block("if (#{options.name}.length > 0)") {
@@ -214,30 +186,17 @@ module DA_HTML
             print_children(x)
           }
           return
-        end # if empty
 
-        if x.tag_name == "array"
-          options = Tag_Options.new(x)
-          coll     = options.name
-          var_name = options.as_name.not_nil!
-          length   = var_name(coll) + "_length"
-          i        = var_name(coll) + "_i"
-          let length, "#{coll}.length"
-          print_block("for(let #{i} = 0; #{i} < #{length}; ++#{i})") {
-            let var_name, "#{coll}[#{i}]"
-            print_children(x)
-          }
-          return
-        end # if x.tag_name == "array"
-
+      when x.print_in_html?
         append_to_js "<#{x.tag_name} #{x.attributes.map { |k, v| "#{k}=\"#{v}\"" }.join ' '}>".inspect
         indent {
           print_children(x)
         }
         append_to_js("</#{x.tag_name}>".inspect) if x.end_tag?
+
       end # case
 
     end # def print
 
-  end # === struct To_JS
+  end # === struct To_Javascript
 end # === module DA_HTML
