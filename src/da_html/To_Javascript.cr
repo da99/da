@@ -1,16 +1,52 @@
 
 module DA_HTML
-  class To_Javascript
 
-    getter document : Document
-    getter js_io   : IO::Memory   = IO::Memory.new
-    getter levels  : Deque(Int32) = Deque(Int32).new
+  class JS_Printer
 
-    def initialize(@document)
-    end # def
+    getter js_io = IO::Memory.new
+
+    def initialize
+    end # === def
+
+    def <<(*args)
+      args.each { |x| js_io << x }
+      js_io
+    end
+
+    def to_s(io)
+      js_io.to_s(io)
+    end
+
+    def html_printer
+      To_HTML
+    end
+
+    def print_open_tag(tag : Tag)
+      case tag.tag_name
+      when "html", "head", "body"
+        return tag
+      when "script"
+        self << "function #{tag.attributes["id"]} {\n  let io = \"\";\n  "
+      else
+        html_printer.to_html_open_tag(self, tag)
+      end
+      tag
+    end # === def
+
+    def print_close_tag(tag : Tag)
+      case tag.tag_name
+      when "html", "head"
+        return tag
+      when "script"
+        self << "\n  return io;\n}\n"
+      else
+        html_printer.to_html_close_tag(self, tag)
+      end
+      tag
+    end # === def
 
     def convert
-      return self if !js_io.empty? || !cr_io.empty?
+      return self if !js_io.empty?
       print_block("function template(data)") {
         indent {
           let "io", "\"\""
@@ -19,20 +55,6 @@ module DA_HTML
         }
       }
       self
-    end # === def
-
-    def to_crystal(tag_name : String, o : Tag_Options)
-      as_name   = o.as_name || "x"
-      s = <<-Crystal
-
-        js_#{tag_name.gsub(/[^a-z0-9\_]/, '_')}(#{o.name})
-      Crystal
-      cr_io << s
-      s
-    end # def to_crystal
-
-    def to_crystal
-      document.cr_io.to_s
     end # === def
 
     def append_to_js(x : String)
@@ -78,12 +100,14 @@ module DA_HTML
       print "} // #{s}\n"
     end
 
-    def print(x : String)
-      js_io << spaces << x
+    def print(x : Text | Comment)
+      js_io << x.tag_text
       js_io
+      # js_io << spaces << x
+      # js_io
     end
 
-    def print(x : Node)
+    def _print(x : Node)
       case
 
       when x.is_a?(DA_HTML::Text)
@@ -95,39 +119,6 @@ module DA_HTML
           var_name = x.attributes.keys.join(' ')
           append_to_js "#{var_name}.toString()"
           return
-
-      when x.tag_name == "crystal"
-        if cr_io.empty?
-          @cr_io << <<-Crystal
-
-            def js_negative(x : Int32 | Int64)
-              x
-            end
-            def js_positive(x : Int32 | Int64)
-              x
-            end
-            def js_zero(x : Int32 | Int64)
-              x
-            end
-            def js_empty(x : Array(T)) forall T
-              x
-            end
-            def js_not_empty(x : Array(T)) forall T
-              x
-            end
-            def js_each(x : Array(T)) forall T
-              x
-            end
-            def js_each(x : Hash(K,V)) forall K,V
-              x
-            end
-
-          Crystal
-        end
-
-        txt = x.children.find { |y| y.comment? }.not_nil!.tag_text.not_nil!.strip
-         cr_io << txt
-        return
 
       when x.tag_name == "negative"
 
@@ -197,6 +188,21 @@ module DA_HTML
       end # case
 
     end # def print
+
+
+  end # === class JS_Printer
+
+  module To_Javascript
+    extend self
+
+    def to_javascript(document)
+      to_javascript(JS_Printer.new, document).to_s
+    end # def
+
+    def to_javascript(io, document)
+      Walk.walk(io, document)
+      io
+    end # def
 
   end # === struct To_Javascript
 end # === module DA_HTML

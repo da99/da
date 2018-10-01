@@ -66,4 +66,5 @@ require "./da_html/Tag_Options"
 require "./da_html/To_HTML"
 require "./da_html/To_Javascript"
 require "./da_html/Each_Node"
+require "./da_html/Walk"
 

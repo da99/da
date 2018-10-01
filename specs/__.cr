@@ -18,6 +18,8 @@ extend DA_SPEC
 
 require "./compiler/Each_Node"
 require "./compiler/Document"
+require "./compiler/To_HTML"
+require "./compiler/To_Javascript"
 # require "../examples/*"
 # require "./dsl/*"
 

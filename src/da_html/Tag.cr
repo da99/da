@@ -11,16 +11,8 @@ module DA_HTML
     getter attributes = {} of String => Attribute_Value
     getter children   = [] of Node
 
-    @end_tag : Bool
-
     def initialize(node : Myhtml::Node, @index = 0)
       @tag_name = node.tag_name
-      @end_tag = case @tag_name
-                 when "input"
-                   false
-                 else
-                   true
-                 end
       node.attributes.each { |k, v| @attributes[k] = v }
       node.children.each_with_index { |c, i| @children.push DA_HTML.to_tag(c, index: i) }
     end # === def
@@ -30,7 +22,6 @@ module DA_HTML
       @index,
       attributes,
       children : Array(Tag | Text) = [] of Tag | Text,
-      @end_tag : Bool = true,
       text : String? = nil,
     )
       if attributes
