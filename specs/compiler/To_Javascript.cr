@@ -8,24 +8,23 @@ describe "DA_HTML::To_Javascript.to_javascript" do
         </head>
         <body>
           <script id="my_template">
-            <p>a</p>
+            <p>abc</p>
           </script>
         </body>
       </html>
     HTML
     doc = DA_HTML::Document.new(html)
-    actual = DA_HTML::To_Javascript.to_javascript(doc).strip
-    expected = %[
+    actual = DA.strip_each_line(DA_HTML::To_Javascript.to_javascript(doc).strip)
+    expected = DA.strip_each_line(%[
         function my_template(data) {
           let io = "";
-          let io += "<p>a</p>";
+          io += "<p>";
+          io += "abc";
+          io += "</p>";
           return io;
         }
-    ]
+    ])
 
-    if DA.development?
-      puts actual
-    end
     assert actual == expected
   end # === it
 end # === desc "DA_HTML::To_Javascript.to_javascript"

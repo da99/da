@@ -1,33 +1,33 @@
 
 module DA_HTML
+
+  # Example:
+  #   Walk.walk(io, document.children)
+  #   io.open_tag(node) -> node || nil
+  #   io.close_tag(node)
+  #   io.node(node)
   module Walk
     extend self
 
-    def walk(printer, document : Document)
-      document.nodes.each { |node|
-        walk(printer, node)
-      }
-      printer
+    def walk(io, children : Array(Node))
+      children.each { |node| walk(io, node) }
+      io
     end
 
-    def walk(printer, node : Node)
+    def walk(io, node)
       case node
       when Tag
-        result = printer.print_open_tag(node)
-        if result
-          result.children.each { |n|
-            walk(printer, n)
-          }
-          printer.print_close_tag(result)
+        result = io.open_tag(node)
+        case result
+        when Tag
+          walk(io, result.children)
+          io.close_tag(result)
         end
       else
-        printer.print(node)
+        io.node(node)
       end
-    end
-
-    def walk(other)
-      nil
-    end
+      io
+    end # def
 
   end # === module Walk
 end # === module DA_HTML

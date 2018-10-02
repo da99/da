@@ -1,16 +1,36 @@
 
 module DA_HTML
 
-  class JS_Printer
+  class To_Javascript
+
+    def self.to_javascript(document)
+      io = self.new
+      Walk.walk(io, document.children)
+      io.to_s
+    end # def
+
+    # =============================================================================
+    # Instance:
+    # =============================================================================
 
     getter js_io = IO::Memory.new
+    @in_script_tag = false
+    @in_tag = false
 
     def initialize
     end # === def
 
+    def in_script?
+      @in_script_tag
+    end
+
+    def in_tag?
+      @in_tag
+    end # === def
+
     def <<(*args)
       args.each { |x| js_io << x }
-      js_io
+      self
     end
 
     def to_s(io)
@@ -21,45 +41,54 @@ module DA_HTML
       To_HTML
     end
 
-    def print_open_tag(tag : Tag)
+    def node(node : Text)
+      return self if !in_script?
+      return self if node.empty?
+      if in_tag?
+        self << %[ io += #{node.tag_text.inspect};\n]
+      else
+        Walk.walk(self, Document.new(node.tag_text.strip).children)
+      end
+      self
+    end # === def
+
+    def node(node : Comment)
+      self
+    end # === def
+
+    def open_tag(tag : Tag)
       case tag.tag_name
       when "html", "head", "body"
         return tag
       when "script"
-        self << "function #{tag.attributes["id"]} {\n  let io = \"\";\n  "
+        @in_script_tag = true
+        self << %[
+          function #{tag.attributes["id"]}(data) {
+            let io = \"\";
+        ].lstrip
       else
-        html_printer.to_html_open_tag(self, tag)
+        temp_io = IO::Memory.new
+        html_printer.to_html_open_tag(temp_io, tag)
+        self << %[ io += #{temp_io.to_s.inspect};\n ]
+        @in_tag = true
       end
       tag
     end # === def
 
-    def print_close_tag(tag : Tag)
+    def close_tag(tag : Tag)
       case tag.tag_name
-      when "html", "head"
+      when "html", "head", "body"
         return tag
       when "script"
-        self << "\n  return io;\n}\n"
+        self << "  return io;\n}\n"
+        @in_script_tag = false
       else
-        html_printer.to_html_close_tag(self, tag)
+        temp_io = IO::Memory.new
+        html_printer.to_html_close_tag(temp_io, tag)
+        self << %[ io += #{temp_io.to_s.inspect};\n ]
+        @in_tag = false
       end
       tag
-    end # === def
-
-    def convert
-      return self if !js_io.empty?
-      print_block("function template(data)") {
-        indent {
-          let "io", "\"\""
-          nodes.each { |x| print(x) }
-          print "return io;\n"
-        }
-      }
-      self
-    end # === def
-
-    def append_to_js(x : String)
-      js_io << spaces << "io += " << x << ";\n"
-      js_io
     end # === def
 
     def indent
@@ -78,18 +107,12 @@ module DA_HTML
 
     def let(x : String, y : String)
       js_io << spaces << "let " << var_name(x) << " = " << y << ";\n"
-      js_io
+      self
     end # === def
 
     def print_line(x : String)
       js_io << spaces << x << ";\n"
-      js_io
-    end # === def
-
-    def print_children(x)
-      x.children.each { |y|
-        print(y)
-      }
+      self
     end # === def
 
     def print_block(s : String)
@@ -102,7 +125,7 @@ module DA_HTML
 
     def print(x : Text | Comment)
       js_io << x.tag_text
-      js_io
+      self
       # js_io << spaces << x
       # js_io
     end
@@ -190,19 +213,6 @@ module DA_HTML
     end # def print
 
 
-  end # === class JS_Printer
-
-  module To_Javascript
-    extend self
-
-    def to_javascript(document)
-      to_javascript(JS_Printer.new, document).to_s
-    end # def
-
-    def to_javascript(io, document)
-      Walk.walk(io, document)
-      io
-    end # def
-
   end # === struct To_Javascript
+
 end # === module DA_HTML

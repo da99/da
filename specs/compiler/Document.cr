@@ -4,6 +4,6 @@ describe DA_HTML::Document do
     html = %[ <html><body>a</body></html> ]
 
     doc = DA_HTML::Document.new(html)
-    assert doc.nodes.class == Array(DA_HTML::Node)
+    assert doc.children.class == Array(DA_HTML::Node)
   end # === it
 end # === desc "Document"

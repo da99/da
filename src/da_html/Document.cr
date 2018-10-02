@@ -27,12 +27,12 @@ module DA_HTML
 
     getter origin : String
     getter raw    : String
-    getter nodes = [] of Node
+    getter children = [] of Node
 
     def initialize(@origin : String)
       @raw   = DA.until_done(@origin) { |x| Document.close_custom_tags(x) }
       parser = Myhtml::Parser.new(@raw)
-      nodes.push DA_HTML.to_tag(parser.root!, index: 0)
+      children.push DA_HTML.to_tag(parser.root!, index: 0)
     end # === def
 
     def html

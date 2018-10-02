@@ -2,6 +2,12 @@
 require "myhtml"
 require "da"
 
+module DA
+  def strip_each_line(s : String)
+    s.strip.lines.map { |x| x.strip }.join('\n')
+  end # def
+end # === module DA
+
 module DA_HTML
 
   extend self
