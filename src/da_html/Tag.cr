@@ -7,34 +7,13 @@ module DA_HTML
     # =============================================================================
 
     getter tag_name   : String
-    getter index      = 0
     getter attributes = {} of String => Attribute_Value
     getter children   = [] of Node
 
-    def initialize(node : Myhtml::Node, @index = 0)
+    def initialize(node : Myhtml::Node)
       @tag_name = node.tag_name
       node.attributes.each { |k, v| @attributes[k] = v }
-      node.children.each_with_index { |c, i| @children.push DA_HTML.to_tag(c, index: i) }
-    end # === def
-
-    def initialize(
-      @tag_name : String,
-      @index,
-      attributes,
-      children : Array(Tag | Text) = [] of Tag | Text,
-      text : String? = nil,
-    )
-      if attributes
-        attributes.each { |k, v| @attributes[k] = v }
-      end
-
-      if children
-        children.each { |c| @children.push c }
-      end
-
-      if text
-        @children.push Text.new(text, index: children.size)
-      end
+      node.children.each { |c| @children.push DA_HTML.to_tag(c) }
     end # === def
 
     def tag_text
@@ -49,21 +28,10 @@ module DA_HTML
       children.empty?
     end
 
-    def to_html
-      to_html(IO::Memory.new).to_s
-    end
-
-    def to_html(io)
-      io << "<#{tag_name}"
-      attributes.each { |k, v|
-        io << " #{k}=#{v.inspect}"
-      }
-      io << '>'
-      children.each { |n|
-        n.to_html(io)
-      }
-      io << "</#{tag_name}>"
-      io
+    def void?
+      {"area", "base", "br", "col", "command", "embed",
+       "hr", "img", "input", "keygen", "link", "meta",
+       "param", "source", "track", "wbr"}.includes? tag_name
     end # === def
 
   end # === struct Tag

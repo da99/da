@@ -3,9 +3,8 @@ module DA_HTML
   struct Comment
 
     getter tag_text : String
-    getter index = 0
 
-    def initialize(n : Myhtml::Node, @index)
+    def initialize(n : Myhtml::Node)
       @tag_text = n.tag_text
     end # def
 

@@ -16,6 +16,11 @@ module DA_HTML
       io
     end # === def
 
+    # NOTE: .to_javascript is to filter out
+    # HTML that exists out of the <script> tag.
+    # .to_javascript! is for tags inside <script> tag.
+    # In other words, .to_javascript is to ignore tags,
+    # .to_javascript! is to always render tags.
     def self.to_javascript(io, n : Node)
       case n
       when Tag
@@ -33,29 +38,30 @@ module DA_HTML
         function #{n.attributes["id"]}(data) {
           let io = "";
       ]
-      io = tags_to_javascript(io, Fragment.new(n.tag_text.not_nil!).children)
-      io << %[
-          return io;
-        }
-      ]
+      io = to_javascript!(io, Fragment.new(n.tag_text.not_nil!).children)
+      io << %[ return io;\n} ]
       io
     end # === def
 
-    def self.tags_to_javascript(io, nodes : Array(Node))
+    def self.to_javascript!(io, nodes : Array(Node))
       nodes.each { |n|
-        tag_to_javascript(io, n)
+        to_javascript!(io, n)
       }
       io
     end # === def
 
-    def self.tag_to_javascript(io, node : Node)
+    def self.to_javascript!(io, node : Node)
       case node
       when Comment
         :ignore
       when Text
         io << %[ io += #{node.to_html.inspect};\n] unless node.empty?
       when Tag
-        io << %[ io += #{node.to_html.inspect};\n]
+        io << %[ io += #{To_HTML.to_html_open_tag(node).inspect};\n]
+        node.children.each { |n|
+          to_javascript!(io, n)
+        }
+        io << %[ io += #{To_HTML.to_html_close_tag(node).inspect};\n]
       else
         raise Exception.new("Unknown tag for template javascript: #{node.inspect}")
       end

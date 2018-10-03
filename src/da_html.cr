@@ -43,29 +43,15 @@ module DA_HTML
     n.tag_name == "_comment"
   end
 
-  def to_tag(n : Myhtml::Node, index : Int32) : Node
+  def to_tag(n : Myhtml::Node) : Node
     case n.tag_name
     when "_comment"
-      return Comment.new(n, index: index)
+      return Comment.new(n)
     when "-text"
-      return Text.new(n, index: index)
+      return Text.new(n)
     end
 
-    a = {} of String => Attribute_Value
-    n.attributes.each { |k, v|
-      case v
-      when Attribute_Value
-        a[k] = v
-      else
-        raise Exception.new("Unknown attribute for #{n.tag_name}: #{k.inspect}=#{v.inspect}")
-      end
-    }
-    t = Tag.new(n.tag_name, index: index, attributes: a)
-
-    n.children.each_with_index { |y, i|
-      t.children.push DA_HTML.to_tag(y, index: i)
-    }
-    t
+    Tag.new(n)
   end # def
 
   def prettify(str : String)

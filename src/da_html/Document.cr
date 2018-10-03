@@ -32,7 +32,7 @@ module DA_HTML
     def initialize(@origin : String)
       @raw   = DA.until_done(@origin) { |x| Document.close_custom_tags(x) }
       parser = Myhtml::Parser.new(@raw)
-      children.push DA_HTML.to_tag(parser.root!, index: 0)
+      children.push DA_HTML.to_tag(parser.root!)
     end # === def
 
     def body
