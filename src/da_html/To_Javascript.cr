@@ -3,11 +3,63 @@ module DA_HTML
 
   class To_Javascript
 
-    def self.to_javascript(document)
-      io = self.new
-      Walk.walk(io, document.children)
+    def self.to_javascript(document : Document)
+      io = IO::Memory.new
+      to_javascript(io, document.children)
       io.to_s
     end # def
+
+    def self.to_javascript(io, nodes : Array(Node))
+      nodes.each { |node|
+        to_javascript(io, node)
+      }
+      io
+    end # === def
+
+    def self.to_javascript(io, n : Node)
+      case n
+      when Tag
+        if n.tag_name == "script"
+          script_tag_to_javascript(io, n)
+        else
+          to_javascript(io, n.children)
+        end
+      end # case
+      io
+    end # === def
+
+    def self.script_tag_to_javascript(io, n : Node)
+      io << %[
+        function #{n.attributes["id"]}(data) {
+          let io = "";
+      ]
+      io = tags_to_javascript(io, Fragment.new(n.tag_text.not_nil!).children)
+      io << %[
+          return io;
+        }
+      ]
+      io
+    end # === def
+
+    def self.tags_to_javascript(io, nodes : Array(Node))
+      nodes.each { |n|
+        tag_to_javascript(io, n)
+      }
+      io
+    end # === def
+
+    def self.tag_to_javascript(io, node : Node)
+      case node
+      when Comment
+        :ignore
+      when Text
+        io << %[ io += #{node.to_html.inspect};\n] unless node.empty?
+      when Tag
+        io << %[ io += #{node.to_html.inspect};\n]
+      else
+        raise Exception.new("Unknown tag for template javascript: #{node.inspect}")
+      end
+    end # === def
 
     # =============================================================================
     # Instance:

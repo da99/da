@@ -17,5 +17,14 @@ module DA_HTML
       "-text"
     end
 
+    def to_html
+      to_html(IO::Memory.new).to_s
+    end # === def
+
+    def to_html(io)
+      io << DA_HTML_ESCAPE.escape(tag_text)
+      io
+    end # === def
+
   end # === struct Text
 end # === module DA_HTML

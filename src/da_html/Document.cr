@@ -35,6 +35,16 @@ module DA_HTML
       children.push DA_HTML.to_tag(parser.root!, index: 0)
     end # === def
 
+    def body
+      body = DA_HTML.find_tag_name(self, "html > body")
+      case body
+      when Tag
+        return body
+      else
+        raise Exception.new("Tag not found: body")
+      end
+    end
+
     def html
       To_HTML.new(self).to_html
     end # === def

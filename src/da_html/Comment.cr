@@ -17,5 +17,13 @@ module DA_HTML
       "_comment"
     end # === def
 
+    def to_html
+      to_html(IO::Memory.new).to_s
+    end # === def
+
+    def to_html(io)
+      io
+    end # === def
+
   end # === class Comment
 end # === module DA_HTML

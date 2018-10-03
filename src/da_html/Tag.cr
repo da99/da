@@ -49,6 +49,23 @@ module DA_HTML
       children.empty?
     end
 
+    def to_html
+      to_html(IO::Memory.new).to_s
+    end
+
+    def to_html(io)
+      io << "<#{tag_name}"
+      attributes.each { |k, v|
+        io << " #{k}=#{v.inspect}"
+      }
+      io << '>'
+      children.each { |n|
+        n.to_html(io)
+      }
+      io << "</#{tag_name}>"
+      io
+    end # === def
+
   end # === struct Tag
 
 end # === module DA_HTML

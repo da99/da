@@ -1,5 +1,6 @@
 
 require "myhtml"
+require "da_html_escape"
 require "da"
 
 module DA
@@ -14,6 +15,25 @@ module DA_HTML
 
   alias Node = Text | Tag | Comment
   alias Attribute_Value = Int32 | Int64 | String
+
+  def find_tag_name(node, tag_name : String)
+    tag_name.split(/\ *>\ */).reduce(node) { |n, t|
+      result = _find_tag_name(n, t)
+
+      case result
+      when Tag
+        :ignore
+      else
+        return nil
+      end
+      result
+    }
+  end
+
+  def _find_tag_name(node, tag_name : String)
+    result = node.children.find { |n| n.tag_name == tag_name }
+    result
+  end # def
 
   def text?(x : Myhtml::Node)
     x.tag_name == "-text"
@@ -68,6 +88,7 @@ require "./da_html/Comment"
 require "./da_html/Tag"
 require "./da_html/Text"
 require "./da_html/Document"
+require "./da_html/Fragment"
 require "./da_html/Tag_Options"
 require "./da_html/To_HTML"
 require "./da_html/To_Javascript"

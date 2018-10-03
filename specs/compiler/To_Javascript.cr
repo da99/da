@@ -25,6 +25,7 @@ describe "DA_HTML::To_Javascript.to_javascript" do
         }
     ])
 
+    puts actual if DA.development?
     assert actual == expected
   end # === it
 end # === desc "DA_HTML::To_Javascript.to_javascript"
