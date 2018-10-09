@@ -46,9 +46,8 @@ describe "DA_HTML::To_Javascript.to_javascript" do
       %[
         function my_template(data) {
           let io = "";
-          let x = undefined;
-          for (var _coll__i = 0, _coll__len = coll.length; _coll__i < _coll__len; ++_coll__i) {
-            x = coll[_coll__i];
+          for (let _coll__i = 0, _coll__len = coll.length; _coll__i < _coll__len; ++_coll__i) {
+            let x = coll[_coll__i];
             io += "<p>";
             io += x.toString();
             io += "</p>";
@@ -57,7 +56,6 @@ describe "DA_HTML::To_Javascript.to_javascript" do
         }
       ]
     )
-    puts actual if DA.development?
     assert actual == expected
   end # === it
 

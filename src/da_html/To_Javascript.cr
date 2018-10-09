@@ -85,9 +85,8 @@ module DA_HTML
     def self.each_to_javascript(io, node)
       coll, _as, var = node.attributes.keys
       io << %[
-        let #{coll}_i = 0;
-        let #{coll}_len = #{coll}.length;
-        for(#{coll}_i; #{coll}_i < #{coll}_len; ++#{coll}_i) {
+        for (let _#{coll}__i = 0, _#{coll}__len = #{coll}.length; _#{coll}__i < _#{coll}__len; ++_#{coll}__i) {
+          let #{var} = #{coll}[_#{coll}__i];
       ].lstrip
       to_javascript!(io, node.children)
 

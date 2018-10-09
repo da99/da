@@ -14,6 +14,23 @@ macro strip(str)
 end
 
 DA_SPEC.pattern(ARGV.join(" ")) unless ARGV.empty?
+
+module DA_SPEC
+  def examine(*args)
+    all_strings = args.all? { |pair| pair.last.is_a?(String) }
+    puts "================================"
+    args.each { |x|
+      puts x.first
+      if all_strings
+        puts x.last
+      else
+        puts x.last.inspect
+      end
+      puts "================================"
+    }
+  end
+end # === module DA_SPEC
+
 extend DA_SPEC
 
 require "./compiler/Each_Node"
