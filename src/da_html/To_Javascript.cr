@@ -1,15 +1,17 @@
 
 module DA_HTML
 
-  class To_Javascript
+  module To_Javascript
 
-    def self.to_javascript(document : Document)
+    extend self
+
+    def to_javascript(document : Document)
       io = IO::Memory.new
       to_javascript(io, document.children)
       io.to_s
     end # def
 
-    def self.to_javascript(io, nodes : Array(Node))
+    def to_javascript(io, nodes : Array(Node))
       nodes.each { |node|
         to_javascript(io, node)
       }
@@ -21,11 +23,11 @@ module DA_HTML
     # .to_javascript! is for tags inside <script> tag.
     # In other words, .to_javascript is to ignore tags,
     # .to_javascript! is to always render tags.
-    def self.to_javascript(io, n : Node)
+    def to_javascript(io, n : Node)
       case n
       when Tag
-        if n.tag_name == "script"
-          script_tag_to_javascript(io, n)
+        if n.tag_name == "template"
+          template_tag_to_javascript(io, n)
         else
           to_javascript(io, n.children)
         end
@@ -33,24 +35,24 @@ module DA_HTML
       io
     end # === def
 
-    def self.script_tag_to_javascript(io, n : Node)
+    def template_tag_to_javascript(io, n : Node)
       io << %[
         function #{n.attributes["id"]}(data) {
           let io = "";
       ]
-      io = to_javascript!(io, Fragment.new(n.tag_text.not_nil!).children)
+      io = to_javascript!(io, n.children)
       io << %[ return io;\n} ]
       io
     end # === def
 
-    def self.to_javascript!(io, nodes : Array(Node))
+    def to_javascript!(io, nodes : Array(Node))
       nodes.each { |n|
         to_javascript!(io, n)
       }
       io
     end # === def
 
-    def self.to_javascript!(io, node : Node)
+    def to_javascript!(io, node : Node)
       case node
       when Comment
         :ignore
@@ -60,6 +62,8 @@ module DA_HTML
         case node.tag_name
         when "each"
           each_to_javascript(io, node)
+        when "each-in"
+          each_in_to_javascript(io, node)
         when "var"
           var_to_javascript(io, node)
         else
@@ -76,17 +80,17 @@ module DA_HTML
       io
     end # === def
 
-    def self.var_to_javascript(io, node)
+    def var_to_javascript(io, node)
       name = node.tag_text
       io << %[io += #{name}.toString();\n]
       io
     end # === def
 
-    def self.each_to_javascript(io, node)
+    def each_to_javascript(io, node)
       coll, _as, var = node.attributes.keys
       io << %[
-        for (let _#{coll}__i = 0, _#{coll}__len = #{coll}.length; _#{coll}__i < _#{coll}__len; ++_#{coll}__i) {
-          let #{var} = #{coll}[_#{coll}__i];
+        for (let #{i coll} = 0, #{length coll} = #{coll}.length; #{i coll} < #{length coll}; ++#{i coll}) {
+          let #{var} = #{coll}[#{i coll}];
       ].lstrip
       to_javascript!(io, node.children)
 
@@ -94,97 +98,42 @@ module DA_HTML
       io
     end # def
 
+    def var_name(name : String)
+      name.gsub(/[^a-z\_0-9]/, "_")
+    end
+
+    def i(name : String)
+      "_#{var_name name}__i"
+    end
+
+    def data(name : String)
+      "data.#{name}"
+    end
+
+    def keys(name : String)
+      "_#{var_name name}__keys"
+    end
+
+    def length(name : String)
+      "_#{var_name name}__length"
+    end
+
+    def each_in_to_javascript(io, node)
+      coll, _as, key, var = node.attributes.keys.join(' ').split(/\ |,/)
+      io << %[
+       for (let #{i(coll)} = 0, #{keys(coll)} = Object.keys(#{coll}), #{length(coll)} = #{keys coll}.length; #{i coll} < #{length coll}; ++#{i(coll)}) {
+         let #{key} = #{keys coll}[#{i coll}];
+         let #{var} = #{coll}[#{key}];
+      ].lstrip
+      to_javascript!(io, node.children)
+      io << %[ }\n]
+      io
+    end # === def
+
     # =============================================================================
     # Instance:
     # =============================================================================
 
-    getter js_io = IO::Memory.new
-    @in_script_tag = false
-    @in_tag = false
-
-    def initialize
-    end # === def
-
-    def in_script?
-      @in_script_tag
-    end
-
-    def in_tag?
-      @in_tag
-    end # === def
-
-    def <<(*args)
-      args.each { |x| js_io << x }
-      self
-    end
-
-    def to_s(io)
-      js_io.to_s(io)
-    end
-
-    def html_printer
-      To_HTML
-    end
-
-    def node(node : Text)
-      return self if !in_script?
-      return self if node.empty?
-      if in_tag?
-        self << %[ io += #{node.tag_text.inspect};\n]
-      else
-        Walk.walk(self, Document.new(node.tag_text.strip).children)
-      end
-      self
-    end # === def
-
-    def node(node : Comment)
-      self
-    end # === def
-
-    def open_tag(tag : Tag)
-      case tag.tag_name
-      when "html", "head", "body"
-        return tag
-      when "script"
-        @in_script_tag = true
-        self << %[
-          function #{tag.attributes["id"]}(data) {
-            let io = \"\";
-        ].lstrip
-      else
-        temp_io = IO::Memory.new
-        html_printer.to_html_open_tag(temp_io, tag)
-        self << %[ io += #{temp_io.to_s.inspect};\n ]
-        @in_tag = true
-      end
-      tag
-    end # === def
-
-    def close_tag(tag : Tag)
-      case tag.tag_name
-      when "html", "head", "body"
-        return tag
-      when "script"
-        self << "  return io;\n}\n"
-        @in_script_tag = false
-      else
-        temp_io = IO::Memory.new
-        html_printer.to_html_close_tag(temp_io, tag)
-        self << %[ io += #{temp_io.to_s.inspect};\n ]
-        @in_tag = false
-      end
-      tag
-    end # === def
-
-    def indent
-      levels.push 1
-      yield
-      levels.pop
-    end # === def
-
-    def spaces
-      "  " * levels.size
-    end # === def
 
     def var_name(x : String)
       x.gsub(/[^a-zA-Z0-9\-]/, "_")

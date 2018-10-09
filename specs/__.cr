@@ -37,6 +37,8 @@ require "./compiler/Each_Node"
 require "./compiler/Document"
 require "./compiler/To_HTML"
 require "./compiler/To_Javascript"
+require "./compiler/To_Javascript.each"
+require "./compiler/To_Javascript.each-in"
 # require "../examples/*"
 # require "./dsl/*"
 
