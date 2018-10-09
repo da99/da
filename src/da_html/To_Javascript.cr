@@ -57,15 +57,43 @@ module DA_HTML
       when Text
         io << %[ io += #{node.to_html.inspect};\n] unless node.empty?
       when Tag
-        io << %[ io += #{To_HTML.to_html_open_tag(node).inspect};\n]
-        node.children.each { |n|
-          to_javascript!(io, n)
-        }
-        io << %[ io += #{To_HTML.to_html_close_tag(node).inspect};\n]
+        case node.tag_name
+        when "each"
+          each_to_javascript(io, node)
+        when "var"
+          var_to_javascript(io, node)
+        else
+          io << %[ io += #{To_HTML.to_html_open_tag(node).inspect};\n]
+          node.children.each { |n|
+            to_javascript!(io, n)
+          }
+          io << %[ io += #{To_HTML.to_html_close_tag(node).inspect};\n]
+        end
       else
         raise Exception.new("Unknown tag for template javascript: #{node.inspect}")
       end
+
+      io
     end # === def
+
+    def self.var_to_javascript(io, node)
+      name = node.tag_text
+      io << %[io += #{name}.toString();\n]
+      io
+    end # === def
+
+    def self.each_to_javascript(io, node)
+      coll, _as, var = node.attributes.keys
+      io << %[
+        let #{coll}_i = 0;
+        let #{coll}_len = #{coll}.length;
+        for(#{coll}_i; #{coll}_i < #{coll}_len; ++#{coll}_i) {
+      ].lstrip
+      to_javascript!(io, node.children)
+
+      io << %[ }\n ]
+      io
+    end # def
 
     # =============================================================================
     # Instance:
