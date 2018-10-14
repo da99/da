@@ -1,61 +1,40 @@
 
 module DA_HTML
-  class Document
 
-    # =============================================================================
-    # Class:
-    # =============================================================================
 
-    def self.html5_prepend
-      <<-HTML5
+  def html5_prepend
+    <<-HTML5
       <!doctype html>
       <html lang="en">
-      HTML5
+    HTML5
+  end
+
+  def cleanup(s : String)
+    s
+      .sub(/<html>/, html5_prepend)
+      .gsub(/\<=([\ a-zA-Z0-9\.\_]+)\>/) { |x, y| "<var>#{y[1]}</var>" }
+      .gsub(/\<include\ +"?([^"\>]+)"?\>/) { |x, y| File.read(y[1]) }
+      .gsub(/\<template\ +"?([^"\>]+)"?\>/) { |x, y| %[<template>#{File.read y[1]}</template>] }
+  end # === def
+
+  def to_document(raw : String)
+    doc    = Deque(Node).new
+    html   = DA.until_done(raw) { |x| DA_HTML.cleanup(x) }
+    parser = Myhtml::Parser.new(html)
+
+    doc.push DA_HTML.to_tag(parser.root!)
+
+    doc
+  end # === def
+
+  def body(doc : Document)
+    body = DA_HTML.find_tag_name(doc, "html > body")
+    case body
+    when Tag
+      return body
+    else
+      raise Exception.new("Tag not found: body")
     end
+  end # === def
 
-    def self.close_custom_tags(s : String)
-      s
-        .sub(/<html>/, html5_prepend)
-        .gsub(/\<=([\ a-zA-Z0-9\.\_]+)\>/) { |x, y| "<var>#{y[1]}</var>" }
-        .gsub(/\<include\ +"?([^"\>]+)"?\>/) { |x, y| File.read(y[1]) }
-        .gsub(/\<template\ +"?([^"\>]+)"?\>/) { |x, y| %[<template>#{File.read y[1]}</template>] }
-    end # === def
-
-    # =============================================================================
-    # Instance:
-    # =============================================================================
-
-    getter origin : String
-    getter raw    : String
-    getter children = [] of Node
-
-    def initialize(@origin : String)
-      @raw   = DA.until_done(@origin) { |x| Document.close_custom_tags(x) }
-      parser = Myhtml::Parser.new(@raw)
-      children.push DA_HTML.to_tag(parser.root!)
-    end # === def
-
-    def body
-      body = DA_HTML.find_tag_name(self, "html > body")
-      case body
-      when Tag
-        return body
-      else
-        raise Exception.new("Tag not found: body")
-      end
-    end
-
-    def html
-      To_HTML.new(self).to_html
-    end # === def
-
-    def javascript
-      To_Javascript.new(self).to_javascript
-    end
-
-    def crystal
-      To_Javascript.new(self).to_crystal
-    end
-
-  end # === struct Document
 end # === module DA_HTML

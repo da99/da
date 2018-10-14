@@ -8,7 +8,7 @@ module DA_HTML
 
     getter tag_name   : String
     getter attributes = {} of String => Attribute_Value
-    getter children   = [] of Node
+    getter children   = Document.new
 
     def initialize(node : Myhtml::Node)
       @tag_name = node.tag_name

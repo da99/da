@@ -1,6 +1,6 @@
 
 module DA_HTML
-  class Text
+  struct Text
 
     getter tag_text : String
 

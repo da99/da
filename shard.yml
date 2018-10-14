@@ -11,6 +11,8 @@ dependencies:
     branch: master
   myhtml:
     github: kostya/myhtml
+  terminal_table:
+    github: benoist/terminal_table.cr
 development_dependencies:
   da_spec:
     github: da99/da_spec.cr

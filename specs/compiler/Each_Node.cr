@@ -10,9 +10,9 @@ describe "DA_HTML::Each_Node#each" do
     ].split.join
 
     expected = ["html", "head", "title", "body", "p", "-text"]
-    doc      = DA_HTML::Document.new(html)
+    doc      = DA_HTML.to_document(html)
     actual   = [] of String
-    DA_HTML::Each_Node.each(doc.children) { |n| actual << n.tag_name }
+    DA_HTML::Each_Node.each(doc) { |n| actual << n.tag_name }
 
     assert expected == actual
   end # === it

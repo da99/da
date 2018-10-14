@@ -3,8 +3,8 @@ module DA_HTML
   module Each_Node
     extend self
 
-    def flatten_nodes(raw : Array(Node))
-      flat = [] of Node
+    def flatten_nodes(raw : Document)
+      flat = Document.new
       raw.each { |n|
         flat << n
         flatten_nodes(n, flat)
@@ -12,7 +12,7 @@ module DA_HTML
       flat
     end # === def
 
-    def flatten_nodes(node : Node, arr : Array(Node))
+    def flatten_nodes(node : Node, arr : Document)
       case node
       when Text
         :ignore
@@ -27,7 +27,7 @@ module DA_HTML
       return arr
     end # === def
 
-    def each(nodes : Array(DA_HTML::Node))
+    def each(nodes : Document)
       flatten_nodes(nodes).each { |n| yield n }
     end # === def
 

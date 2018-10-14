@@ -13,7 +13,15 @@ module DA_HTML
 
   extend self
 
+  struct Text
+  end
+  struct Tag
+  end
+  struct Comment
+  end
+
   alias Node = Text | Tag | Comment
+  alias Document = Deque(Node)
   alias Attribute_Value = Int32 | Int64 | String
 
   def find_tag_name(node, tag_name : String)
@@ -73,6 +81,7 @@ end # === module DA_HTML
 require "./da_html/Comment"
 require "./da_html/Tag"
 require "./da_html/Text"
+require "./da_html/JS_String"
 require "./da_html/Document"
 require "./da_html/Fragment"
 require "./da_html/Tag_Options"

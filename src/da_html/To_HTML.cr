@@ -8,8 +8,8 @@ module DA_HTML
     end # === def
 
     def to_html(io, document : Document)
-      io << "<!doctype html>\n" if io.empty? && document.children.first.tag_name == "html"
-      document.children.each { |n| to_html(io, n) }
+      io << "<!doctype html>\n" if io.empty? && document.first.tag_name == "html"
+      document.each { |n| to_html(io, n) }
       io
     end # === def
 

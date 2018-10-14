@@ -22,7 +22,7 @@ describe "To_Javascript.to_javascript each-in" do
       }
     JS
 
-    doc = DA_HTML::Document.new(html)
+    doc = DA_HTML.to_document(html)
     actual = DA_HTML::To_Javascript.to_javascript(doc)
 
     assert DA.strip_each_line(actual) == DA.strip_each_line(expected)

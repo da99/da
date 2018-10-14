@@ -1,83 +1,107 @@
 
 module DA_HTML
 
+  alias JS_Document = Deque(JS_String | Node)
+
   module To_Javascript
 
     extend self
 
+    def template_tags(doc : Document)
+      bag = JS_Document.new
+      doc.each { |n|
+        if n.is_a?(Tag) && n.tag_name == "template"
+          bag.push n
+          next
+        end
+
+        if n.is_a?(Tag)
+          bag.concat template_tags(n.children)
+          next
+        end
+
+        next
+      }
+      bag
+    end # === def
+
     def to_javascript(document : Document)
-      io = IO::Memory.new
-      to_javascript(io, document.children)
-      io.to_s
+      to_js_document(
+        template_tags(document)
+      )
+        .join '\n'
     end # def
 
-    def to_javascript(io, nodes : Array(Node))
-      nodes.each { |node|
-        to_javascript(io, node)
-      }
-      io
+    def to_js_document(doc : JS_Document)
+      compile_html_tags(
+        compile_template_tags(doc)
+      )
     end # === def
 
-    # NOTE: .to_javascript is to filter out
-    # HTML that exists out of the <script> tag.
-    # .to_javascript! is for tags inside <script> tag.
-    # In other words, .to_javascript is to ignore tags,
-    # .to_javascript! is to always render tags.
-    def to_javascript(io, n : Node)
-      case n
-      when Tag
-        if n.tag_name == "template"
-          template_tag_to_javascript(io, n)
-        else
-          to_javascript(io, n.children)
+    def to_js_document(doc : Document)
+      JS_Document.new.concat doc
+    end # === def
+
+    def compile_template_tags(doc : JS_Document)
+      js_doc = JS_Document.new
+      doc.each { |t|
+        if (t.is_a?(Tag) && t.tag_name == "template")
+          js_doc << JS_String.new(%[
+              function #{t.attributes["id"]}(data) {
+                let io = "";
+          ].strip)
+
+          js_doc.concat to_js_document(t.children)
+
+          js_doc << JS_String.new(%[ return io;\n} ])
+          next
         end
-      end # case
-      io
-    end # === def
 
-    def template_tag_to_javascript(io, n : Node)
-      io << %[
-        function #{n.attributes["id"]}(data) {
-          let io = "";
-      ]
-      io = to_javascript!(io, n.children)
-      io << %[ return io;\n} ]
-      io
-    end # === def
-
-    def to_javascript!(io, nodes : Array(Node))
-      nodes.each { |n|
-        to_javascript!(io, n)
+        js_doc << t
       }
-      io
+      js_doc
     end # === def
 
-    def to_javascript!(io, node : Node)
-      case node
-      when Comment
-        :ignore
-      when Text
-        io << %[ io += #{node.to_html.inspect};\n] unless node.empty?
-      when Tag
-        case node.tag_name
-        when "each"
-          each_to_javascript(io, node)
-        when "each-in"
-          each_in_to_javascript(io, node)
-        when "var"
-          var_to_javascript(io, node)
-        else
-          io << %[ io += #{To_HTML.to_html_open_tag(node).inspect};\n]
-          node.children.each { |n|
-            to_javascript!(io, n)
-          }
-          io << %[ io += #{To_HTML.to_html_close_tag(node).inspect};\n]
+    def compile_html_tags(doc : JS_Document)
+      js_doc = JS_Document.new
+      doc.each { |t|
+        case t
+        when Tag
+          js_doc << JS_String.new(
+            %[ io += #{To_HTML.to_html_open_tag(t).inspect};]
+          )
+          js_doc << JS_String.new(
+            %[ io += #{To_HTML.to_html_close_tag(t).inspect};]
+          )
+
+        when Text
+          unless t.empty?
+            js_doc << JS_String.new(%[ io += #{t.to_html.inspect};\n]) 
+          end
+
+        when JS_String
+          js_doc << t
         end
+      }
+      js_doc
+    end # def
+
+    def tag_to_javascript(js_doc : JS_Document, node : Tag)
+      case node.tag_name
+      when "each"
+        each_to_javascript(io, node)
+      when "each-in"
+        each_in_to_javascript(io, node)
+      when "var"
+        var_to_javascript(io, node)
       else
-        raise Exception.new("Unknown tag for template javascript: #{node.inspect}")
+        io << %[ io += #{To_HTML.to_html_open_tag(node).inspect};\n]
+        node.children.each { |n|
+          to_javascript!(io, n)
+        }
+        io << %[ io += #{To_HTML.to_html_close_tag(node).inspect};\n]
       end
-
-      io
+      js_doc
     end # === def
 
     def var_to_javascript(io, node)
