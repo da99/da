@@ -6,7 +6,7 @@ module DA_HTML
     getter raw      : String
 
     def initialize(@raw : String)
-      doc = Document.new(@raw)
+      doc = Deque(Node).new(@raw)
       @children = doc.body.children
     end
 

@@ -3,11 +3,11 @@ module DA_HTML
   module To_HTML
     extend self
 
-    def to_html(document : Document)
+    def to_html(document : Deque(Node))
       to_html(IO::Memory.new, document).to_s
     end # === def
 
-    def to_html(io, document : Document)
+    def to_html(io, document : Deque(Node))
       io << "<!doctype html>\n" if io.empty? && document.first.tag_name == "html"
       document.each { |n| to_html(io, n) }
       io

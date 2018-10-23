@@ -3,12 +3,12 @@ module DA_HTML
 
   alias JS_Document = Deque(JS_String | Node)
 
-  module To_Javascript
+  module Javascript
 
     extend self
 
-    def template_tags(doc : Document)
-      bag = JS_Document.new
+    def template_tags(doc : Deque(Node))
+      bag = Deque(Node).new
       doc.each { |n|
         if n.is_a?(Tag) && n.tag_name == "template"
           bag.push n
@@ -25,11 +25,24 @@ module DA_HTML
       bag
     end # === def
 
-    def to_javascript(document : Document)
-      to_js_document(
-        template_tags(document)
-      )
-        .join '\n'
+    def to_javascript(nodes : Deque(Node))
+      io = IO::Memory.new
+      template_tags(nodes).each { |n|
+        to_javascript(io, n)
+      }
+      io.to_s
+    end # def
+
+    def to_javascript(io, node : Node)
+      case node
+      when Comment
+        :ignore
+      when Text
+        io << "\nio += #{node.to_html.inspect};"
+      when Tag
+        io << "\nio += #{node.tag_name.inspect};"
+      end # case
+      io
     end # def
 
     def to_js_document(doc : JS_Document)
@@ -38,7 +51,7 @@ module DA_HTML
       )
     end # === def
 
-    def to_js_document(doc : Document)
+    def to_js_document(doc : Deque(Node))
       JS_Document.new.concat doc
     end # === def
 
@@ -271,6 +284,6 @@ module DA_HTML
     end # def print
 
 
-  end # === struct To_Javascript
+  end # === struct Javascript
 
 end # === module DA_HTML

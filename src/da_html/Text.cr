@@ -17,11 +17,11 @@ module DA_HTML
     end
 
     def to_html
-      to_html(IO::Memory.new).to_s
+      DA_HTML_ESCAPE.escape(tag_text)
     end # === def
 
     def to_html(io)
-      io << DA_HTML_ESCAPE.escape(tag_text)
+      io << to_html
       io
     end # === def
 

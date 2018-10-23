@@ -8,25 +8,13 @@ module DA_HTML
 
     getter tag_name   : String
     getter attributes = {} of String => Attribute_Value
-    getter children   = Document.new
+    getter children   = Deque(Node).new
 
     def initialize(node : Myhtml::Node)
       @tag_name = node.tag_name
       node.attributes.each { |k, v| @attributes[k] = v }
       node.children.each { |c| @children.push DA_HTML.to_tag(c) }
     end # === def
-
-    def tag_text
-      if children.empty?
-        nil
-      else
-        children.first.tag_text
-      end
-    end
-
-    def empty?
-      children.empty?
-    end
 
     def void?
       {"area", "base", "br", "col", "command", "embed",

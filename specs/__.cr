@@ -1,6 +1,6 @@
 
+require "da"
 require "da_spec"
-require "inspect_bang"
 require "../src/da_html"
 
 macro strip(str)
@@ -33,14 +33,12 @@ end # === module DA_SPEC
 
 extend DA_SPEC
 
-require "./compiler/Each_Node"
-require "./compiler/Document"
+require "./compiler/to_tags"
 require "./compiler/To_HTML"
-require "./compiler/to_document"
-require "./compiler/To_Javascript"
-require "./compiler/To_Javascript.template_tags"
-require "./compiler/To_Javascript.each"
-require "./compiler/To_Javascript.each-in"
+require "./compiler/to_javascript"
+require "./compiler/Javascript.template_tags"
+require "./compiler/Javascript.each"
+require "./compiler/Javascript.each-in"
 # require "../examples/*"
 # require "./dsl/*"
 

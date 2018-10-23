@@ -1,5 +1,5 @@
 
-describe "To_Javascript.to_javascript each-in" do
+describe "Javascript.to_javascript each-in" do
   it "sets key" do
     html = <<-HTML
     <html><head></head><body>
@@ -22,9 +22,9 @@ describe "To_Javascript.to_javascript each-in" do
       }
     JS
 
-    doc = DA_HTML.to_document(html)
-    actual = DA_HTML::To_Javascript.to_javascript(doc)
+    doc = DA_HTML.to_tags(html)
+    actual = DA_HTML::Javascript.to_javascript(doc)
 
     assert DA.strip_each_line(actual) == DA.strip_each_line(expected)
   end # === it
-end # === desc "To_Javascript.to_javascript each-in"
+end # === desc "Javascript.to_javascript each-in"

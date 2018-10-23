@@ -40,7 +40,7 @@ module Clean_First_Text
   end # === def
 end # === module Clean_First_Text
 
-doc = DA_HTML::Document.new(html)
+doc = Deque(Node).new(html)
 doc.map_walk! { |n|
   Upcase_HREF.clean(
     Clean_First_Text.clean(n)

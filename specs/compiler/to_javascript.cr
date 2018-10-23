@@ -1,6 +1,6 @@
 
 
-describe "DA_HTML::To_Javascript.to_javascript" do
+describe "DA_HTML.to_javascript" do
 
   it "turns template tags to Javascript functions" do
     html = <<-HTML
@@ -11,8 +11,8 @@ describe "DA_HTML::To_Javascript.to_javascript" do
         </body>
       </html>
     HTML
-    doc = DA_HTML.to_document(html)
-    actual = DA.strip_each_line(DA_HTML::To_Javascript.to_javascript(doc))
+    doc = DA_HTML.to_tags(html)
+    actual = DA.strip_each_line(DA_HTML.to_javascript(doc))
     expected = DA.strip_each_line(%[
         function my_template(data) {
           let io = "";
@@ -26,4 +26,4 @@ describe "DA_HTML::To_Javascript.to_javascript" do
     assert actual == expected
   end # === it
 
-end # === desc "DA_HTML::To_Javascript.to_javascript"
+end # === desc "DA_HTML::Javascript.to_javascript"
