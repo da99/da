@@ -45,7 +45,7 @@ module DA_HTML
         {% begin %}
           case node.tag_name
 
-            {% for x in "each each-in var template negative".split %}
+            {% for x in "each each-in var template positive negative zero empty not-empty".split %}
             when {{x}}
               {{x.gsub(/-/, "_").id}}_to_javascript(io, node)
             {% end %}
@@ -114,14 +114,48 @@ module DA_HTML
       io
     end # === def
 
+    def positive_to_javascript(io, node)
+      var = node.attributes.keys.first
+      js_block(io, "if (#{var} === 0)") {
+        node.children.each { |x| to_javascript(io, x) }
+      }
+      io << " // if === 0"
+      io
+    end # def
+
     def negative_to_javascript(io, node)
       var = node.attributes.keys.first
       js_block(io, "if (#{var} < 0)") {
-        node.children.each { |x|
-          to_javascript(io, x)
-        }
+        node.children.each { |x| to_javascript(io, x) }
       }
       io << " // if < 0"
+      io
+    end # def
+
+    def zero_to_javascript(io, node)
+      var = node.attributes.keys.first
+      js_block(io, "if (#{var} === 0)") {
+        node.children.each { |x| to_javascript(io, x) }
+      }
+      io << " // if === 0"
+      io
+    end # def
+
+    def empty_to_javascript(io, node)
+      var = node.attributes.keys.first
+      js_block(io, "if (#{var}.length === 0)") {
+        node.children.each { |x| to_javascript(io, x) }
+      }
+      io << " // if length === 0"
+      io
+    end # def
+
+    def not_empty_to_javascript(io, node)
+      var = node.attributes.keys.first
+      js_block(io, "if (#{var}.length > 0)") {
+        node.children.each { |x| to_javascript(io, x) }
+      }
+      io << " // if length > 0"
       io
     end # def
 
@@ -165,66 +199,6 @@ module DA_HTML
       io << "\n}"
       io
     end
-
-    def _print(x : Node)
-      case
-      when x.tag_name == "zero"
-
-          options = Tag_Options.new(x)
-          to_crystal("zero", options)
-          print_block("if (#{options.name} === 0)") {
-            if options.as_name?
-              let(options.as_name.not_nil!, options.name)
-            end
-            print_children(x)
-          }
-          return
-
-      when x.tag_name == "positive"
-
-          options = Tag_Options.new(x)
-          to_crystal("positive", options)
-          print_block("if (#{options.name} > 0)") {
-            if options.as_name?
-              let(options.as_name.not_nil!, options.name)
-            end
-            print_children(x)
-          }
-          return
-
-      when x.tag_name == "empty"
-          options = Tag_Options.new(x)
-          to_crystal("empty", options)
-          print_block("if (#{options.name}.length === 0)") {
-            if options.as_name?
-              let(options.as_name.not_nil!, options.name)
-            end
-            print_children(x)
-          }
-          return
-
-      when x.tag_name == "not-empty"
-          options = Tag_Options.new(x)
-          to_crystal("not-empty", options)
-          print_block("if (#{options.name}.length > 0)") {
-            if options.as_name?
-              let(options.as_name.not_nil!, options.name)
-            end
-            print_children(x)
-          }
-          return
-
-      when x.print_in_html?
-        append_to_js "<#{x.tag_name} #{x.attributes.map { |k, v| "#{k}=\"#{v}\"" }.join ' '}>".inspect
-        indent {
-          print_children(x)
-        }
-        append_to_js("</#{x.tag_name}>".inspect) if x.end_tag?
-
-      end # case
-
-    end # def print
-
 
   end # === struct Javascript
 

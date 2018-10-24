@@ -1,11 +1,11 @@
 
-describe "Javascript.to_javascript negative" do
+describe "Javascript.to_javascript zero" do
 
-  it "renders variable if negative" do
+  it "renders variable if zero" do
     html = <<-HTML
       <html> <head></head> <body>
           <template id="my_template">
-            <negative data.x> <p><=x></p> </negative>
+            <zero data.x> <p><=x></p> </zero>
           </template>
         </body> </html>
     HTML
@@ -15,11 +15,11 @@ describe "Javascript.to_javascript negative" do
       %[
         function my_template(data) {
           let io = "";
-          if (data.x < 0) {
+          if (data.x === 0) {
             io += "<p>";
             io += x.toString();
             io += "</p>";
-          } // if < 0
+          } // if === 0
           return io;
         } // function
       ]
