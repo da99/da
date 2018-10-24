@@ -20,7 +20,7 @@ describe "DA_HTML.to_javascript" do
           io += "abc";
           io += "</p>";
           return io;
-        }
+        } // function
     ])
 
     assert actual == expected

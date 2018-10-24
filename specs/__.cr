@@ -39,6 +39,7 @@ require "./compiler/to_javascript"
 require "./compiler/Javascript.template_tags"
 require "./compiler/Javascript.each"
 require "./compiler/Javascript.each-in"
+require "./compiler/Javascript.negative"
 # require "../examples/*"
 # require "./dsl/*"
 

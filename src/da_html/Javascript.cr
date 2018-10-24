@@ -42,24 +42,19 @@ module DA_HTML
         io << "\nio += #{node.to_html.inspect};" unless node.empty?
 
       when Tag
-        case node.tag_name
+        {% begin %}
+          case node.tag_name
 
-        when "each"
-          each_to_javascript(io, node)
+            {% for x in "each each-in var template negative".split %}
+            when {{x}}
+              {{x.gsub(/-/, "_").id}}_to_javascript(io, node)
+            {% end %}
 
-        when "each-in"
-          each_in_to_javascript(io, node)
+          else
+            tag_to_javascript(io, node)
 
-        when "var"
-          var_to_javascript(io, node)
-
-        when "template"
-          template_to_javascript(io, node)
-
-        else
-          tag_to_javascript(io, node)
-
-        end
+          end
+        {% end %}
       end # case
       io
     end # def
@@ -70,7 +65,8 @@ module DA_HTML
           let io = "";
       ].strip
       tag.children.each { |x| to_javascript(io, x) }
-      io << "\nreturn io;\n}"
+      io << "\nreturn io;"
+      io << "\n} // function"
       io
     end # === def
 
@@ -118,6 +114,17 @@ module DA_HTML
       io
     end # === def
 
+    def negative_to_javascript(io, node)
+      var = node.attributes.keys.first
+      js_block(io, "if (#{var} < 0)") {
+        node.children.each { |x|
+          to_javascript(io, x)
+        }
+      }
+      io << " // if < 0"
+      io
+    end # def
+
     # =============================================================================
     # Instance:
     # =============================================================================
@@ -152,28 +159,15 @@ module DA_HTML
       self
     end # === def
 
-    def print_block(s : String)
-      print "#{s} {\n"
-      indent {
+    def js_block(io, s : String)
+      io << '\n' << "#{s} {"
         yield
-      }
-      print "} // #{s}\n"
+      io << "\n}"
+      io
     end
 
     def _print(x : Node)
       case
-      when x.tag_name == "negative"
-
-          options = Tag_Options.new(x)
-          to_crystal("negative", options)
-          print_block("if (#{options.name} < 0)") {
-            if options.as_name?
-              let(options.as_name.not_nil!, "#{options.name}")
-            end
-            print_children(x)
-          }
-          return
-
       when x.tag_name == "zero"
 
           options = Tag_Options.new(x)

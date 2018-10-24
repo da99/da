@@ -1,11 +1,11 @@
 
-describe "Javascript.to_javascript each" do
+describe "Javascript.to_javascript negative" do
 
-  it "renders: for coll as x" do
+  it "renders variable if negative" do
     html = <<-HTML
       <html> <head></head> <body>
           <template id="my_template">
-            <each coll as x> <p><=x></p> </each>
+            <negative data.x> <p><=x></p> </negative>
           </template>
         </body> </html>
     HTML
@@ -15,12 +15,11 @@ describe "Javascript.to_javascript each" do
       %[
         function my_template(data) {
           let io = "";
-          for (let _coll__i = 0, _coll__length = coll.length; _coll__i < _coll__length; ++_coll__i) {
-            let x = coll[_coll__i];
+          if (data.x < 0) {
             io += "<p>";
             io += x.toString();
             io += "</p>";
-          }
+          } // if < 0
           return io;
         } // function
       ]

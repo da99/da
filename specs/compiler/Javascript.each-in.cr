@@ -19,7 +19,7 @@ describe "Javascript.to_javascript each-in" do
             io += x.toString();
           }
           return io;
-      }
+      } // function
     JS
 
     doc = DA_HTML.to_tags(html)
