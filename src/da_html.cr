@@ -99,15 +99,18 @@ module DA_HTML
     Javascript.to_javascript(nodes)
   end
 
+  {% for x in "to_html open_tag close_tag".split %}
+    def {{x.id}}(*args)
+      HTML.{{x.id}}(*args)
+    end
+  {% end %}
+
 end # === module DA_HTML
 
 require "./da_html/Comment"
 require "./da_html/Tag"
 require "./da_html/Text"
-require "./da_html/JS_String"
 require "./da_html/Fragment"
-require "./da_html/Tag_Options"
-require "./da_html/To_HTML"
+require "./da_html/HTML"
 require "./da_html/Javascript"
-require "./da_html/Each_Node"
 

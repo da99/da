@@ -1,7 +1,7 @@
 
 module DA_HTML
 
-  alias JS_Document = Deque(JS_String | Node)
+  alias JS_Document = Deque(Node)
 
   module Javascript
 
@@ -37,23 +37,41 @@ module DA_HTML
       case node
       when Comment
         :ignore
+
       when Text
-        io << "\nio += #{node.to_html.inspect};"
+        io << "\nio += #{node.to_html.inspect};" unless node.empty?
+
       when Tag
-        io << "\nio += #{node.tag_name.inspect};"
+        case node.tag_name
+
+        when "each"
+          each_to_javascript(io, node)
+
+        when "each-in"
+          each_in_to_javascript(io, node)
+
+        when "var"
+          var_to_javascript(io, node)
+
+        when "template"
+          io << '\n' << %[
+            function #{node.attributes["id"]}(data) {
+              let io = "";
+          ].strip
+          node.children.each { |x|
+            to_javascript(io, x)
+          }
+          io << "\nreturn io;\n}"
+        else
+          io << %[\nio += #{DA_HTML.open_tag(node).gsub('"', %[\\"]).inspect};]
+          unless node.void?
+            node.children.each { |x| to_javascript(io, x) }
+            io << %[\nio += #{DA_HTML.close_tag(node).inspect};]
+          end
+        end
       end # case
       io
     end # def
-
-    def to_js_document(doc : JS_Document)
-      compile_html_tags(
-        compile_template_tags(doc)
-      )
-    end # === def
-
-    def to_js_document(doc : Deque(Node))
-      JS_Document.new.concat doc
-    end # === def
 
     def compile_template_tags(doc : JS_Document)
       js_doc = JS_Document.new
@@ -81,10 +99,10 @@ module DA_HTML
         case t
         when Tag
           js_doc << JS_String.new(
-            %[ io += #{To_HTML.to_html_open_tag(t).inspect};]
+            %[ io += #{HTML.to_html_open_tag(t).inspect};]
           )
           js_doc << JS_String.new(
-            %[ io += #{To_HTML.to_html_close_tag(t).inspect};]
+            %[ io += #{HTML.to_html_close_tag(t).inspect};]
           )
 
         when Text
@@ -108,30 +126,36 @@ module DA_HTML
       when "var"
         var_to_javascript(io, node)
       else
-        io << %[ io += #{To_HTML.to_html_open_tag(node).inspect};\n]
+        io << %[ io += #{HTML.to_html_open_tag(node).inspect};\n]
         node.children.each { |n|
           to_javascript!(io, n)
         }
-        io << %[ io += #{To_HTML.to_html_close_tag(node).inspect};\n]
+        io << %[ io += #{HTML.to_html_close_tag(node).inspect};\n]
       end
       js_doc
     end # === def
 
     def var_to_javascript(io, node)
-      name = node.tag_text
-      io << %[io += #{name}.toString();\n]
-      io
+      text = node.children.first
+      case text
+      when Text
+        io << %[\nio += #{text.tag_text}.toString();]
+        io
+      else
+        raise Exception.new("Expecting text for node: #{node.inspect}")
+      end
     end # === def
 
     def each_to_javascript(io, node)
       coll, _as, var = node.attributes.keys
-      io << %[
+      io << '\n' << %[
         for (let #{i coll} = 0, #{length coll} = #{coll}.length; #{i coll} < #{length coll}; ++#{i coll}) {
           let #{var} = #{coll}[#{i coll}];
-      ].lstrip
-      to_javascript!(io, node.children)
+      ].strip
 
-      io << %[ }\n ]
+      node.children.each { |x| to_javascript(io, x) }
+
+      io << "\n}"
       io
     end # def
 
@@ -157,13 +181,13 @@ module DA_HTML
 
     def each_in_to_javascript(io, node)
       coll, _as, key, var = node.attributes.keys.join(' ').split(/\ |,/)
-      io << %[
+      io << '\n' << %[
        for (let #{i(coll)} = 0, #{keys(coll)} = Object.keys(#{coll}), #{length(coll)} = #{keys coll}.length; #{i coll} < #{length coll}; ++#{i(coll)}) {
          let #{key} = #{keys coll}[#{i coll}];
          let #{var} = #{coll}[#{key}];
-      ].lstrip
-      to_javascript!(io, node.children)
-      io << %[ }\n]
+      ].strip
+      node.children.each { |x| to_javascript(io, x) }
+      io << "\n}"
       io
     end # === def
 
