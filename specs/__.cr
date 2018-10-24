@@ -34,7 +34,7 @@ end # === module DA_SPEC
 extend DA_SPEC
 
 require "./compiler/to_tags"
-require "./compiler/To_HTML"
+require "./compiler/to_html"
 require "./compiler/to_javascript"
 require "./compiler/Javascript.template_tags"
 require "./compiler/Javascript.each"

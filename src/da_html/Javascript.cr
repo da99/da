@@ -54,85 +54,32 @@ module DA_HTML
           var_to_javascript(io, node)
 
         when "template"
-          io << '\n' << %[
-            function #{node.attributes["id"]}(data) {
-              let io = "";
-          ].strip
-          node.children.each { |x|
-            to_javascript(io, x)
-          }
-          io << "\nreturn io;\n}"
+          template_to_javascript(io, node)
+
         else
-          io << %[\nio += #{DA_HTML.open_tag(node).gsub('"', %[\\"]).inspect};]
-          unless node.void?
-            node.children.each { |x| to_javascript(io, x) }
-            io << %[\nio += #{DA_HTML.close_tag(node).inspect};]
-          end
+          tag_to_javascript(io, node)
+
         end
       end # case
       io
     end # def
 
-    def compile_template_tags(doc : JS_Document)
-      js_doc = JS_Document.new
-      doc.each { |t|
-        if (t.is_a?(Tag) && t.tag_name == "template")
-          js_doc << JS_String.new(%[
-              function #{t.attributes["id"]}(data) {
-                let io = "";
-          ].strip)
-
-          js_doc.concat to_js_document(t.children)
-
-          js_doc << JS_String.new(%[ return io;\n} ])
-          next
-        end
-
-        js_doc << t
-      }
-      js_doc
+    def template_to_javascript(io, tag : Tag)
+      io << '\n' << %[
+        function #{tag.attributes["id"]}(data) {
+          let io = "";
+      ].strip
+      tag.children.each { |x| to_javascript(io, x) }
+      io << "\nreturn io;\n}"
+      io
     end # === def
 
-    def compile_html_tags(doc : JS_Document)
-      js_doc = JS_Document.new
-      doc.each { |t|
-        case t
-        when Tag
-          js_doc << JS_String.new(
-            %[ io += #{HTML.to_html_open_tag(t).inspect};]
-          )
-          js_doc << JS_String.new(
-            %[ io += #{HTML.to_html_close_tag(t).inspect};]
-          )
-
-        when Text
-          unless t.empty?
-            js_doc << JS_String.new(%[ io += #{t.to_html.inspect};\n]) 
-          end
-
-        when JS_String
-          js_doc << t
-        end
-      }
-      js_doc
-    end # def
-
-    def tag_to_javascript(js_doc : JS_Document, node : Tag)
-      case node.tag_name
-      when "each"
-        each_to_javascript(io, node)
-      when "each-in"
-        each_in_to_javascript(io, node)
-      when "var"
-        var_to_javascript(io, node)
-      else
-        io << %[ io += #{HTML.to_html_open_tag(node).inspect};\n]
-        node.children.each { |n|
-          to_javascript!(io, n)
-        }
-        io << %[ io += #{HTML.to_html_close_tag(node).inspect};\n]
+    def tag_to_javascript(io, tag : Tag)
+      io << %[\nio += #{DA_HTML.open_tag(tag).gsub('"', %[\\"]).inspect};]
+      unless tag.void?
+        tag.children.each { |x| to_javascript(io, x) }
+        io << %[\nio += #{DA_HTML.close_tag(tag).inspect};]
       end
-      js_doc
     end # === def
 
     def var_to_javascript(io, node)
@@ -159,26 +106,6 @@ module DA_HTML
       io
     end # def
 
-    def var_name(name : String)
-      name.gsub(/[^a-z\_0-9]/, "_")
-    end
-
-    def i(name : String)
-      "_#{var_name name}__i"
-    end
-
-    def data(name : String)
-      "data.#{name}"
-    end
-
-    def keys(name : String)
-      "_#{var_name name}__keys"
-    end
-
-    def length(name : String)
-      "_#{var_name name}__length"
-    end
-
     def each_in_to_javascript(io, node)
       coll, _as, key, var = node.attributes.keys.join(' ').split(/\ |,/)
       io << '\n' << %[
@@ -195,6 +122,21 @@ module DA_HTML
     # Instance:
     # =============================================================================
 
+    def var_name(name : String)
+      name.gsub(/[^a-z\_0-9]/, "_")
+    end
+
+    def i(name : String)
+      "_#{var_name name}__i"
+    end
+
+    def keys(name : String)
+      "_#{var_name name}__keys"
+    end
+
+    def length(name : String)
+      "_#{var_name name}__length"
+    end
 
     def var_name(x : String)
       x.gsub(/[^a-zA-Z0-9\-]/, "_")
@@ -218,26 +160,8 @@ module DA_HTML
       print "} // #{s}\n"
     end
 
-    def print(x : Text | Comment)
-      js_io << x.tag_text
-      self
-      # js_io << spaces << x
-      # js_io
-    end
-
     def _print(x : Node)
       case
-
-      when x.is_a?(DA_HTML::Text)
-        return if x.empty?
-        append_to_js x.tag_text.inspect
-        return
-
-      when x.tag_name == "var"
-          var_name = x.attributes.keys.join(' ')
-          append_to_js "#{var_name}.toString()"
-          return
-
       when x.tag_name == "negative"
 
           options = Tag_Options.new(x)

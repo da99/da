@@ -1,5 +1,5 @@
 
-describe "DA_HTML::To_HTML.to_html" do
+describe "DA_HTML.to_html" do
   it "prints an Deque(DA_HTML::Node)" do
     html     = %[ <html><body><p>hello</p></body></html> ]
     expected = %[<!doctype html>\n<html lang="en"><head></head><body><p>hello</p></body></html>]
