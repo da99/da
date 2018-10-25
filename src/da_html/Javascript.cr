@@ -85,30 +85,36 @@ module DA_HTML::Javascript
     end
   end # === def
 
+  def tag_options(tag)
+    tag.attributes.keys.join(' ').split(/ as |,/).map(&.strip).reject(&.empty?)
+  end # def
+
   def each_to_javascript(io, node)
-    coll, _as, var = node.attributes.keys
-    io << '\n' << %[
-      for (let #{i coll} = 0, #{length coll} = #{coll}.length; #{i coll} < #{length coll}; ++#{i coll}) {
-        let #{var} = #{coll}[#{i coll}];
-    ].strip
+    o = tag_options(node)
+    if o[2]?
+      coll, index, var = o[0], o[1], o[2]
+    else
+      coll, index, var = o[0], nil, o[1]?
+    end
 
-    node.children.each { |x| to_javascript(io, x) }
+    js_block(io, %[for (let #{i coll} = 0, #{length coll} = #{coll}.length; #{i coll} < #{length coll}; ++#{i coll})]) {
+      io << "\nlet #{index} = #{i coll};" if index
+      io << "\nlet #{var} = #{coll}[#{i coll}];" if var
 
-    io << "\n}"
+      node.children.each { |x| to_javascript(io, x) }
+    }
     io
   end # def
 
   def each_in_to_javascript(io, node)
-    o = Tag_Options.new(node)
-    coll, key, var = o.name!, o.key!, o.value!
+    o = tag_options(node)
+    coll, key, var = o[0], o[1], o[2]
 
-    io << '\n' << %[
-     for (let #{i(coll)} = 0, #{keys(coll)} = Object.keys(#{coll}), #{length(coll)} = #{keys coll}.length; #{i coll} < #{length coll}; ++#{i(coll)}) {
-       let #{key} = #{keys coll}[#{i coll}];
-       let #{var} = #{coll}[#{key}];
-    ].strip
-    node.children.each { |x| to_javascript(io, x) }
-    io << "\n}"
+    js_block(io, %[for (let #{i(coll)} = 0, #{keys(coll)} = Object.keys(#{coll}), #{length(coll)} = #{keys coll}.length; #{i coll} < #{length coll}; ++#{i(coll)})]) {
+      io << "\nlet #{key} = #{keys coll}[#{i coll}];" if key
+      io << "\nlet #{var} = #{coll}[#{key}];" if var
+      node.children.each { |x| to_javascript(io, x) }
+    }
     io
   end # === def
 
@@ -192,60 +198,5 @@ module DA_HTML::Javascript
     io << "\n}"
     io
   end
-
-  struct Tag_Options
-
-    def self.var_name!(x : String, msg : String)
-      if !x[/^[a-zA-Z\.0-9]{1,35}$/]?
-        raise Exception.new(msg)
-      end
-      x
-    end
-
-    AS_PATTERN = /^([a-zA-Z\.\_\-0-9]+)(\ +AS\ +([a-z0-9\_\,\ ]+))?$/i
-
-    getter name  : String? = nil
-    getter key   : String? = nil
-    getter value : String? = nil
-    getter raw : String
-
-    def initialize(tag)
-      @raw = tag.attributes.keys.join(' ')
-
-      # Possible string values: "name as k, v"  "name"  "k, v" ...
-      pieces = @raw.split(/ as /).map(&.strip).reject(&.empty?)
-      case pieces.size
-      when 0
-        return
-      when 1, 2
-        @name = self.class.var_name!(pieces.shift, "Invalid collection name: #{raw}")
-      else
-        raise Exception.new("Too many \"as\" values: #{tag.tag_name} => #{raw}")
-      end
-
-      # Possible string values: "k,v" "k, v" "k , v" "v"
-      pieces = pieces.join(' ').split(',').map(&.strip).reject(&.empty?)
-
-      case pieces.size
-      when 2
-        @key = self.class.var_name!(pieces.shift, "Invalid key name: #{raw}")
-      end
-      @value = self.class.var_name!(pieces.pop, "Invalid value name: #{raw}")
-    end # def
-
-    {% for x in "name key value".split %}
-      def {{x.id}}?
-        !@{{x.id}}.nil?
-      end
-
-      def {{x.id}}!
-        if @{{x.id}}.nil?
-          raise Exception.new("Missing {{x.id}} name in: #{raw}")
-        end
-        @{{x.id}}.not_nil!
-      end
-    {% end %}
-
-  end # === struct Tag_Options
 
 end # === module DA_HTML::Javascript
