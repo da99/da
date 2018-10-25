@@ -1,13 +1,15 @@
 
 describe "Javascript.to_javascript each-in" do
-  it "sets key" do
+
+  it "sets key and value" do
     html = <<-HTML
     <html><head></head><body>
       <template id="my_template">
-        <each-in coll as k,x> <=k>: <=x> </each-in>
+        <each-in coll as k, x> <=k>: <=x> </each-in>
       </template>
     </body></html>
     HTML
+
     expected = <<-JS
       function my_template(data) {
           let io = "";

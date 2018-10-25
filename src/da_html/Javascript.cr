@@ -160,7 +160,7 @@ module DA_HTML
     end # def
 
     # =============================================================================
-    # Instance:
+    # Helpers methods to print javascript:
     # =============================================================================
 
     def var_name(name : String)
@@ -185,11 +185,6 @@ module DA_HTML
 
     def let(x : String, y : String)
       js_io << spaces << "let " << var_name(x) << " = " << y << ";\n"
-      self
-    end # === def
-
-    def print_line(x : String)
-      js_io << spaces << x << ";\n"
       self
     end # === def
 

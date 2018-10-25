@@ -17,15 +17,31 @@ DA_SPEC.pattern(ARGV.join(" ")) unless ARGV.empty?
 
 module DA_SPEC
   def examine(*args)
-    all_strings = args.all? { |pair| pair.last.is_a?(String) }
     puts "================================"
+
+    # If 2 Strings:
+    if args.size == 2 && args.all? { |pair| pair.last.is_a?(String) }
+      a = args.first.last
+      b = args.last.last
+      if a.is_a?(String) && b.is_a?(String)
+        a = a.lines
+        b = b.lines
+        a.each_with_index { |x, i|
+          if b[i]? == a[i]?
+              puts "#{i}: #{a[i]}"
+          else
+            puts "#{i} a: #{a[i]}"
+            puts "#{i} b: #{b[i]}"
+            return
+          end
+        }
+        return
+      end # if a, b == String
+    end
+
     args.each { |x|
       puts x.first
-      if all_strings
-        puts x.last
-      else
-        puts x.last.inspect
-      end
+      puts x.last.inspect
       puts "================================"
     }
   end
