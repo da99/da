@@ -23,18 +23,21 @@ module DA_SPEC
     if args.size == 2 && args.all? { |pair| pair.last.is_a?(String) }
       a = args.first.last
       b = args.last.last
-      if a.is_a?(String) && b.is_a?(String)
+      if a.is_a?(String) && b.is_a?(String) && !a.empty? && !b.empty?
         a = a.lines
         b = b.lines
         a.each_with_index { |x, i|
           if b[i]? == a[i]?
-              puts "#{i}: #{a[i]}"
+            puts "#{i}: #{a[i]}"
           else
             puts "#{i} a: #{a[i]}"
-            puts "#{i} b: #{b[i]}"
+            puts "#{i} b: #{b[i]?}"
             return
           end
         }
+        if a.size < b.size
+          b[-1..(a.size-b.size)].each_with_index { |l, x| puts "b#{x + a.size}: #{l.inspect}" }
+        end
         return
       end # if a, b == String
     end
@@ -51,6 +54,7 @@ extend DA_SPEC
 
 require "./compiler/to_tags"
 require "./compiler/to_html"
+require "./compiler/to_crystal"
 require "./compiler/to_javascript"
 require "./compiler/Javascript.template_tags"
 require "./compiler/Javascript.each"

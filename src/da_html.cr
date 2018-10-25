@@ -95,6 +95,10 @@ module DA_HTML
     end
   end # === def
 
+  def to_crystal(nodes : Deque(Node))
+    Crystal.to_crystal(IO::Memory.new, nodes).to_s
+  end
+
   def to_javascript(nodes : Deque(Node))
     Javascript.to_javascript(nodes)
   end
@@ -113,4 +117,5 @@ require "./da_html/Text"
 require "./da_html/Fragment"
 require "./da_html/HTML"
 require "./da_html/Javascript"
+require "./da_html/Crystal"
 

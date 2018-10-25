@@ -3,6 +3,10 @@ module DA_HTML
   module HTML
     extend self
 
+    def known_tag?(t : Tag)
+      known_tag? t.tag_name
+    end
+
     def known_tag?(s : String)
       case
       when "html", "link", "meta", "base,", "style", "title",
