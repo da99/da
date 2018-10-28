@@ -1,5 +1,4 @@
 
-require "myhtml"
 require "da_html_escape"
 require "da"
 
@@ -14,7 +13,7 @@ module DA_HTML
   extend self
 
   def known_tag?(tag_name : Symbol)
-    { :html, :link, :meta, :base,, :style, :title,
+    { :html, :link, :meta, :base, :style, :title,
       :body, :address, :article, :aside, :footer, :header,
       :h1, :h2, :h3, :h4, :h5, :h6,
       :hgroup, :nav, :section, :blockquote,
@@ -33,7 +32,6 @@ module DA_HTML
       :label, :legend, :meter, :optgroup, :option,
       :output, :progress, :select, :textarea, :details,
       :dialog, :menu, :menuitem, :summary }.includes? tag_name
-    end
   end # def
 
   def void?(tag_name : Symbol)
@@ -57,6 +55,35 @@ module DA_HTML
   end # === def pretty_html
 
   struct HTML_Attribute
+    def self.id_class(raw : String)
+      in_id   = false
+      attrs   = Deque(HTML_Attribute).new
+      id      = Deque(Char).new
+      class_  = Deque(Char).new
+
+      raw.each_char { |c|
+        case c
+        when '#'
+          in_id = true
+        when '.'
+          in_id = false
+          (class_ << ' ') unless class_.empty?
+        else
+          (in_id ? id : class_) << c
+        end
+      }
+
+      if !id.empty?
+        attrs << HTML_Attribute.new(:id, id.join)
+      end
+
+      if !class_.empty?
+        attrs << HTML_Attribute.new(:class, class_.join)
+      end
+
+      attrs
+    end # def
+
     getter name : Symbol
     getter value : String
 
@@ -64,7 +91,7 @@ module DA_HTML
     end
   end # === module HTML_Attribute
 
-  module Page
+  module Base
 
     getter io : IO::Memory
 
@@ -77,26 +104,44 @@ module DA_HTML
     end # def
 
     def doctype!
-      io << "<!doctype html>"
+      io << "<!DOCTYPE html>"
     end # def
 
     def html!
       doctype!
-      html! lang("en") do
+      html lang("en") do
         yield
       end
     end # === def
 
     def html(*args)
-      open_tag("html", *args)
+      open_tag(:html, *args)
       yield
-      close_tag("html")
+      close_tag(:html)
     end # def
 
-    {% for tag in "head body p span div".split.map(&.id) %}
+    {% for tag in "head".split.map(&.id) %}
+      def {{tag}}
+        open_tag(:{{tag}})
+        yield
+        close_tag(:{{tag}})
+      end # === def
+    {% end %}
+
+    {% for tag in "title".split.map(&.id) %}
+      def {{tag}}
+        open_tag(:{{tag}})
+        result = yield
+        text(result) if result.is_a?(String)
+        close_tag(:{{tag}})
+      end # === def
+    {% end %}
+
+    {% for tag in "body p span div".split.map(&.id) %}
       def {{tag}}(*args)
         open_tag(:{{tag}}, *args)
-        yield
+        result = yield
+        text(result) if result.is_a?(String)
         close_tag(:{{tag}})
       end # === def
     {% end %}
@@ -112,10 +157,21 @@ module DA_HTML
       io
     end # === def
 
+    def attribute(a : HTML_Attribute)
+      io << ' ' << a.name << '=' << a.value.inspect
+    end # def
+
     def open_tag(tag_name : Symbol, *args)
       io << '<' << tag_name
-      args.each { |x|
-        io << ' ' << x.name << '=' << x.value.inspect
+      args.each_with_index { |x, i|
+        case x
+        when String
+          HTML_Attribute.id_class(x).each { |x|
+            attribute x
+          }
+        when HTML_Attribute
+          attribute x
+        end
       }
       io << '>'
       io
@@ -134,9 +190,18 @@ module DA_HTML
     def to_s(io_)
       io_ << @io
     end
-  end # === module Page
+  end # === module Base
+
+  struct Page
+    include Base
+  end # === struct Page
+
+  def to_html
+    page = Page.new
+    with page yield
+    page.io
+  end # === def
 
 end # === module DA_HTML
 
-require "./da_html/HTML"
 

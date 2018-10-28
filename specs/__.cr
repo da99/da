@@ -5,6 +5,10 @@ require "../src/da_html"
 
 macro strip(str)
   %result = {{str}}
+  if %result.is_a?(IO::Memory)
+    %result = %result.to_s
+  end
+
   case %result
   when String
     %result.strip.split("\n").map { |x| x.strip }.join
@@ -52,19 +56,7 @@ end # === module DA_SPEC
 
 extend DA_SPEC
 
-require "./compiler/to_tags"
-require "./compiler/to_html"
-require "./compiler/to_crystal"
-require "./compiler/to_javascript"
-require "./compiler/Javascript.template_tags"
-require "./compiler/Javascript.each"
-require "./compiler/Javascript.each-in"
-require "./compiler/Javascript.positive"
-require "./compiler/Javascript.negative"
-require "./compiler/Javascript.zero"
-require "./compiler/Javascript.empty"
-require "./compiler/Javascript.not-empty"
 # require "../examples/*"
-# require "./dsl/*"
+require "./dsl/00.basics"
 
 
