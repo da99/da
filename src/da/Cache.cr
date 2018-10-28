@@ -9,10 +9,11 @@ module DA
     DIR = if DA.development?
             "/tmp/da_cache"
           else
-            "/deploy/da_cache"
+            raise Exception.new("Can only be used on development environments.")
           end
 
     getter prefix : String
+
     def initialize(@prefix)
     end # === def initialize(prefix : String)
 
