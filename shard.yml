@@ -1,6 +1,6 @@
 ---
 name: da
-version: 4.6.3
+version: 4.6.4
 development_dependencies:
   da_spec:
     git: file:///apps/da_spec
