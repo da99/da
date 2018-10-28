@@ -13,27 +13,34 @@ module DA_HTML
 
   extend self
 
-  alias Node = Text | Comment | Tag
-  alias Attribute_Value = Int32 | Int64 | String
-
-  def find_tag_name(node, tag_name : String)
-    tag_name.split(/\ *>\ */).reduce(node) { |n, t|
-      result = _find_tag_name(n, t)
-
-      case result
-      when Tag
-        :ignore
-      else
-        return nil
-      end
-      result
-    }
-  end
-
-  def _find_tag_name(node, tag_name : String)
-    result = node.children.find { |n| n.tag_name == tag_name }
-    result
+  def known_tag?(tag_name : Symbol)
+    { :html, :link, :meta, :base,, :style, :title,
+      :body, :address, :article, :aside, :footer, :header,
+      :h1, :h2, :h3, :h4, :h5, :h6,
+      :hgroup, :nav, :section, :blockquote,
+      :dd, :dir, :div, :dl, :dt, :figcaption, :figure,
+      :hr, :li, :main, :ol, :p, :pre, :ul, :a, :abbr,
+      :b, :bdi, :bdo, :br, :cite, :code, :data,
+      :dfn, :em, :i, :kbd, :mark, :q, :rb, :rp,
+      :rt, :rtc, :ruby, :s, :samp,
+      :small, :span, :strong, :sub, :sup, :time, :tt,
+      :u, :var, :wbr,
+      :noscript, :script,
+      :del, :ins, :caption,
+      :col, :colgroup, :table, :tbody, :td,
+      :tfoot, :th, :thead, :tr, :button,
+      :datalist, :fieldset, :form, :input,
+      :label, :legend, :meter, :optgroup, :option,
+      :output, :progress, :select, :textarea, :details,
+      :dialog, :menu, :menuitem, :summary }.includes? tag_name
+    end
   end # def
+
+  def void?(tag_name : Symbol)
+    {:area, :base, :br, :col, :command, :embed,
+     :hr, :img, :input, :keygen, :link, :meta,
+     :param, :source, :track, :wbr}.includes? tag_name
+  end # === def
 
   def prettify(str : String)
     indent = 0
@@ -49,73 +56,87 @@ module DA_HTML
     }
   end # === def pretty_html
 
-  def to_tag(n : Myhtml::Node) : Node
-    case n.tag_name
-    when "_comment"
-      Comment.new(n)
-    when "-text"
-      Text.new(n)
-    else
-      Tag.new(n)
+  struct HTML_Attribute
+    getter name : Symbol
+    getter value : String
+
+    def initialize(@name, @value)
     end
-  end # def
+  end # === module HTML_Attribute
 
-  def to_tags(raw : String)
-    doc    = Deque(Node).new
-    html   = DA.until_done(raw) { |x| DA_HTML.cleanup(x) }
-    parser = Myhtml::Parser.new(html)
+  module Page
 
-    doc.push DA_HTML.to_tag(parser.root!)
+    getter io : IO::Memory
 
-    doc
-  end # === def
-
-  def html5_prepend
-    <<-HTML5
-      <!doctype html>
-      <html lang="en">
-    HTML5
-  end
-
-  def cleanup(s : String)
-    s
-      .sub(/<html>/, html5_prepend)
-      .gsub(/\<=([\ a-zA-Z0-9\.\_]+)\>/) { |x, y| "<var>#{y[1]}</var>" }
-      .gsub(/\<include\ +"?([^"\>]+)"?\>/) { |x, y| File.read(y[1]) }
-      .gsub(/\<template\ +"?([^"\>]+)"?\>/) { |x, y| %[<template>#{File.read y[1]}</template>] }
-  end # === def
-
-  def body(doc : Deque(Node))
-    body = DA_HTML.find_tag_name(doc, "html > body")
-    case body
-    when Tag
-      return body
-    else
-      raise Exception.new("Tag not found: body")
+    def initialize
+      @io = IO::Memory.new
     end
-  end # === def
 
-  def to_crystal(nodes : Deque(Node))
-    Crystal.to_crystal(IO::Memory.new, nodes).to_s
-  end
+    def text(raw : String)
+      io << DA_HTML_ESCAPE.escape(raw)
+    end # def
 
-  def to_javascript(nodes : Deque(Node))
-    Javascript.to_javascript(nodes)
-  end
+    def doctype!
+      io << "<!doctype html>"
+    end # def
 
-  {% for x in "to_html open_tag close_tag".split %}
-    def {{x.id}}(*args)
-      HTML.{{x.id}}(*args)
+    def html!
+      doctype!
+      html! lang("en") do
+        yield
+      end
+    end # === def
+
+    def html(*args)
+      open_tag("html", *args)
+      yield
+      close_tag("html")
+    end # def
+
+    {% for tag in "head body p span div".split.map(&.id) %}
+      def {{tag}}(*args)
+        open_tag(:{{tag}}, *args)
+        yield
+        close_tag(:{{tag}})
+      end # === def
+    {% end %}
+
+    {% for attr in "lang id class_".split.map(&.id) %}
+      def {{attr}}(x)
+        HTML_Attribute.new(:{{attr.gsub(/_+$/, "")}}, x)
+      end
+    {% end %}
+
+    def <<(x : String)
+      io << x
+      io
+    end # === def
+
+    def open_tag(tag_name : Symbol, *args)
+      io << '<' << tag_name
+      args.each { |x|
+        io << ' ' << x.name << '=' << x.value.inspect
+      }
+      io << '>'
+      io
+    end # def
+
+    def close_tag(tag_name : Symbol)
+      io << '<' << '/' << tag_name << '>'
+      io
+    end # def
+
+    def void_tag(tag_name, *args)
+      open_tag(tag_name, *args)
+      io
+    end # === def
+
+    def to_s(io_)
+      io_ << @io
     end
-  {% end %}
+  end # === module Page
 
 end # === module DA_HTML
 
-require "./da_html/Comment"
-require "./da_html/Tag"
-require "./da_html/Text"
-require "./da_html/Fragment"
 require "./da_html/HTML"
-require "./da_html/Javascript"
-require "./da_html/Crystal"
 
