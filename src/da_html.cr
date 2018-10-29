@@ -161,6 +161,13 @@ module DA_HTML
       io << ' ' << a.name << '=' << a.value.inspect
     end # def
 
+    def tag(tag_name : Symbol, *args)
+      open_tag(tag_name, *args)
+      yield
+      close_tag(tag_name)
+      io
+    end # def
+
     def open_tag(tag_name : Symbol, *args)
       io << '<' << tag_name
       args.each_with_index { |x, i|
@@ -186,6 +193,14 @@ module DA_HTML
       open_tag(tag_name, *args)
       io
     end # === def
+
+    def link_main_css
+      io << %(\n<link href="/main.css" rel="stylesheet">)
+    end # def
+
+    def script_main_js
+      io << %(\n<script src="/main.js" type="application/javascript"></script>)
+    end # def
 
     def to_s(io_)
       io_ << @io

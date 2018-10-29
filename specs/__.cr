@@ -58,5 +58,6 @@ extend DA_SPEC
 
 # require "../examples/*"
 require "./dsl/00.basics"
+require "./dsl/01.customize"
 
 

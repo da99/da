@@ -16,20 +16,20 @@ class Customize_01
   end
 
   def my_strong
-    tag("strong") do
-      with self yield self
-    end
+    tag(:strong) {
+      text(yield)
+    }
   end # === def my_strong
+
+  def self.to_html
+    page = new
+    with page yield
+    page.io.to_s
+  end # def
 
 end # === struct Validator_01
 
 describe "Customize" do
-
-  it "raises an error if an invalid attr is requested" do
-    assert_raises(DA_HTML::Invalid_Attr) {
-      Customize_01.to_html { p(hello: "name") { "hello" } }
-    }
-  end # === it "raises an error if an invalid attr is requested"
 
   it "allows custom tags without attrs" do
     actual = Customize_01.to_html {
