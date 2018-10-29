@@ -4,6 +4,24 @@ da\_html.cr
 
 My personal Crystal shard to create sanitized HTML.
 
+Currently, Crustal 0.26.1, you have to include the
+Base module on the Class/Struct that will do the
+final rendering.
+The following won't work:
+
+```crystal
+   module Something
+     include DA_HTML::Base
+     def my_tag
+       tag(:my_tag) { }
+     end
+   end
+
+   struct/class A
+     include Something
+   end
+```
+
 Quick Intro:
 ======
 
@@ -20,7 +38,7 @@ Custom Tags:
 =============
 
 ```Crystal
-  class My_Page
+  struct My_Page
 
     include DA_HTML::Base
 
@@ -29,18 +47,18 @@ Custom Tags:
         # sanitize args
       }
 
-      raw! "<my_tag"
-      args.each { |x|
-        attr! :some_key, x
-      }
-      raw! '>'
+      tag :my_tag, args do
+        result = yield
+        text(result) if result.is_a?(String)
+      end
 
-      text? {
-        with self yield self
-      }
+    end # def
 
-      raw! "</my_tag>"
-    end
+    def self.to_html
+      page = new
+      with page yield
+      page.io.to_s
+    end # def
 
   end # === class My_Page
 
@@ -53,18 +71,26 @@ Partials:
 =========
 
 ```Crystal
-  class My_Partial
-    include DA_HTML::Base
+  module My_Partial
     def my_tag
-      raw! "<my_tag></my_tag>"
+      tag(:my_tag) { }
     end
   end
 
-  DA_HTML.to_html { |page|
+  struct My_Page
+    include DA_HTML::Base
+    include My_Partial
+
+    def self.to_html
+      page = new
+      with page yield
+      page.io.to_s
+    end # def
+  end
+
+  My_Page.to_html { |page|
     div { }
-    My_Partial.partial(page) {
-      my_tag
-    }
+    my_tag
   }
 ```
 

@@ -12,7 +12,7 @@ module DA_HTML
           when :required
             is_required = true
           else
-            raise Invalid_Attr_Value.new(%[input (of type text)], x)
+            raise HTML_Attribute::Invalid_Value.new(%[input (of type text)], x)
           end
         }
         attrs.each { |k, v|
@@ -20,7 +20,7 @@ module DA_HTML
           when :maxlength
             max = v
           else
-            raise Invalid_Attr_Value.new(%[input (of type text)], k, v)
+            raise HTML_Attribute::Invalid_Value.new(%[input (of type text)], k, v)
           end
         }
         raw! %[<input type="text"]

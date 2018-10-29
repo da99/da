@@ -1,5 +1,6 @@
 
 require "da_html_escape"
+require "da_uri"
 require "da"
 
 module DA
@@ -9,7 +10,7 @@ module DA
 end # === module DA
 
 module DA_HTML
-
+  A_REL_COMMON = {"nofollow", "noopener", "noreferrer"}
   extend self
 
   def known_tag?(tag_name : Symbol)
@@ -55,6 +56,10 @@ module DA_HTML
   end # === def pretty_html
 
   struct HTML_Attribute
+
+    class Invalid_Value < Exception
+    end # class
+
     def self.id_class(raw : String)
       in_id   = false
       attrs   = Deque(HTML_Attribute).new
@@ -85,9 +90,17 @@ module DA_HTML
     end # def
 
     getter name : Symbol
-    getter value : String
+    getter value : String?
 
-    def initialize(@name, @value)
+    def initialize(@name)
+      @value = nil
+    end
+
+    def initialize(@name, @value : String)
+    end
+
+    def value?
+      !@value.nil?
     end
   end # === module HTML_Attribute
 
@@ -146,8 +159,79 @@ module DA_HTML
       end # === def
     {% end %}
 
-    {% for attr in "lang id class_".split.map(&.id) %}
-      def {{attr}}(x)
+    def a(*raw)
+      attrs  = Deque(HTML_Attribute).new
+      rel    = Deque(String).new
+      href   = nil
+
+      raw.each { |attr|
+        case attr
+        when String
+          attrs.concat HTML_Attribute.id_class(attr)
+        when HTML_Attribute
+          k = attr.name
+          v = attr.value
+          case k
+          when :rel
+            if v.is_a?(String)
+              v.split.each { |x|
+                case x
+                when "external", "help", "prev", "next", "search", "nofollow", "noopener", "noreferrer"
+                  rel.push x
+                else
+                  raise HTML_Attribute::Invalid_Value.new("<a #{k}=#{v.inspect}")
+                end
+              }
+            end
+
+          when :target
+            case
+            when v.is_a?(String) && {"_self", "_blank", "_parent", "_top"}.includes?(v)
+              target = v
+              attrs << HTML_Attribute.new(k, v)
+            else
+              raise HTML_Attribute::Invalid_Value.new("<a #{k}=#{v.inspect}")
+            end
+
+          when :href
+            if v.is_a?(String)
+              href = DA_URI.clean(v)
+              if href.is_a?(String)
+                attrs << HTML_Attribute.new(k, href)
+              end
+            end
+
+          else
+            raise HTML_Attribute::Invalid_Value.new("<a #{k}=#{v.inspect}")
+
+          end # case
+        end # case attr
+      }
+
+      if !href || href.strip.empty?
+        raw_href = raw.find { |x| x.is_a?(HTML_Attribute) && x.name == :href }
+        if raw_href.is_a?(HTML_Attribute)
+          raise HTML_Attribute::Invalid_Value.new(%[attribute for 'a' tag has an invalid URL: #{raw_href.value.inspect}.])
+        else
+          raise HTML_Attribute::Invalid_Value.new(%[attribute for 'a' tag was not specified.])
+        end
+      end
+
+      A_REL_COMMON.each { |x|
+        if !rel.includes?(x)
+          rel.push x
+        end
+      }
+      attrs << HTML_Attribute.new(:rel, rel.join(' '))
+
+      tag(:a, attrs) {
+        result = yield
+        text(result) if result.is_a?(String)
+      }
+    end # def
+
+    {% for attr in "href lang id class_".split.map(&.id) %}
+      def {{attr}}(x : String)
         HTML_Attribute.new(:{{attr.gsub(/_+$/, "")}}, x)
       end
     {% end %}
@@ -158,13 +242,23 @@ module DA_HTML
     end # === def
 
     def attribute(a : HTML_Attribute)
-      io << ' ' << a.name << '=' << a.value.inspect
+      val = a.value
+      if val.is_a?(Nil)
+        io << ' ' << a.name
+      else
+        io << ' ' << a.name << '=' << DA_HTML_ESCAPE.escape(a.value.to_s).inspect
+      end
     end # def
 
     def tag(tag_name : Symbol, *args)
       open_tag(tag_name, *args)
       yield
       close_tag(tag_name)
+      io
+    end # def
+
+    def tag(tag_name : Symbol, *args)
+      open_tag(tag_name, *args)
       io
     end # def
 
@@ -178,6 +272,8 @@ module DA_HTML
           }
         when HTML_Attribute
           attribute x
+        else
+          x.each { |x2| attribute x2 }
         end
       }
       io << '>'
@@ -202,6 +298,12 @@ module DA_HTML
       io << %(\n<script src="/main.js" type="application/javascript"></script>)
     end # def
 
+    {% for x in "nofollow noreferrer noopener".split.map(&.id) %}
+      def {{x}}
+        HTML_Attribute.new(:{{x}})
+      end
+    {% end %}
+
     def to_s(io_)
       io_ << @io
     end
@@ -211,10 +313,16 @@ module DA_HTML
     include Base
   end # === struct Page
 
+  def to_html(io)
+    page = Page.new
+    with page yield
+    io << page.io
+  end # === def
+
   def to_html
     page = Page.new
     with page yield
-    page.io
+    page.io.to_s
   end # === def
 
 end # === module DA_HTML
