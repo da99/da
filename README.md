@@ -22,6 +22,19 @@ The following won't work:
    end
 ```
 
+Different designs were designed and implemented before settling
+on server-side rendering for *all* HTML. (No client-side rendering, such as in React/JSX)
+The reason is to decrease typos and other errors via the Crystal compiler.
+Using Crystal to render both on the server-side and client-side was also
+dismissed because the complexity in combining Crystal and Javascript contexts.
+
+The *easiest* way (i.e. less code, fewest bugs, cognitive load of the developer) is thus:
+  * Render all HTML templates and output on the server.
+  * Send content via AJAX calls (and if possible HTTP compression) to browser (i.e. client).
+  * Browser adds Javascript events, actions, etc.
+  * HTML is added to DOM.
+
+
 Quick Intro:
 ======
 
