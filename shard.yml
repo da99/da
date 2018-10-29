@@ -1,6 +1,6 @@
 ---
 name: da_html
-version: 3.1.3
+version: 3.2.0
 dependencies:
   da:
     github: da99/da
