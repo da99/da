@@ -236,6 +236,20 @@ module DA_HTML
       end
     {% end %}
 
+    {% for x in "name content".split.map(&.id) %}
+      def {{x}}(s : String)
+        DA_HTML::HTML_Attribute.new(:name, s)
+      end # def
+    {% end %}
+
+    def meta_utf8
+      tag(
+        :meta,
+        DA_HTML::HTML_Attribute.new(:"http-equiv", "Content-Type"),
+        content("text/html; charset=UTF-8")
+      )
+    end # def
+
     def <<(x : String)
       io << x
       io

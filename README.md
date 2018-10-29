@@ -5,9 +5,9 @@ da\_html.cr
 My personal Crystal shard to create sanitized HTML.
 
 Currently, Crustal 0.26.1, you have to include the
-Base module on the Class/Struct that will do the
-final rendering.
-The following won't work:
+setup a special `def initialize` on the module to
+do the final rendering if you use an intermediary module
+instead of including `DA_HTML::Base` directly:
 
 ```crystal
    module Something
@@ -17,9 +17,20 @@ The following won't work:
      end
    end
 
-   struct/class A
+   module B
      include Something
    end
+
+   struct C
+     include B
+
+     # Not necessary if you include DA_HTML::Base directly
+     # or use an include DA_HTML::Base via included macro:
+     def initialize
+       super
+     end
+   end
+
 ```
 
 Different designs were designed and implemented before settling
