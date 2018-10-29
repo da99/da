@@ -109,13 +109,11 @@ Partials:
 
 Security:
 =========
-```crystal
-  # Handle this "window.opener API." security vulnerability:
-  #  https://news.ycombinator.com/item?id=15685324
-  #  https://www.jitbit.com/alexblog/256-targetblank---the-most-underestimated-vulnerability-ever/
-  #  https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a
-  it "adds rel=\"nofollow noopener noreferrer\" when target attr is used" do
-```
+Handle this "window.opener API." security vulnerability:
+
+  * https://news.ycombinator.com/item?id=15685324
+  * https://www.jitbit.com/alexblog/256-targetblank---the-most-underestimated-vulnerability-ever/
+  *  https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a
 
 
 

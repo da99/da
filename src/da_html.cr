@@ -230,7 +230,7 @@ module DA_HTML
       }
     end # def
 
-    {% for attr in "href lang id class_".split.map(&.id) %}
+    {% for attr in "rel href target lang id class_".split.map(&.id) %}
       def {{attr}}(x : String)
         HTML_Attribute.new(:{{attr.gsub(/_+$/, "")}}, x)
       end
