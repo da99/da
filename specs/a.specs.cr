@@ -1,28 +1,4 @@
 
-class SPEC_A_TAG
-
-  include DA_HTML::Printer
-
-  def to_html(i : DA_HTML::Instruction)
-    super
-  end # === def to_html
-
-  class Parser
-
-    include DA_HTML::Parser
-
-    def allow(name : String, x : XML::Node)
-      case name
-      when "text!"
-        x
-      when "a"
-        allow_body_tag(x, href: /[a-z\/]+/, target: /_blank/, rel: /(archives)/)
-      end
-    end # === def allow
-
-  end # === class Parser
-
-end # === class SPEC_A_TAG
 describe "a tag" do
   # Handle this "window.opener API." security vulnerability:
   #  https://news.ycombinator.com/item?id=15685324
