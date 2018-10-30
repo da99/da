@@ -1,8 +1,8 @@
 
 describe "a tag" do
 
-  it "raises DA_HTML::HTML_Attribute::Invalid_Value on javascript :href values" do
-    assert_raises(DA_HTML::HTML_Attribute::Invalid_Value) {
+  it "raises DA_HTML::Attribute::Invalid_Value on javascript :href values" do
+    assert_raises(DA_HTML::Attribute::Invalid_Value) {
       DA_HTML.to_html {
         a(href("javascript://a")) { "my page" }
       }
@@ -39,8 +39,8 @@ describe "a tag" do
     assert actual == expect
   end # === it "does not allow target attribute"
 
-  it "raises DA_HTML::HTML_Attribute::Invalid_Value if rel is an unknown value" do
-    msg = assert_raises(DA_HTML::HTML_Attribute::Invalid_Value) {
+  it "raises DA_HTML::Attribute::Invalid_Value if rel is an unknown value" do
+    msg = assert_raises(DA_HTML::Attribute::Invalid_Value) {
       actual = DA_HTML.to_html {
         a(href("/a")) { "a" }
         a(href("/b"), target("_blank"), rel("archives")) { "b" }

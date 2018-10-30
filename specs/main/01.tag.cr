@@ -4,23 +4,23 @@ class Customize_Tag_01
   include DA_HTML::Base
 
   def name(v : String)
-    DA_HTML::HTML_Attribute.new(:name, v)
+    DA_HTML::Attribute.new(:name, v)
   end # def
 
   def red
-    DA_HTML::HTML_Attribute.new(:red)
+    DA_HTML::Attribute.new(:red)
   end # def
 
   def red(x)
-    DA_HTML::HTML_Attribute.new(:red, x)
+    DA_HTML::Attribute.new(:red, x)
   end # def
 
   def blue(x)
-    DA_HTML::HTML_Attribute.new(:blue, x)
+    DA_HTML::Attribute.new(:blue, x)
   end
 
   def selected
-    DA_HTML::HTML_Attribute.new(:selected)
+    DA_HTML::Attribute.new(:selected)
   end # === def
 
   def self.to_html

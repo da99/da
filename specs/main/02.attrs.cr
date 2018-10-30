@@ -4,7 +4,7 @@ class Attrs_02
   include DA_HTML::Base
 
   def hello(s)
-    DA_HTML::HTML_Attribute.new(:hello, s)
+    DA_HTML::Attribute.new(:hello, s)
   end # def
 
   def span(*attrs)
@@ -15,15 +15,15 @@ class Attrs_02
   end # def
 
   def required
-    DA_HTML::HTML_Attribute.new(:required)
+    DA_HTML::Attribute.new(:required)
   end
 
   def maxlength(x : Int32)
-    DA_HTML::HTML_Attribute.new(:maxlength, x.to_s)
+    DA_HTML::Attribute.new(:maxlength, x.to_s)
   end
 
   def input_text(*attrs)
-    tag(:input, DA_HTML::HTML_Attribute.new(:type, "text"), *attrs)
+    tag(:input, DA_HTML::Attribute.new(:type, "text"), *attrs)
   end # def
 
   def self.to_html
