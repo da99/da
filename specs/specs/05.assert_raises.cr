@@ -82,7 +82,7 @@ else
         a = [] of Int32
         a.pop
       }
-      assert e.class.name == "nothing"
+      assert e.class.name == "IndexError"
     end
   end # === desc "assert_raises"
 end # === if

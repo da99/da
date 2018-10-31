@@ -1,19 +1,9 @@
 
 require "colorize"
-require "terminal_table"
 
 module DA_SPEC
 
   @@pattern : String | Symbol | Regex | Nil = nil
-  @@run_count = 0
-
-  def self.run_count
-    @@run_count
-  end
-
-  def self.increate_run_count
-    @@run_count += 1
-  end
 
   def self.pattern
     @@pattern
@@ -34,12 +24,13 @@ module DA_SPEC
   def self.matches?(a)
     return false if skip_all?
 
-    p = pattern
-    case p
+    full_name = a.full_name
+    target = pattern
+    case target
     when String
-      a.full_name.index(p)
+      a.full_name[target]?
     when Regex
-      p =~ a.full_name
+      target =~ a.full_name
     when Nil
       true
     else
@@ -49,6 +40,9 @@ module DA_SPEC
 
   class Describe
 
+    class_getter names = Deque(String).new
+    class_getter asserts = Deque(String).new
+
     getter name : String
 
     def initialize(*args)
@@ -57,61 +51,62 @@ module DA_SPEC
     end # === def initalize
 
     def it(name : String)
-      x = It.new(self, name)
+      x = It.new(name)
+      Describe.names.push x.name
       if DA_SPEC.matches?(x)
+        beginning_assert_count = Describe.asserts.size
+        print "- ", x.name, ": "
         begin
           with x yield
         rescue ex
-          puts_header
-          x.print_fail "(", ex.class.to_s, ") ", ex.message.colorize.mode(:bold)
-          count = 0
+          x.print_fail "#{ex.class.to_s}:", ex.message.colorize.mode(:bold)
+          line_count = 0
           ex.backtrace.each { |line|
             puts line
-            count += 1
-            break if count > 15
+            line_count += 1
+            break if line_count > 15
           }
           exit 1
         end
+        ending_assert_count = Describe.asserts.size
+        if beginning_assert_count == ending_assert_count
+          raise Exception.new("No assertions for 'it'.")
+        end
+        print '\n'
       end
+      Describe.names.pop
     end # === def it
-
-    def puts_header
-      unless @already_printed_header
-        print name.colorize.mode(:bold), ":", "\n"
-        @already_printed_header = true
-      end
-    end # === def puts_name
 
   end # === class Describe
 
   class It
 
     getter name : String
-    getter describe : Describe
+    getter? header_written : Bool = false
 
-    def initialize(@describe, @name)
+    def initialize(@name)
     end # === def initialize
 
     def full_name
-      [@describe.name, name].compact.join(" ")
+      Describe.names.map(&.strip).join(' ')
     end # === def full_name
 
     def print_pass
-      print "- ", name.colorize(:green), "\n"
+      print "✔".colorize(:green)
     end
 
     def print_fail(*args)
-      print "- ", name.colorize(:red), ": ", *args
+      print "✗".colorize(:red), '\n'
+      print args.join(' ')
       print "\n"
     end # === def print_fail
 
     def assert_raises(error_class, msg : Nil | String | Regex = nil)
-      DA_SPEC.increate_run_count
-      describe.puts_header
+      Describe.asserts.push(error_class.to_s)
       begin
         yield
         print_fail
-        examine({"Expected: ", error_class.name}, {"Actual: ", "[none]"})
+        examine({"Expected", error_class.name}, {"Actual", "[none]"})
         exit 1
       rescue e
         case
@@ -140,12 +135,17 @@ module DA_SPEC
   def describe(*args)
     return if DA_SPEC.skip_all?
     d = Describe.new(*args)
+    print d.name.colorize.mode(:bold), ":", "\n"
+    Describe.names.push d.name
     with d yield
+    Describe.names.pop
+    d
   end # === def describe
 
   def examine(*args)
     headings = [] of String
-    rows = [] of String
+    rows     = [] of String
+
     args.each { |pair|
       key       = pair.first
       val       = pair.last
@@ -161,8 +161,13 @@ module DA_SPEC
     puts t.render
   end
 
+  def examine(*args)
+    args.each { |pair|
+      print pair.first.colorize.mode(:bold), ": ", pair.last.inspect, '\n'
+    }
+  end # def
+
   macro assert(func_call)
-    DA_SPEC.increate_run_count
     %origin   = {{func_call.stringify}}
     %a        = {{func_call.receiver}}
     %b        = {{func_call.args.first}}
@@ -171,11 +176,11 @@ module DA_SPEC
     %a_string = %a.inspect
     %b_string = %b.inspect
 
-    describe.puts_header
+    Describe.asserts.push %origin
     if %result
       print_pass
     else
-      print_fail("#{%origin} -> #{%result.inspect}".colorize.mode(:bold))
+      print_fail("#{%origin.colorize.mode(:bold)} -> #{%result.inspect.colorize(:red).mode(:bold)}")
       examine({"A", %a}, {"B", %b})
       exit 1
     end
@@ -184,7 +189,7 @@ module DA_SPEC
 end # === module DA_SPEC
 
 at_exit {
-  if DA_SPEC.run_count == 0
+  if DA_SPEC::Describe.asserts.empty?
     STDERR.puts "!!! No assertions were run."
     exit 1
   end

@@ -12,7 +12,7 @@ if in_spec?
     end
 
     it "outputs name of Exception class" do
-      assert result.output =~ / \(Exception\) /
+      assert result.output =~ /Exception: .+this is unexpected/
     end
   }
 else

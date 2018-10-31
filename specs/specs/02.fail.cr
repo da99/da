@@ -7,9 +7,5 @@ if in_spec?
     end
   }
 else
-  describe("Bad") {
-    it("fails") {
-      assert 1 == 2
-    }
-  } # === desc "Bad"
+  describe("Bad") { it("fails") { assert 1 == 2 } }
 end
