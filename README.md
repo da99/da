@@ -32,4 +32,11 @@ Reference
     end
 
   end # === describe
+
+  module DA_SPEC
+    def examine(*pairs)
+      # override this method to display the actual/expected
+      # results when an assertion fails.
+    end
+  end # module
 ```
