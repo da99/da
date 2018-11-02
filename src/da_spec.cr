@@ -50,8 +50,8 @@ module DA_SPEC
       @already_printed_header = false
     end # === def initalize
 
-    def it(name : String)
-      x = It.new(name)
+    def it(name : String, file = __FILE__, line = __LINE__)
+      x = It.new(name, file: file, line: line)
       Describe.names.push x.name
       if DA_SPEC.matches?(x)
         beginning_assert_count = Describe.asserts.size
@@ -59,9 +59,11 @@ module DA_SPEC
         begin
           with x yield
         rescue ex
-          x.print_fail "#{ex.class.to_s}:", ex.message.colorize.mode(:bold)
+          x.print_fail
+          puts "  #{ex.class.to_s}: #{ex.message.colorize.mode(:bold)}"
           line_count = 0
           ex.backtrace.each { |line|
+            print "  "
             puts line
             line_count += 1
             break if line_count > 15
@@ -81,10 +83,12 @@ module DA_SPEC
 
   class It
 
-    getter name : String
     getter? header_written : Bool = false
+    getter name : String
+    getter file : String
+    getter line : Int32
 
-    def initialize(@name)
+    def initialize(@name, @file, @line)
     end # === def initialize
 
     def full_name
@@ -95,10 +99,8 @@ module DA_SPEC
       print "✔".colorize(:green)
     end
 
-    def print_fail(*args)
+    def print_fail
       print "✗".colorize(:red), '\n'
-      print args.join(' ')
-      print "\n"
     end # === def print_fail
 
     def assert_raises(error_class, msg : Nil | String | Regex = nil)
@@ -143,27 +145,8 @@ module DA_SPEC
   end # === def describe
 
   def examine(*args)
-    headings = [] of String
-    rows     = [] of String
-
     args.each { |pair|
-      key       = pair.first
-      val       = pair.last
-      as_string = pair.last.inspect
-
-      headings.push key
-      rows.push as_string
-    }
-
-    t = TerminalTable.new
-    t.headings = headings
-    t << rows
-    puts t.render
-  end
-
-  def examine(*args)
-    args.each { |pair|
-      print pair.first.colorize.mode(:bold), ": ", pair.last.inspect, '\n'
+      puts "  #{pair.first.colorize.mode(:bold)}: #{pair.last.inspect}"
     }
   end # def
 
@@ -177,10 +160,13 @@ module DA_SPEC
     %b_string = %b.inspect
 
     Describe.asserts.push %origin
+
     if %result
       print_pass
     else
-      print_fail("#{%origin.colorize.mode(:bold)} -> #{%result.inspect.colorize(:red).mode(:bold)}")
+      print_fail
+      puts "  #{line.colorize.mode(:bold)}: #{file}"
+      puts "  #{%origin.colorize.mode(:bold)} -> #{%result.inspect.colorize(:red).mode(:bold)}"
       examine({"A", %a}, {"B", %b})
       exit 1
     end
