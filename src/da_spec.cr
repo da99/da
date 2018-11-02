@@ -167,7 +167,7 @@ module DA_SPEC
       print_fail
       puts "  #{line.colorize.mode(:bold)}: #{file}"
       puts "  #{%origin.colorize.mode(:bold)} -> #{%result.inspect.colorize(:red).mode(:bold)}"
-      examine({"A", %a}, {"B", %b})
+      examine({ {{func_call.receiver.stringify}}, %a}, { {{func_call.args.first.stringify}}, %b})
       exit 1
     end
   end # === macro assert
