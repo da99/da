@@ -100,6 +100,7 @@ module DA
       }
     end # === def run_process_status
 
+    # Write a .sh scrip file to tmp/out of DA app dir.
     def watch_run(raw_path : String)
       app_dir = Dir.current
       file_path = File.expand_path(raw_path)
@@ -120,16 +121,6 @@ module DA
         >.strip)
       end
     end # === def watch_run
-
-    def watch_setup
-      files = {} of String => Time?
-      3.times { |i|
-        x = i + 1
-        f = "tmp/out/run.#{x}.txt"
-        files[f] = File.exists?(f) ? mtime(f) : nil
-      }
-      Dir.mkdir_p("tmp/out")
-    end # def
 
     def watch
       Signal::TERM.trap do
