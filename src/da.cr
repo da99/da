@@ -1,10 +1,4 @@
 
-{%begin%}
-  %dir = "/progs/crystal/current"
-  ENV["SHARDS_INSTALL_PATH"] = File.join(Dir.current, "/.shards/.install")
-  ENV["CRYSTAL_PATH"] = "#{%dir}/share/crystal/src:#{Dir.current}/.shards/.install"
-{%end%}
-
 require "file_utils"
 
 module DA

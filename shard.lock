@@ -1,6 +1,6 @@
 version: 1.0
 shards:
   da_spec:
-    git: file:///apps/da_spec
+    github: da99/da_spec
     version: 1.0.2
 
