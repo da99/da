@@ -8,7 +8,7 @@ set -x
 case "$@" in
   "bin compile")
     crystal env
-    crystal build bin/__.cr -o bin/da
+    crystal build --warnings all bin/__.cr -o bin/da
     ;;
   *)
     $@
