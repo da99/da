@@ -29,6 +29,7 @@ require "./da/Runit"
 require "./da/Public_Dir"
 require "./da/Postgresql"
 require "./da/Time"
+require "./da/OS"
 
 require "./da/Script"
 

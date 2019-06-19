@@ -25,6 +25,12 @@ when "-h --help help".split.includes?(ARGV.first)
   DA.print_help
 
 
+when full_cmd["list usb drives"]?
+  DA.cli_list_usb_drives
+
+when ARGV.size == 3 && full_cmd["set volume "]?
+  DA::OS.set_volume(ARGV.last)
+
 when full_cmd[/^run .+/]?
   # === {{CMD}} run my cmd -with -args
   args = ARGV[1..-1]
