@@ -6,6 +6,20 @@ module DA
     end
   end
 
+  def cli_list_usb_drives
+    usb_drives.each { |l| puts l }
+  end
+
+  def usb_drives
+    `lsblk -l`.strip.split('\n').select { |line|
+      # NAME      MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
+      #  0           1     2     3   4  5    6
+      pieces = line.split
+      name, type = pieces[0], pieces[5]
+      type == "disk" && name[/^sd/]?
+    }
+  end
+
   def text_file?(s : String)
     File.exists?(s) && `file --mime #{s}`["text/plain"]?
   end

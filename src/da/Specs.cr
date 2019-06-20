@@ -18,7 +18,7 @@ module DA
     def compile
       Dir.mkdir_p(File.dirname bin)
       DA.system!("mkdir -p tmp/out")
-      DA.system!("crystal build #{src} -o #{bin}")
+      DA.system!("crystal build --warnings all #{src} -o #{bin}")
     end
 
     def run(args = [] of String)

@@ -309,7 +309,7 @@ module DA
         end
       end
 
-      args = ["build", src, "-o", tmp].concat(args)
+      args = ["build", "--warnings", "all", src, "-o", tmp].concat(args)
       DA.orange! "=== {{Compiling}}: #{Crystal::BIN} #{args.join " "} --> BOLD{{#{tmp}}}"
       DA.system!(Crystal::BIN, args)
 

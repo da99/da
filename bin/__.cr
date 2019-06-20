@@ -25,6 +25,12 @@ when "-h --help help".split.includes?(ARGV.first)
   DA.print_help
 
 
+when full_cmd["list usb drives"]?
+  DA.cli_list_usb_drives
+
+when ARGV.size == 3 && full_cmd["set volume "]?
+  DA::OS.set_volume(ARGV.last)
+
 when full_cmd[/^run .+/]?
   # === {{CMD}} run my cmd -with -args
   args = ARGV[1..-1]
@@ -155,7 +161,13 @@ when full_cmd == "shards!"
 
 when full_cmd =~ /^bin compile( .+)?$/
   # === {{CMD}} bin compile [args to compile]
-  DA::Crystal.bin_compile(ARGV[2..-1])
+  case
+  when File.exists?("bin/__.cr")
+    DA::Crystal.bin_compile(ARGV[2..-1])
+  else
+    STDERR.puts "!!! No acceptable bin file found in ./bin directory."
+    Process.exit 2
+  end
 
 when full_cmd == "first-repo"
   # === {{CMD}} first-repo

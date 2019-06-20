@@ -1,4 +1,31 @@
 
+module DA
+  module OS
+    extend self
+
+    def set_volume(val : String)
+      names = [] of String
+      name = nil
+      active = nil
+      `pacmd list-sinks`.strip.split('\n').each { |raw|
+        line = raw.strip
+        case
+        when line["name: "]?
+          name = line.split.last.not_nil!.strip("<>")
+        when line["state: RUNNING"]?
+          if name.is_a?(String)
+            cmd = "pactl set-sink-volume #{name} #{val}"
+            puts cmd
+            puts `pactl set-sink-volume #{name} #{val}`.strip
+            puts $?.inspect
+          end
+        end # case
+      }
+    end # === def
+  end # module
+end # module
+
+
 module DA_Dev
   module OS
     extend self
