@@ -138,7 +138,8 @@ module DA
 
       if File.exists?(pid_file)
         old = File.read(pid_file).strip
-        if !old.empty? && old.to_i != this_pid && Process.exists?(old.to_i)
+        cmdline_file = "/proc/#{old}/cmdline"
+        if File.exists?(cmdline_file) && old.to_i != Process.pid.to_i && File.read(cmdline_file)[/da\ +watch/]?
           DA.red! "!!! {{Already running}}: pid BOLD{{#{old}}}"
           exit 1
         end
