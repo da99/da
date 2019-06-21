@@ -161,13 +161,7 @@ when full_cmd == "shards!"
 
 when full_cmd =~ /^bin compile( .+)?$/
   # === {{CMD}} bin compile [args to compile]
-  case
-  when File.exists?("bin/__.cr")
-    DA::Crystal.bin_compile(ARGV[2..-1])
-  else
-    STDERR.puts "!!! No acceptable bin file found in ./bin directory."
-    Process.exit 2
-  end
+  DA::Dev.bin_compile(ARGV[2..-1])
 
 when full_cmd == "first-repo"
   # === {{CMD}} first-repo

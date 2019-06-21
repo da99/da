@@ -245,5 +245,15 @@ module DA
       PROCESSES.any? { |file, x| process_exists?(x.pid) }
     end
 
-  end # === module Watch
+    def bin_compile(args)
+      case
+      when File.exists?("bin/__.cr")
+        DA::Crystal.bin_compile(args)
+      else
+        STDERR.puts "!!! No acceptable bin file found in ./bin directory."
+        Process.exit 2
+      end
+    end # === def
+
+  end # === module
 end # === module DA
