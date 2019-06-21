@@ -1,3 +1,9 @@
 ---
 name: da
 version: 4.7.0
+
+targets:
+  da:
+    main: bin/__.cr
+  my:
+    main: bin/my.cr

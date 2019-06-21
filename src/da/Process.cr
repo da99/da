@@ -68,6 +68,11 @@ module DA
   end
 
   # =============================================================================
+  def exec!(bin : String, args : Array(String), *others)
+    DA.orange! "=== {{Exec}}: BOLD{{#{bin}}} #{args.map(&.inspect).join ' '}"
+    Process.exec(bin, args, *others)
+  end
+  # =============================================================================
 
   def success?(stat : Process::Status)
     stat.success?

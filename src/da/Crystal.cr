@@ -250,7 +250,9 @@ module DA
       }
     end
 
-    def shards!(run_bin_compile = true)
+    # Returns a Boolean on whether the shard.lock file was updated.
+    # You can use this to determine if you want to re-build your shard.
+    def shards!(run_bin_compile = true) : Bool
       shard_yml = "shard.yml"
       shard_lock = "shard.lock"
 
@@ -260,7 +262,7 @@ module DA
 
       if File.exists?(shard_lock) && File.info(shard_yml).modification_time < File.info(shard_lock).modification_time
         DA.orange! "=== {{Skipping shards install/update}}: #{shard_yml} hasn't changed."
-        return
+        return false
       end
 
       lock = File.exists?(shard_lock) ? File.read(shard_lock) : ""
@@ -275,46 +277,31 @@ module DA
                    ""
                  end
 
-      if run_bin_compile
-        if lock != new_lock
-          bin_compile
-        else
-          STDERR.puts "=== Skipping bin compile. shard.lock the same."
-        end
-      end
+      lock != new_lock
     end # === def shards
 
     def bin_compile(args = [] of String)
-      shell_script = "sh/bin_compile.sh"
-      if File.exists?(shell_script) && File.executable?(shell_script)
-        DA.system! shell_script, args
-        DA.green! "=== {{DONE}}: BOLD{{#{shell_script}}} ==="
-        return
-      end
-
-      shards!(run_bin_compile: false)
-
-      name = File.basename(Dir.current)
-      bin  = "bin/#{name}"
-      tmp  = "tmp/out/#{name}"
-      src  = "bin/__.cr"
-      Dir.mkdir_p "tmp/out"
-
+      # Check if a shell file exists in place of the target bin file:
+      bin = "/apps/#{Dir.current}/bin/#{Dir.current}"
       if File.exists?(bin)
         raw = `file --mime #{bin}`.strip
         mime = raw.split[1].split("/").first?
         executable = raw[" executable, "]?
-        if mime != "application" && !executable
-          DA.exit! " Non-binary file {{already exists}}: #{bin}"
+          if mime != "application" && !executable
+            DA.exit! " Non-binary file {{already exists}}: #{bin}"
         end
       end
 
-      args = ["build", "--warnings", "all", src, "-o", tmp].concat(args)
-      DA.orange! "=== {{Compiling}}: #{Crystal::BIN} #{args.join " "} --> BOLD{{#{tmp}}}"
-      DA.system!(Crystal::BIN, args)
+      # Install and update shards, then build:
+      shards!
+      new_args = "build -- --warnings all".split.concat(args)
+      DA.inspect! new_args
+      if File.read("shard.yml")["targets:"]?
+        DA.exec!("shards", new_args)
+      end
 
-      File.rename(tmp, bin)
-      DA.green! "=== {{Done}}: #{bin}"
+
+      DA.exit! "!!! No {{targets}} set in {{shard.yml}}."
     end # === def bin_compile
   end # === module Crystal
 end # === module DA
