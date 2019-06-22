@@ -11,18 +11,23 @@ for x in /apps /progs ; do
 done
 
 
+# gvfs needed for mounting of USB drives in file managers.
 # binutils - provides 'ar' binary
 sudo xbps-install -S \
   htop  \
   xz tree git gcc crystal dpkg archiver dbus \
   ripgrep fzf zsh \
+  xclip \
   bspwm \
   xorg \
   wget curl rsync \
   binutils  \
   git neovim \
   dunst bmon \
+  alsa-utils \
+  gvfs zip unzip \
   void-repo-nonfree \
+  fish \
   ConsoleKit2   || :
 
 
@@ -124,7 +129,6 @@ if pgrep xinit ; then
     gst-plugins-good1 \
     paper-gtk-theme paper-icon-theme \
     faenza-icon-theme faience-icon-theme \
-    dfu-programmer \
     lxappearance \
     xtitle wmctrl \
     xarchiver \
@@ -140,3 +144,13 @@ if ! test -e bin/da ; then
   crystal env
   crystal build --warnings all bin/__.cr -o bin/da
 fi
+
+sudo rm -f /var/service/agetty-tty4
+sudo rm -f /var/service/agetty-tty5
+sudo rm -f /var/service/agetty-tty6
+
+for x in dbus ; do
+  if ! test -e "/var/service/$x" ; then
+    sudo ln -s /etc/sv/$x /var/service/
+  fi
+done
