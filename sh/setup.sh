@@ -133,6 +133,7 @@ if pgrep xinit ; then
     xtitle wmctrl \
     xarchiver \
     redis \
+    pavucontrol \
     xdg-utils || :
 fi
 
