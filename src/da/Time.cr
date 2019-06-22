@@ -1,7 +1,7 @@
 
 module DA
   def human_time(raw_time : Int64)
-    human_time Time.to_unix(raw_time)
+    human_time Time.unix(raw_time)
   end
 
   def human_time(time : Time)

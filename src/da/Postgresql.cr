@@ -217,7 +217,7 @@ module DA
     end # if
 
     full_script = (prepends + [content]).join('\n')
-    temp_file = "/tmp/#{Time.utc.to_unix}.#{File.basename(filename)}.#{full_script.size}.sql"
+    temp_file = "/tmp/#{Time.now.to_unix}.#{File.basename(filename)}.#{full_script.size}.sql"
 
     File.write(temp_file, full_script)
     begin
