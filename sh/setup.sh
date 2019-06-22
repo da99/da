@@ -134,6 +134,7 @@ if pgrep xinit ; then
     xarchiver \
     redis \
     pavucontrol \
+    ffmpeg \
     xdg-utils || :
 fi
 
