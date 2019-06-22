@@ -128,6 +128,7 @@ if pgrep xinit ; then
     lxappearance \
     xtitle wmctrl \
     xarchiver \
+    redis \
     xdg-utils || :
 fi
 
