@@ -154,3 +154,19 @@ for x in dbus ; do
     sudo ln -s /etc/sv/$x /var/service/
   fi
 done
+
+if ! grep -P "^never" "/sys/kernel/mm/transparent_hugepage/enabled" ; then
+  (
+    echo "!!! Disable THP: https://github.com/antirez/redis/issues/3176"
+    echo "file: /etc/rc.local"
+    echo "echo never > /sys/kernel/mm/transparent_hugepage/enabled"
+  ) >&2
+  exit 2
+fi
+
+if ! test "$(cat /proc/sys/net/core/somaxconn)" = "512" ; then
+    echo "file: /etc/rc.local"
+    echo "echo 512 > /proc/sys/net/core/somaxconn"
+  exit 2
+fi
+
