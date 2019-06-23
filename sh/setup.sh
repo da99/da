@@ -129,7 +129,7 @@ if pgrep xinit ; then
     gst-plugins-good1 \
     paper-gtk-theme paper-icon-theme \
     faenza-icon-theme faience-icon-theme \
-    lxappearance \
+    lxappearance lxinput \
     xtitle wmctrl \
     xarchiver \
     redis \
