@@ -118,7 +118,7 @@ fi # if current_version == latest_version
 # xarchiver lets you browse archive files.
 if pgrep xinit ; then
   sudo xbps-install -S \
-    bluez \
+    bluez  bluez-alsa libbluetooth \
     nemo \
     mpv smplayer lemonbar sxhkd feh xdo \
     rofi   lynx  git-lfs \
