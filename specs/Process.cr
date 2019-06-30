@@ -29,3 +29,9 @@ describe "Process.exit!" do
     end
   end # === it "sets exit_code"
 end # === desc "Process.exit!"
+
+describe "Process.exec!" do
+  it "can accept just a String." do
+    assert `tmp/out/__.run "exit!" accept just a String`["load average"]? == true
+  end
+end

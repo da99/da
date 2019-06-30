@@ -68,7 +68,7 @@ module DA
   end
 
   # =============================================================================
-  def exec!(bin : String, args : Array(String), *others)
+  def exec!(bin : String, args : Array(String) = [] of String, *others)
     DA.orange! "=== {{Exec}}: BOLD{{#{bin}}} #{args.map(&.inspect).join ' '}"
     Process.exec(bin, args, *others)
   end

@@ -19,6 +19,9 @@ module DA
       Dir.mkdir_p(File.dirname bin)
       DA.system!("mkdir -p tmp/out")
       DA.system!("crystal build --warnings all #{src} -o #{bin}")
+      if File.exists?("specs/__.run.cr")
+        DA.system!("crystal build --warnings all specs/__.run.cr -o tmp/out/__.run")
+      end
     end
 
     def run(args = [] of String)
