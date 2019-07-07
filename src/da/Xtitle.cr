@@ -23,6 +23,6 @@ module DA
       get_from_output.gets
     end
 
-  end # === class Lemonbar
+  end # === class
 
 end # === module
