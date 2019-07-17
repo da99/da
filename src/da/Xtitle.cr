@@ -24,5 +24,4 @@ module DA
     end
 
   end # === class
-
 end # === module
