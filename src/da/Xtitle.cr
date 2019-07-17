@@ -9,7 +9,7 @@ module DA
 
     getter process : Process
 
-    def initialize(cmd_args : Array(String)? = ["-s"])
+    def initialize(cmd_args : Array(String) = ["-s"])
       @input_pipe, @send_to_input = IO.pipe
       @get_from_output, @output_pipe = IO.pipe
       @process = Process.new("xtitle", cmd_args, input: @input_pipe, output: @output_pipe)
