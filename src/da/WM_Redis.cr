@@ -18,7 +18,7 @@ module DA
 
     delegate del, get, set, lpush, rpush, lpop, to: @redis_pool
 
-    def initialize(redis_conf_path)
+    def initialize(conf_path)
       rp = @redis_pool = Redis::PooledClient.new(unixsocket: conf_path)
       at_exit { rp.close }
     end # def
