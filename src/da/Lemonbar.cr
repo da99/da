@@ -5,7 +5,7 @@ module DA
     BACKGROUND       = "#000000"
     FOREGROUND       = "#D8EAFF"
     ORANGE           = "#F17400"
-    LIGHT_FOREGROUND = "#44000000" # "#21374F"
+    LIGHT_FOREGROUND = "#21374F" # "#44000000" 
     PIPE             = "%{F#{LIGHT_FOREGROUND}}|%{F-}"
 
     getter input_pipe      : IO::FileDescriptor
@@ -40,6 +40,19 @@ module DA
       @input_pipe, @send_to_input = IO.pipe
       @get_from_output, @output_pipe = IO.pipe
       @process = Process.new("lemonbar", cmd_args, input: @input_pipe, output: @output_pipe)
+    end
+
+    def <<(x : IO::Memory | String)
+      send_to_input << x
+    end
+
+    def with_pipe(x : IO::Memory | String)
+      send_to_input << x << Lemonbar::PIPE
+    end
+
+    # Write a newline to input pipe.
+    def write
+      send_to_input << '\n'
     end
 
     def write(str : IO::Memory | String)
