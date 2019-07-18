@@ -167,12 +167,12 @@ module DA
       end
     end # def
 
-    def close
-      st = spy_title
-      if st
-        st.process.kill unless st.process.terminated?
-      end
-    end
+    # def close
+    #   st = spy_title
+    #   if st
+    #     st.process.kill unless st.process.terminated?
+    #   end
+    # end
 
     def id?(raw_id : String)
       raw_id.downcase == id

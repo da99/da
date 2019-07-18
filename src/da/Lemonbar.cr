@@ -46,8 +46,8 @@ module DA
       send_to_input << x
     end
 
-    def with_pipe(x : IO::Memory | String)
-      send_to_input << x << Lemonbar::PIPE
+    def pipe
+      send_to_input << Lemonbar::PIPE
     end
 
     # Write a newline to input pipe.
@@ -61,6 +61,10 @@ module DA
 
     def read_line
       get_from_output.gets
+    end
+
+    def highlight(s)
+      self << "%{F#{Lemonbar::ORANGE}}#{s}%{F-}"
     end
 
   end # === class Lemonbar
