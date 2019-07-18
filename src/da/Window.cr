@@ -138,6 +138,7 @@ module DA
     getter pid       : Int32
     getter title     : String
     getter geo       : Geo? = nil
+    getter spy_title : Xprop? = nil
     @is_focus        : Bool = false
 
     def initialize(raw_id : String)
@@ -153,18 +154,16 @@ module DA
       pieces.shift # hostname
       @title = pieces.join(' ')
       if Window.media_player?(@class_)
-        spy = Xprop.new_spy_title(@id)
-        at_exit { spy.process.kill unless spy.process.terminated? }
-        spawn {
-          while !spy.process.terminated? && Process.exists?(@pid)
-            @title = spy.read_value || "[unknown]"
-            DA.inspect! @title
-            sleep 0.1
-          end
-          spy.process.kill unless spy.process.terminated?
-        }
+        @spy_title = Xprop.new_spy_title(@id)
       end
     end # def
+
+    def close
+      st = spy_title
+      if st
+        st.process.kill unless st.process.terminated?
+      end
+    end
 
     def id?(raw_id : String)
       raw_id.downcase == id
