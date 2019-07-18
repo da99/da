@@ -5,7 +5,7 @@ module DA
     BACKGROUND       = "#000000"
     FOREGROUND       = "#D8EAFF"
     ORANGE           = "#F17400"
-    LIGHT_FOREGROUND = "#3A73921" # "#44000000" 
+    LIGHT_FOREGROUND = "#1F6E55" # "#44000000" 
     PIPE             = "%{F#{LIGHT_FOREGROUND}} | %{F-}"
 
     getter input_pipe      : IO::FileDescriptor
