@@ -38,7 +38,7 @@ module DA
       @process = Process.new("lemonbar", cmd_args, input: @input_pipe, output: @output_pipe)
     end
 
-    def <<(x : IO::Memory | String)
+    def <<(x : IO::Memory | String | Char)
       send_to_input << x
     end
 
