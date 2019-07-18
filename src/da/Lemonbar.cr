@@ -55,6 +55,17 @@ module DA
       send_to_input << '\n'
     end
 
+    def join(x)
+      last_i = x.size - 1
+      x.each_with_index { |y, i|
+        self << y 
+        unless i == last_i
+          self.pipe
+        end
+      }
+      self
+    end
+
     def write(str : IO::Memory | String)
       send_to_input.puts str
     end
