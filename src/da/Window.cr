@@ -104,8 +104,6 @@ module DA
       list
     end # def
 
-    Window.update
-
     def self.list
       @@list
     end
