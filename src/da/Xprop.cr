@@ -32,7 +32,7 @@ module DA
       get_from_output.gets
     end
 
-    def read_value
+    def read_title
       s = read_line
       if s.is_a?(String)
         match = s.match /^.+ = "(.+)"$/

@@ -154,7 +154,16 @@ module DA
       pieces.shift # hostname
       @title = pieces.join(' ')
       if Window.media_player?(@class_)
-        @spy_title = Xprop.new_spy_title(@id)
+        st = @spy_title = Xprop.new_spy_title(@id)
+        spawn {
+          while !st.process.terminated?
+            x = st.read_title
+            if x.is_a?(String)
+              @title = x
+            end
+            sleep 0.1
+          end
+        }
       end
     end # def
 
