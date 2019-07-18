@@ -5,8 +5,8 @@ module DA
     BACKGROUND       = "#000000"
     FOREGROUND       = "#D8EAFF"
     ORANGE           = "#F17400"
-    LIGHT_FOREGROUND = "#21374F" # "#44000000" 
-    PIPE             = "%{F#{LIGHT_FOREGROUND}}|%{F-}"
+    LIGHT_FOREGROUND = "#3A73921" # "#44000000" 
+    PIPE             = "%{F#{LIGHT_FOREGROUND}} | %{F-}"
 
     getter input_pipe      : IO::FileDescriptor
     getter send_to_input   : IO::FileDescriptor
@@ -20,10 +20,6 @@ module DA
       bar.write("%{c}#{msg}%{-c}")
       bar
     end # === def
-
-    def self.orange(s)
-      "%{F#{Lemonbar::ORANGE}}#{s}%{F-}"
-    end
 
     def initialize(args : Array(String)? = nil)
       cmd_args = "
