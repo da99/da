@@ -55,7 +55,7 @@ module DA
       send_to_input << '\n'
     end
 
-    def join(x)
+    def join(x : Enumerable)
       last_i = x.size - 1
       x.each_with_index { |y, i|
         self << y 
