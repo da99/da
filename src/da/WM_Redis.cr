@@ -47,10 +47,14 @@ module DA
 
     def set(k, v : Hash(String, Array(Window)))
       io = IO::Memory.new
-      v.map { |group_name, windows|
-        "#{group_name}:#{windows.map { |x| x.focus? ? "*#{x.id}" : x.id}.join ','}"
-      }.join('|', io)
-      set(k, io.to_s)
+      if v.empty?
+        del(k)
+      else
+        v.map { |group_name, windows|
+          "#{group_name}:#{windows.map { |x| x.focus? ? "*#{x.id}" : x.id}.join ','}"
+        }.join('|', io)
+        set(k, io.to_s)
+      end
     end # def
 
   end # === class
