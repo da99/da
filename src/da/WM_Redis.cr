@@ -30,15 +30,15 @@ module DA
     end # def
 
     def get_windows(k : String)
-        raw = redis_pool.get(k)
-        v = Hash(String, Array(String)).new
-        if raw
-          raw.split('|').each { |raw_group|
-            group_name, raw_windows = raw_group.split(':')
-            v[group_name] = raw_windows.split(',')
-          }
-        end
-        v
+      raw = redis_pool.get(k)
+      v = Hash(String, Array(String)).new
+      if raw
+        raw.split('|').each { |raw_group|
+          group_name, raw_windows = raw_group.split(':')
+          v[group_name] = raw_windows.split(',')
+        }
+      end
+      v
     end # def
 
     def next
