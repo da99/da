@@ -54,6 +54,15 @@ module DA
     colorize(raw, :yellow)
   end
 
+  def on_debug(s : String)
+    return false unless debug?
+    if STDOUT.tty? && STDERR.tty?
+      STDERR.puts orange(s)
+    else
+      STDERR.puts s
+    end
+  end # def
+
   def orange!(e : ::Exception)
     msg = e.message
     if msg
