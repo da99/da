@@ -32,8 +32,8 @@ when ARGV.size == 3 && full_cmd["set volume "]?
   DA::OS.set_volume(ARGV.last)
 
 when full_cmd[/^run max \d+ .+/]?
-  # === {{CMD}} run max [number] cmd -with -args
-  max = ARGV[2].to_i32
+  # === {{CMD}} run max [seconds] cmd -with -args
+  max = (ARGV[2].to_i32 * 10)
   if max < 1 || max > 250
     raise DA::Exit.new(1, "Max is out of range: 1-250")
   end

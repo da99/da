@@ -31,8 +31,8 @@ module DA
       {"smplayer", "vlc", "mpv", "mplayer"}.includes?(classname_or_class)
     end # def
 
-    def self.clean_id(raw_id : String)
-      raw_id.downcase
+    def self.clean_id(raw : String)
+      "0x%08x" % raw.to_i(prefix: true)
     end
 
     def self.focus
@@ -76,11 +76,16 @@ module DA
 
     def self.resize(raw_id : String, geo)
       win_id = clean_id(raw_id)
-      @@list.find { |w|
+      w = @@list.find { |w|
         if w.id == win_id
           w.resize geo
+          true
         end
       }
+      if !w
+        DA.inspect! "--- Window with id #{raw_id.inspect} not found."
+      end
+      w
     end # def
 
     def self.update
