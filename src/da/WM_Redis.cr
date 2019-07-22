@@ -51,7 +51,7 @@ module DA
         del(k)
       else
         v.map { |group_name, windows|
-          "#{group_name}:#{windows.map { |x| x.focus? ? "*#{x.id}" : x.id}.join ','}"
+          "#{group_name}:#{windows.map { |w| w.focused? ? "*#{w.id}" : w.id}.join ','}"
         }.join('|', io)
         set(k, io.to_s)
       end
