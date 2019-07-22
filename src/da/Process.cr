@@ -79,14 +79,15 @@ module DA
   end
 
   def success?(full_cmd : String)
-    args = full_cmd.split
-    bin  = args.shift
-    if STDOUT.tty? && STDERR.tty?
-      DA.orange! "=== {{Running}}: #{full_cmd}"
-    end
-    status = Process.run(bin, args)
-    success? status
+    success? full_cmd.split
   end
+
+  def success?(origin : Array(String))
+    bin  = origin.first
+    args = origin[1..-1]
+    DA.on_debug "=== {{Running}}: #{bin} #{args.join ' '}"
+    success? Process.run(bin, args)
+  end # def
 
   def success!(s : Process::Status)
     return true if success?(s)

@@ -31,6 +31,22 @@ when full_cmd["list usb drives"]?
 when ARGV.size == 3 && full_cmd["set volume "]?
   DA::OS.set_volume(ARGV.last)
 
+when full_cmd[/^run max \d+ .+/]?
+  # === {{CMD}} run max [number] cmd -with -args
+  max = ARGV[2].to_i32
+  if max < 1 || max > 250
+    raise DA::Exit.new(1, "Max is out of range: 1-250")
+  end
+  cmd_with_args = ARGV[3..-1]
+  count = 0
+  while !DA.success?(cmd_with_args)
+    sleep 0.1
+    count += 1
+    if count > max
+      Process.exit 1
+    end
+  end
+
 when full_cmd[/^run .+/]?
   # === {{CMD}} run my cmd -with -args
   args = ARGV[1..-1]
@@ -101,6 +117,8 @@ when ARGV[0..1].join(' ') == "link symbolic!" && ARGV[2]? && ARGV[3]? && !ARGV[4
   DA.symlink!(ARGV[2], ARGV[3])
 
 # =============================================================================
+
+
 when ARGV[0]? == "exec"
   # === {{CMD}} crystal install
   args = ARGV.clone
