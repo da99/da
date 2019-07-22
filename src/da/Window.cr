@@ -100,7 +100,11 @@ module DA
 
       focus_id = focused_window_id!
       @@list.each { |w|
-        w.is_focused! if w.id == focus_id
+        if w.id == focus_id
+          w.is_focused!
+        else
+          w.not_focused!
+        end
       }
 
       list
