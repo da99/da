@@ -45,7 +45,7 @@ module DA
     end # def
 
     def self.focused
-      @@list.find { |w| w.focus? }
+      @@list.find { |w| w.focused? }
     end # def
 
     def self.focused_window_id!
