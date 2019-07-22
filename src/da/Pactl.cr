@@ -35,7 +35,13 @@ module DA
 
       @volume     = self.class.volume!
       @is_running = self.class.running?
-      @process    = Process.new("pactl", cmd_args, input: @input_pipe, output: @output_pipe)
+      proc = @process    = Process.new("pactl", cmd_args, input: @input_pipe, output: @output_pipe)
+      at_exit {
+        unless proc.terminated?
+          proc.kill
+          DA.inspect! "killed pactl process: #{proc.pid}"
+        end
+      }
     end
 
     def write(str : IO::Memory | String)

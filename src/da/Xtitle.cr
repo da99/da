@@ -12,7 +12,13 @@ module DA
     def initialize(cmd_args : Array(String) = ["-s"])
       @input_pipe, @send_to_input = IO.pipe
       @get_from_output, @output_pipe = IO.pipe
-      @process = Process.new("xtitle", cmd_args, input: @input_pipe, output: @output_pipe)
+      proc = @process = Process.new("xtitle", cmd_args, input: @input_pipe, output: @output_pipe)
+      at_exit {
+        unless proc.terminated?
+          proc.kill
+          DA.inspect! "killed xtitle process: #{proc.pid}"
+        end
+      }
     end
 
     def write(str : IO::Memory | String)
