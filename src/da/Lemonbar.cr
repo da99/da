@@ -16,7 +16,7 @@ module DA
     getter process : Process
 
     def self.new_loading(msg : String)
-      bar = new("-B #000000 -F #D59C07 -n loading_#{Time.now.to_unix}".split)
+      bar = new("-B #000000 -F #D59C07 -n loading_#{Time.local.to_unix}".split)
       bar.write("%{c}#{msg}%{-c}")
       bar
     end # === def
@@ -35,7 +35,18 @@ module DA
       cmd_args.concat(args) if args
       @input_pipe, @send_to_input = IO.pipe
       @get_from_output, @output_pipe = IO.pipe
-      @process = Process.new("lemonbar", cmd_args, input: @input_pipe, output: @output_pipe)
+      proc = @process = Process.new(
+        "lemonbar",
+        cmd_args,
+        input: @input_pipe,
+        output: @output_pipe
+      )
+      at_exit {
+        unless proc.terminated?
+          proc.kill 
+          DA.inspect! "--- Killed lemonbar process: #{proc.pid}"
+        end
+      }
     end
 
     def <<(x : IO::Memory | String | Char)

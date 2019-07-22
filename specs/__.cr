@@ -1,12 +1,12 @@
 
 ENV["IS_TEST"] = "yes"
 
-require "../src/da"
 require "da_spec"
+require "../src/da"
 
 # the da binary needs to be up-to-date for certain specs,
 #   like "da is dev"
-DA::Crystal.bin_compile
+# DA::Crystal.bin_compile
 
 extend DA_SPEC
 
@@ -40,4 +40,6 @@ require "./Runit.install"
 require "./Runit.link"
 require "./human_time"
 require "./Utility.until_done"
+require "./Lemonbar"
+
 

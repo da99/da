@@ -7,7 +7,7 @@ module DA
   def human_time(time : Time)
     io = IO::Memory.new
 
-    now = Time.now
+    now = Time.local
     is_past = now > time
     is_future = is_past
     span = if is_past

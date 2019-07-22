@@ -18,7 +18,7 @@ describe "Process.exit!" do
   end # === it "sets exit_code"
 
   it "sets .message" do
-    msg = Time.now.to_s
+    msg = Time.local.to_s
     err = assert_raises(DA::Exit) {
       DA.exit! 3, msg
     }
@@ -32,6 +32,7 @@ end # === desc "Process.exit!"
 
 describe "Process.exec!" do
   it "can accept just a String." do
-    assert `tmp/out/__.run "exit!" accept just a String`["load average"]? == true
+    actual = DA.out_err("tmp/out/__.run", "exit! accept just a String".split)
+    assert actual["load average"]? == "load average"
   end
 end

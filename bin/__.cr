@@ -194,15 +194,15 @@ when full_cmd == "next-dirty-repo"
   # === {{CMD}} next-dirty-repo
   puts DA.next_dirty_repo
 
-when ARGV[0..1].join(' ') == "cache read" && ARGV.size == 3
-  # === {{CMD}} cache read KEY
-  cache = DA::Cache.new("raw")
-  cache.read ARGV[2]
+# when ARGV[0..1].join(' ') == "cache read" && ARGV.size == 3
+#   # === {{CMD}} cache read KEY
+#   cache = DA::Cache.new("raw")
+#   cache.read ARGV[2]
 
-when ARGV[0..1].join(' ') == "cache write" && ARGV.size == 4
-  # === {{CMD}} cache write KEY VALUE
-  cache = DA::Cache.new("raw")
-  cache.write ARGV[2], ARGV[3]
+# when ARGV[0..1].join(' ') == "cache write" && ARGV.size == 4
+#   # === {{CMD}} cache write KEY VALUE
+#   cache = DA::Cache.new("raw")
+#   cache.write ARGV[2], ARGV[3]
 
 when full_cmd == "git zsh_prompt"
   # === {{CMD}} git zsh_prompt

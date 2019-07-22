@@ -150,6 +150,13 @@ module DA
 
   # =============================================================================
 
+  def out_err(*args)
+    io = IO::Memory.new
+    Process.run(*args, output: io, error: io)
+    io.rewind
+    io.to_s.strip
+  end
+
   def output(*args)
     output = IO::Memory.new
     Process.run(*args, output: output, error: STDERR)
