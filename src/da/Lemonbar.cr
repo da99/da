@@ -40,10 +40,12 @@ module DA
 
     def <<(x : IO::Memory | String | Char)
       send_to_input << x
+      self
     end
 
     def pipe
       send_to_input << Lemonbar::PIPE
+      self
     end
 
     # Write a newline to input pipe.
