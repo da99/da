@@ -1,6 +1,7 @@
 
 
 require "../src/da"
+require "../src/da/Window"
 
 module DA
 
@@ -315,6 +316,13 @@ when full_cmd[/^script run .+/]? && ARGV.size == 3
   # === {{CMD}} script run file
   file = ARGV.last
   DA::Script.new(file).run
+
+when full_cmd == "list windows"
+  # === {{CMD}} list windows
+  DA::Window.update
+  DA::Window.list.each { |w|
+    puts "#{w.id} #{w.focused?} #{w.title.inspect}"
+  }
 
 else
   DA.exit! 1, "!!! Invalid arguments: #{ARGV.map(&.inspect).join " "}"

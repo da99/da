@@ -35,10 +35,6 @@ module DA
       "0x%08x" % raw.to_i(prefix: true)
     end
 
-    def self.focus
-      @@list.find { |w| w.focus? }
-    end # def
-
     def self.focus_history
       current_ids = @@list.map { |x| x.id }
       Dawin::BSPC_History.node_ids.map { |id|
@@ -48,30 +44,23 @@ module DA
       }.compact
     end # def
 
-    def self.focus(raw_id : String)
-      w_id = clean_id(raw_id)
-      window = nil
-      target_index = nil
-      @@list.each_with_index { |w, i|
-        if w.id?(raw_id)
-          w.focus
-          target_index = i
-          window = w
-        else
-          w.unfocus
-        end
-      }
-
-      # Put focused window on top.
-      if target_index
-        @@list.rotate! target_index
-      end
-
-      window
+    def self.focused
+      @@list.find { |w| w.focus? }
     end # def
 
+    def self.focused_window_id!
+      raw = `xprop -root _NET_ACTIVE_WINDOW`.split.last || ""
+      return nil unless (raw.index("0x") == 0)
+      clean_id(raw)
+    end
+
     def self.resize(geo)
-      resize(Dawin::Root.new.active_window_id, geo)
+      id = focused_window_id!
+      if id
+        resize(id, geo)
+      else
+        DA.inspect! "No focused window found for resizing."
+      end
     end # def
 
     def self.resize(raw_id : String, geo)
@@ -90,11 +79,13 @@ module DA
 
     def self.update
       @@raw_list = `wmctrl -lxp`.strip
+
       ids = @@raw_list.lines.map { |x| clean_id(x.split.first) }
       old_ids = @@list.map { |w| w.id }
       @@list.each { |w|
         if !ids.includes?(w.id)
           @@list.delete w
+          next
         end
       }
 
@@ -104,6 +95,12 @@ module DA
           w = Window.new(new_id)
           @@list.unshift w
         end
+      }
+
+
+      focus_id = focused_window_id!
+      @@list.each { |w|
+        w.is_focused! if w.id == focus_id
       }
 
       list
@@ -194,15 +191,20 @@ module DA
       end
     end # def
 
-    def focus
+    def is_focused!
       @is_focus = true
     end
 
-    def unfocus
+    def not_focused!
       @is_focus = false
     end
 
-    def focus?
+    def focus!
+      DA.run("wmctrl", "-i -a #{id}".split)
+      is_focused!
+    end
+
+    def focused?
       @is_focus
     end
 
