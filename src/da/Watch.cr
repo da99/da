@@ -57,7 +57,7 @@ module DA
     def kill
       unless proc.terminated?
         proc.kill
-        STDERR.puts "killed: #{cmd.inspect} #{args.join ' '}: #{proc.pid}"
+        DA.inspect! "killed: #{cmd.inspect} #{args.join ' '}: #{proc.pid}"
       end
     end # def
 
@@ -68,7 +68,7 @@ module DA
 
       if !long_running? && @proc.terminated?
         sleep seconds
-        STDOUT.puts "=== Running #{cmd} #{args.join ' '}"
+        DA.inspect! "=== Running #{cmd} #{args.join ' '}"
         @proc = Process.new(cmd, args, output: output_pipe, error: output_pipe)
       end
 
