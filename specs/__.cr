@@ -42,5 +42,7 @@ require "./Runit.link"
 require "./human_time"
 require "./Utility.until_done"
 require "./Lemonbar"
+require "./Volume"
+require "./Bluetooth"
 
 
