@@ -123,6 +123,18 @@ module DA
     end # === def watch_run
 
     def watch
+      `mkdir -p /apps/da/tmp`
+      Dir.cd("/apps/da/tmp") {
+        `touch watch.pids`
+        File.read("watch.pids").split.each { |pid|
+          if Process.exists?(pid.to_i)
+            STDERR.puts "Process already exists: #{pid}"
+            Process.exit 2
+          end
+        }
+        File.write("watch.pids", Process.pid)
+      }
+
       Signal::TERM.trap do
         kill_scripts
         Signal::TERM.reset
