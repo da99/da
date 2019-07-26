@@ -12,7 +12,7 @@ module DA
     end # === def self.volume!
 
     def self.running?
-      !!`pacmd list-sinks`["state: RUNNING"]?
+      !!`pacmd list-sink-inputs`["state: RUNNING"]?
     end
 
     # =============================================================================
