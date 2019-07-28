@@ -68,7 +68,7 @@ module DA
 
       if !long_running? && @proc.terminated?
         sleep seconds
-        DA.inspect! "=== Running #{cmd} #{args.join ' '}"
+        # DA.inspect! "=== Running #{cmd} #{args.join ' '}"
         @proc = Process.new(cmd, args, output: output_pipe, error: output_pipe)
       end
 
