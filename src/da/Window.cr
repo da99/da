@@ -11,6 +11,24 @@ module DA
     # Latest focused window starts at 0.
     @@list = Array(Window).new
 
+    def self.to_geo(raw_id : String)
+      id = clean_id(raw_id)
+      x = y = w = h = 0
+      `xwininfo -id #{id}`.each_line { |l|
+        case
+        when l["upper-left X"]?
+          x = l.split(':').last.strip.to_i32
+        when l["upper-left Y"]?
+          y = l.split(':').last.strip.to_i32
+        when l["Width: "]?
+          w = l.split(':').last.strip.to_i32
+        when l["Height: "]?
+          h = l.split(':').last.strip.to_i32
+        end # case
+      }
+      Geo.new(x: x, y: y, w: w, h: h)
+    end # def
+
     def self.gap
       12
     end
@@ -143,17 +161,21 @@ module DA
     getter title     : String
     getter geo       : Geo? = nil
     getter spy_title : Xprop? = nil
+
     @is_focus        : Bool = false
 
     def initialize(raw_id : String)
-      id = raw_id.downcase
+      id = Window.clean_id(raw_id)
+
       raw = @@raw_list.lines.find { |l|
         l.index(id) == 0
       }.not_nil!
-      pieces = raw.split
-      @id = pieces.shift
+
+      pieces   = raw.split
+      @id      = pieces.shift
       @desktop = pieces.shift.to_i32
-      @pid = pieces.shift.to_i32
+      @pid     = pieces.shift.to_i32
+
       @classname, @class_ = pieces.shift.split('.')
       pieces.shift # hostname
       @title = pieces.join(' ')
@@ -169,6 +191,11 @@ module DA
           end
         }
       end
+
+      @geo = begin
+             g = Window.to_geo(@id)
+             g.unknown? ? nil : g
+           end # begin
     end # def
 
     # def close

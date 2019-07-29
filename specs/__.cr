@@ -44,5 +44,7 @@ require "./Utility.until_done"
 require "./Lemonbar"
 require "./Volume"
 require "./Bluetooth"
+require "./Watch"
+require "./Window"
 
 
