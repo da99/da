@@ -2,6 +2,18 @@
 require "../src/da/Window"
 
 describe "DA::Window" do
+  it "turns an Int32 String into a hex string" do
+    raw = "18898155"
+    target = "0x01205ceb"
+    assert DA::Window.clean_id(raw) == target
+  end
+
+  it "turns a 9 char hex String into a 10 hex string" do
+    raw = "0x1205ceb"
+    target = "0x01205ceb"
+    assert DA::Window.clean_id(raw) == target
+  end
+
   it "sets geo from Window::Geo.list" do
     DA::Window.update
     win_id = `xdotool getactivewindow`.strip

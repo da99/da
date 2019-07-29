@@ -50,7 +50,11 @@ module DA
     end # def
 
     def self.clean_id(raw : String)
-      "0x%08x" % raw.to_i(prefix: true)
+      if raw['x']?
+        "0x%08x" % raw.to_i(prefix: true)
+      else
+        "0x%08x" % raw.to_i32
+      end
     end
 
     def self.focus_history
