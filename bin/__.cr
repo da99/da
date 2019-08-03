@@ -2,6 +2,7 @@
 
 require "../src/da"
 require "../src/da/Window"
+require "../src/da/Network"
 
 module DA
 
@@ -323,6 +324,10 @@ when full_cmd == "list windows"
   DA::Window.list.each { |w|
     puts "#{w.id} #{w.focused?} #{w.title.inspect}"
   }
+
+when full_cmd ="network time"
+  # === {{CMD}}
+  puts DA::Network.time
 
 else
   DA.exit! 1, "!!! Invalid arguments: #{ARGV.map(&.inspect).join " "}"

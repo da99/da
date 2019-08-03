@@ -46,5 +46,6 @@ require "./Volume"
 require "./Bluetooth"
 require "./Watch"
 require "./Window"
+require "./Network_Time"
 
 
