@@ -175,12 +175,13 @@ module DA
         l.index(id) == 0
       }.not_nil!
 
-      pieces   = raw.split
-      @id      = pieces.shift
-      @desktop = pieces.shift.to_i32
-      @pid     = pieces.shift.to_i32
+      match    = raw.match(/^(0x[^\ ]+)\ +(\d+)\ (\d+)\ +(.+)\ \ ([^\ ]+)\ (.+)$/).not_nil!
+      pieces   = match.captures
+      @id      = pieces.shift.not_nil!
+      @desktop = pieces.shift.not_nil!.to_i32
+      @pid     = pieces.shift.not_nil!.to_i32
 
-      @classname, @class_ = pieces.shift.split('.')
+      @classname, @class_ = pieces.shift.not_nil!.split('.')
       pieces.shift # hostname
       @title = pieces.join(' ')
       if Window.media_player?(@class_)
