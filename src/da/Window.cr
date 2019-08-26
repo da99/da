@@ -140,7 +140,7 @@ module DA
       @@list.sort { |a, b| a.id <=> b.id }
     end # def
 
-    def self.grouped_by_class_
+    def self.groups
       sort_by_id.group_by { |w|
         w.class_
       }
@@ -181,7 +181,7 @@ module DA
       @desktop = pieces.shift.not_nil!.to_i32
       @pid     = pieces.shift.not_nil!.to_i32
 
-      @classname, @class_ = pieces.shift.not_nil!.split('.')
+      @classname, @class_ = pieces.shift.not_nil!.split('.').map(&.strip)
       pieces.shift # hostname
       @title = pieces.join(' ')
       if Window.media_player?(@class_)

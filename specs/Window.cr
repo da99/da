@@ -31,4 +31,14 @@ describe "DA::Window" do
     actual = DA::Window.new(win_id)
     assert actual.geo == geo
   end
+
+end # describe
+
+describe "DA::Window.groups" do
+  it "returns windows group by class_" do
+    DA::Window.update
+    actual = DA::Window.groups.keys.join(",")
+    target = `wmctrl -lx | cut -d' ' -f4 | cut -d'.' -f2 | uniq`.strip.split('\n').join(',')
+    assert actual == target
+  end
 end # describe
