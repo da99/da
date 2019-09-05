@@ -2,15 +2,15 @@
 module DA
 
   def test?
-    ENV["IS_TEST"]?
+    (ENV["IS_TEST"]? || "").upcase == "YES"
   end
 
   def debug?
-    ENV["IS_DEBUG"]?
+    (ENV["IS_DEBUG"]? || "").upcase == "YES"
   end
 
   def development?
-    !(ENV["IS_DEVELOPMENT"]? || "").empty?
+    (ENV["IS_DEVELOPMENT"]? || "").upcase == "YES"
   end # === def
 
   def inspect!(*args)
