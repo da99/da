@@ -320,7 +320,7 @@ when full_cmd[/^script run .+/]? && ARGV.size == 3
 
 when full_cmd == "list windows"
   # === {{CMD}} list windows
-  DA::Window.update
+  DA::Window.update_list
   DA::Window.list.each { |w|
     puts "#{w.id} #{w.focused?} #{w.title.inspect}"
   }

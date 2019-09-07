@@ -15,7 +15,7 @@ describe "DA::Window" do
   end
 
   it "sets geo from Window::Geo.list" do
-    DA::Window.update
+    DA::Window.update_list
     win_id = `xdotool getactivewindow`.strip
     win_geo = DA::Window.to_geo(win_id)
 
@@ -36,7 +36,7 @@ end # describe
 
 describe "DA::Window.groups" do
   it "returns windows group by class_" do
-    DA::Window.update
+    DA::Window.update_list
     actual = DA::Window.groups.keys.join(",")
     target = `wmctrl -lx | cut -d' ' -f4 | cut -d'.' -f2 | uniq`.strip.split('\n').join(',')
     assert actual == target

@@ -99,7 +99,7 @@ module DA
       w
     end # def
 
-    def self.update
+    def self.update_list
       @@raw_list = `wmctrl -lxp`.strip
 
       ids = @@raw_list.lines.map { |x| clean_id(x.split.first) }
@@ -184,6 +184,7 @@ module DA
       @classname, @class_ = pieces.shift.not_nil!.split('.').map(&.strip)
       pieces.shift # hostname
       @title = pieces.join(' ')
+
       if Window.media_player?(@class_)
         st = @spy_title = Xprop.new_spy_title(@id)
         spawn {
