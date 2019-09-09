@@ -295,11 +295,11 @@ module DA
       # Install and update shards, then build:
       shards!
       new_args = "build -- --warnings all".split.concat(args)
-      DA.inspect! new_args
       if !File.read("shard.yml")["targets:"]?
           DA.exit! "!!! No {{targets}} set in {{shard.yml}}."
       end
 
+      DA.orange! "=== {{shards}} #{new_args.join ' '}"
       DA.success!("shards", new_args)
     end # === def bin_compile
   end # === module Crystal

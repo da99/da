@@ -124,10 +124,12 @@ module DA
 
     def watch
       `mkdir -p /apps/da/tmp`
+
       Dir.cd("/apps/da/tmp") {
         `touch watch.pids`
         File.read("watch.pids").split.each { |pid|
-          if Process.exists?(pid.to_i)
+          file = "/proc/#{pid}/cmdline"
+          if File.exists?(file) && File.read(file)["da watch"]?
             STDERR.puts "Process already exists: #{pid}"
             Process.exit 2
           end
