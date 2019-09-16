@@ -2,6 +2,7 @@
 require "../src/da"
 require "../src/da/Window"
 require "../src/da/Network"
+require "../src/da/Mouse_Pointer"
 
 module DA
 
@@ -47,6 +48,35 @@ when full_cmd[/^run max \d+ .+/]?
       Process.exit 1
     end
   end
+
+when full_cmd == "move mouse pointer to scroll bar"
+  # === {{CMD}} move mouse pointer to scroll bar
+  DA::Window.update_list
+  win = DA::Window.focused
+  if win
+    geo = win.geo
+    if geo
+      mp = DA::Mouse_Pointer.new
+      new_x = geo.x + geo.w - 5
+      new_y = 0
+      scroll_movement = (geo.h / 10).to_i
+      if scroll_movement > 10
+        if mp.x == new_x
+          new_y = mp.y + scroll_movement
+        else
+          new_y = geo.y + scroll_movement
+        end
+        DA.system! "xdotool mousemove --clearmodifiers #{new_x} #{new_y}"
+      else
+        DA.orange! "--- Scroll movement is too small: #{scroll_movement}"
+      end
+    else
+      puts "no geo found."
+    end
+  else
+    puts "no focused window"
+  end
+
 
 when full_cmd[/^run .+/]?
   # === {{CMD}} run my cmd -with -args

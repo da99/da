@@ -198,10 +198,7 @@ module DA
         }
       end
 
-      @geo = begin
-             g = Window.to_geo(@id)
-             g.unknown? ? nil : g
-           end # begin
+      @geo = Window.to_geo(@id)
     end # def
 
     # def close
@@ -267,6 +264,9 @@ module DA
       else
         false
       end
+    end # def
+
+    def move_to_scroll_bar
     end # def
 
   end # === class
