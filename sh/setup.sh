@@ -144,7 +144,7 @@ fi
 cd /apps/da
 if ! test -e bin/da ; then
   crystal env
-  crystal build --warnings all bin/__.cr -o bin/da
+  shards build -- --warnings all --release
 fi
 
 sudo rm -f /var/service/agetty-tty4
