@@ -27,7 +27,7 @@ sudo xbps-install -S \
   alsa-utils \
   gvfs zip unzip \
   void-repo-nonfree \
-  fish \
+  fish-shell \
   ConsoleKit2   || :
 
 
