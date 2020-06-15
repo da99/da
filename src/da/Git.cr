@@ -45,7 +45,7 @@ module DA
 
       if Dir.exists?(name)
         Dir.cd(name) {
-          system("git pull")
+          system("git pull --no-rebase")
           success! $?
         }
       else

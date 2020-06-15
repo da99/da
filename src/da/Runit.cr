@@ -177,7 +177,7 @@ module DA
       file = File.join(super_dir, name)
       begin
         File.read(file).strip
-      rescue e : Errno
+      rescue e : Exception
         `sudo cat #{file}`.strip
       end
     end
