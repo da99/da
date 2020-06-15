@@ -16,7 +16,9 @@ module DA
 
     configured = nil
     repos.each { |repo|
-      if DA.output!("git remote show #{repo}").to_s[/configured.+git push/i]?
+      git_remote_show = "git remote show #{repo}"
+      DA.orange! "=== {{#{git_remote_show}}} ==="
+      if DA.output!(git_remote_show).to_s[/configured.+git push/i]?
         configured = true
       end
 
