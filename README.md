@@ -30,6 +30,8 @@ Process:
   DA.system!(cmd)  # Prints output of cmd.
   DA.success!(cmd) # Prints output of cmd only on failure and exits.
   DA.run(cmd)      # Shows which command is running and returns status.
+  DA.output!(cmd)
+  DA.verbose_output!(cmd)
 ```
 
 Links:

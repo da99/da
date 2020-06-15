@@ -157,6 +157,31 @@ module DA
     io.to_s.strip
   end
 
+  def verbose(*args)
+    verbose(args.map(&.to_str))
+  end # def
+
+  def verbose(x : String)
+    verbose(x.split)
+  end # def
+
+  def verbose(args : Array(String))
+    formatted = args.map_with_index { |x, i|
+      case i
+      when 0
+        "BOLD{{#{x}}}"
+      else
+        x
+      end
+    }.join(' ')
+    DA.orange! "=== {{Running}}: #{formatted}"
+  end # def
+
+  def verbose_output!(*args)
+    DA.verbose(*args)
+    output!(*args)
+  end
+
   def output(*args)
     output = IO::Memory.new
     Process.run(*args, output: output, error: STDERR)
@@ -170,6 +195,7 @@ module DA
     output!(cmd, args)
   end
 
+  # Runs DA.exit! if command fails. Returns output of command.
   def output!(*args) : String
     output = IO::Memory.new
 

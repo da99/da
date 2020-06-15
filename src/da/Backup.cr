@@ -16,13 +16,12 @@ module DA
 
     configured = nil
     repos.each { |repo|
-      git_remote_show = "git remote show #{repo}"
-      DA.orange! "=== {{#{git_remote_show}}} ==="
-      if DA.output!(git_remote_show).to_s[/configured.+git push/i]?
+      DA.orange! "=== {{#{repo}}} ==="
+
+      if DA.verbose_output!("git remote show #{repo}").to_s[/configured.+git push/i]?
         configured = true
       end
 
-      DA.orange! "=== {{#{repo}}} ==="
       if repo == "origin" && !configured
         DA.system!("git push -u #{repo} master")
       else
