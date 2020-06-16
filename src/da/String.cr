@@ -56,8 +56,11 @@ module DA
 
   def on_debug(s : String)
     return false unless debug?
-    if STDOUT.tty? && STDERR.tty?
+    case
+    when STDERR.tty?
       STDERR.puts orange(s)
+    when STDOUT.tty?
+      STDOUT.puts orange(s)
     else
       STDERR.puts s
     end

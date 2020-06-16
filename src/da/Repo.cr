@@ -1,54 +1,64 @@
 
 module DA
 
-  def repo_names
-    Dir.glob("/apps/*/").map { |x|
-      File.basename x
-    }.reject { |x| x.index(".Trash") == 0 || x == "progs" || x == "lost+found" }.sort
-  end
+  module Repo
+    extend self
 
-  def next_dirty_repo
-    all_names = repo_names
-    current   = Dir.current
-    name      = File.basename(current)
-    found_current = false
-    Dir.cd("/apps") {
-      all_names.each { |x|
-        if found_current
-          Dir.cd(x) {
-            return x if DA::Git.dirty?
-          }
-        else
-          if x == name
-            found_current = true
-            next
-          end
-        end
+    def parent_dir
+      File.dirname(dir!) rescue Dir.current
+    end # def
+
+    # Returns name of the current or top-most parent that is a git repo.
+    def dir!
+      dir = `git rev-parse --show-toplevel 2>/dev/null`.strip
+      raise("Git repo not found.") if dir.empty? || !File.directory?(dir)
+      dir
+    end # def
+
+    def name!
+      File.basename(dir!)
+    end # def
+
+    def all!
+      fin = Array(String).new
+      Dir.cd(parent_dir) {
+        `find "#{parent_dir}" -mindepth 1 -maxdepth 1 -type d`.strip.split('\n').each { |x|
+          basename = File.basename(x)
+          next if basename[".Trash"]? || basename == "lost+found"
+          fin.push(basename)
+        }
       }
-    }
+      raise "No repos found." if fin.empty?
+      fin.sort
+    end # def
 
-    return nil
-  end # def next_repo
+    def next_dirty
+      repos_dir = parent_dir
 
-  def next_repo
-    all_names = repo_names
-    current   = Dir.current
-    name      = File.basename(current)
-    found_current = false
-    all_names.each { |x|
-      return x if found_current
+      DA.each_after(all!, name!) { |x|
+        Dir.cd(File.join repos_dir, x) {
+          return x if Git.dirty?
+        }
+      }
+      return nil
+    end # def next_repo
 
-      if x == name
-        found_current = true
-        next
+    def next
+      name = name! rescue nil
+
+      if !name
+        all!.first
+      else
+        found_current = false
+        all!.each { |x|
+          return x if found_current
+          found_current = true if x == name
+        }
       end
-    }
 
-    return nil
-  end # === def next_repo
+      nil
+    end # === def next_repo
 
-  def first_repo
-    repo_names.first
-  end # === def first_repo
+  end # === module
 
 end # === module DA

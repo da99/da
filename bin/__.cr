@@ -214,15 +214,15 @@ when full_cmd =~ /^bin compile( .+)?$/
 
 when full_cmd == "first-repo"
   # === {{CMD}} first-repo
-  puts DA.first_repo
+  puts DA::Repo.all!.first
 
 when full_cmd == "next-repo"
   # === {{CMD}} next-repo
-  puts DA.next_repo
+  puts DA::Repo.next
 
 when full_cmd == "next-dirty-repo"
   # === {{CMD}} next-dirty-repo
-  puts DA.next_dirty_repo
+  puts DA::Repo.next_dirty
 
 # when ARGV[0..1].join(' ') == "cache read" && ARGV.size == 3
 #   # === {{CMD}} cache read KEY

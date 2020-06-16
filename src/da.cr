@@ -20,6 +20,7 @@ require "./da/Git"
 require "./da/VoidLinux"
 require "./da/File_System"
 
+require "./da/Enumerable"
 require "./da/Release"
 require "./da/App"
 require "./da/Linux"

@@ -26,6 +26,7 @@ module DA
 
     # This is a hacky implementation, but so far it works for me.
     def clean?
+      return false if !File.directory?(".git")
       status = `git status`.strip
       is_committed = status["nothing to commit, working tree clean"]?
       return false if !is_committed
@@ -109,7 +110,7 @@ module DA
     end
 
     def repo?
-      DA.success?("git rev-parse --is-inside-work-tree")
+      DA.success?("git rev-parse --is-inside-work-tree 2>/dev/null")
     end
 
     def ahead_of_remote?
