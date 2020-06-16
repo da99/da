@@ -14,7 +14,7 @@ module DA
     end
   end # def
 
-  def each_until(e, target0
+  def each_until(e, target)
     index = e.index(target)
     if index == nil
       e.each { |x| yield x }
