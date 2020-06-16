@@ -2,13 +2,15 @@
 module DA
   extend self
   def each_after(e, target)
-    found = false
-    e.each { |x|
-      if !found
-        found = (x == target)
-        next
-      end
-      yield x
-    }
+    index = e.index(target)
+    if index == nil
+      e.each { |x| yield x }
+    else
+      index = index || -1
+      e.each_with_index { |x, i|
+        next if i <= index
+        yield x
+      }
+    end
   end # def
 end # === module

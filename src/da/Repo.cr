@@ -34,10 +34,11 @@ module DA
 
     def next_dirty
       repos_dir = parent_dir
+      name = name! rescue :none
 
-      DA.each_after(all!, name!) { |x|
+      DA.each_after(all!, name) { |x|
         Dir.cd(File.join repos_dir, x) {
-          return x if Git.dirty?
+          return Dir.current if Git.dirty?
         }
       }
       return nil
