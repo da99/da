@@ -1,74 +1,84 @@
 
 module DA
 
-  module Repo
-    extend self
+  class Repos
+
+    getter dir : String
+
+    def initialize(raw_dir : String)
+      @dir = raw_dir.strip
+      raise "Invalid directory: #{raw_dir.inspect}" unless File.directory?(@dir)
+    end # def
+
+    def names
+      `find -L "#{dir}" -mindepth 1 -maxdepth 1 -type d`.strip.split('\n').map { |x|
+        basename = File.basename(x)
+        next if basename.empty? ||  basename.index('.') == 0 || basename == "lost+found"
+        basename
+      }.compact.sort
+    end # def
+
+    def repos
+      names.map { |r| Repo.new(File.join(dir, r)) }
+    end # def
+
+  end # === class
+
+  class Repo
+    module Class_Methods
+
+      def next_dirty(repo_dir, repo_dirs)
+        begin
+          Repo.new(repo_dir)
+        rescue e : Exception
+        end
+        repos_dir = parent_dir
+        name      = name! rescue :none
+        all_repos = all!
+
+        DA.each_after(all_repos, name) { |x|
+          Dir.cd(File.join repos_dir, x) {
+            return Dir.current if Git.dirty?
+          }
+        }
+
+        # If no dirty repo found, search before repo.
+        DA.each_until(all_repos, name) { |x|
+          Dir.cd(File.join repos_dir, x) {
+            return Dir.current if Git.dirty?
+          }
+        }
+
+        return nil
+      end # def next_repo
+
+    end # === module
+
+    extend Class_Methods
+
+    getter dir : String
+
+    def initialize(raw_dir)
+      @dir = Dir.cd(raw_dir) { `git rev-parse --show-toplevel 2>/dev/null`.strip }
+      raise("Git repo not found for: #{raw_dir.inspect}") if raw_dir.empty?
+    end # def
+
+    def name
+      File.basename dir
+    end # def
 
     def parent_dir
-      File.dirname(dir!) rescue Dir.current
+      File.dirname(dir)
     end # def
 
-    # Returns name of the current or top-most parent that is a git repo.
-    def dir!
-      dir = `git rev-parse --show-toplevel 2>/dev/null`.strip
-      raise("Git repo not found.") if dir.empty? || !File.directory?(dir)
-      dir
+    def repos_dir
+      Repos.new(parent_dir)
     end # def
 
-    def name!
-      File.basename(dir!)
+    def dirty?
+      Dir.cd(dir) { Git.dirty? }
     end # def
 
-    def all!
-      fin = Array(String).new
-      Dir.cd(parent_dir) {
-        `find "#{parent_dir}" -mindepth 1 -maxdepth 1 -type d`.strip.split('\n').each { |x|
-          basename = File.basename(x)
-          next if basename[".Trash"]? || basename == "lost+found"
-          fin.push(basename)
-        }
-      }
-      raise "No repos found." if fin.empty?
-      fin.sort
-    end # def
-
-    def next_dirty
-      repos_dir = parent_dir
-      name      = name! rescue :none
-      all_repos = all!
-
-      DA.each_after(all_repos, name) { |x|
-        Dir.cd(File.join repos_dir, x) {
-          return Dir.current if Git.dirty?
-        }
-      }
-
-      # If no dirty repo found, search before repo.
-      DA.each_until(all_repos, name) { |x|
-        Dir.cd(File.join repos_dir, x) {
-          return Dir.current if Git.dirty?
-        }
-      }
-
-      return nil
-    end # def next_repo
-
-    def next
-      name = name! rescue nil
-
-      if !name
-        all!.first
-      else
-        found_current = false
-        all!.each { |x|
-          return x if found_current
-          found_current = true if x == name
-        }
-      end
-
-      nil
-    end # === def next_repo
-
-  end # === module
+  end # === class
 
 end # === module DA

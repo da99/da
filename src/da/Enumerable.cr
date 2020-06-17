@@ -2,7 +2,12 @@
 module DA
   extend self
   def each_after(e, target)
-    index = e.index(target)
+    index = case target
+            when Proc
+              e.index { |x| target.call(x) }
+            else
+              e.index(target)
+            end
     if index == nil
       e.each { |x| yield x }
     else
@@ -15,7 +20,12 @@ module DA
   end # def
 
   def each_until(e, target)
-    index = e.index(target)
+    index = case target
+            when Proc
+              e.index { |x| target.call(x) }
+            else
+              e.index(target)
+            end
     if index == nil
       e.each { |x| yield x }
     else

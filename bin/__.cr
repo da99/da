@@ -212,17 +212,19 @@ when full_cmd =~ /^bin compile( .+)?$/
   # === {{CMD}} bin compile [args to compile]
   DA::Dev.bin_compile(ARGV[2..-1])
 
-when full_cmd == "first-repo"
-  # === {{CMD}} first-repo
-  puts DA::Repo.all!.first
-
-when full_cmd == "next-repo"
-  # === {{CMD}} next-repo
-  puts DA::Repo.next
-
-when full_cmd == "next-dirty-repo"
+when full_cmd["first-dirty-repo"]?
   # === {{CMD}} next-dirty-repo
-  puts DA::Repo.next_dirty
+  DA::Repos.new(ARGV[1]).repos.find { |r| r.dirty? }.try { |r| puts r.dir }
+
+when full_cmd["next-dirty-repo"]?
+  # === {{CMD}} next-dirty-repo
+  r = DA::Repo.new(ARGV[1])
+  DA.each_after(r.repos_dir.repos, ->(x : DA::Repo) { x.name == r.name}) { |r|
+    if r.dirty?
+      puts r.dir
+      break
+    end
+  }
 
 # when ARGV[0..1].join(' ') == "cache read" && ARGV.size == 3
 #   # === {{CMD}} cache read KEY
