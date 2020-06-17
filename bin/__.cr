@@ -218,13 +218,7 @@ when full_cmd["first-dirty-repo"]?
 
 when full_cmd["next-dirty-repo"]?
   # === {{CMD}} next-dirty-repo
-  r = DA::Repo.new(ARGV[1])
-  DA.each_after(r.repos_dir.repos, ->(x : DA::Repo) { x.name == r.name}) { |r|
-    if r.dirty?
-      puts r.dir
-      break
-    end
-  }
+  DA::Repo.new(ARGV[1]).next { |r| r.dirty? }.try { |r| puts r.dir }
 
 # when ARGV[0..1].join(' ') == "cache read" && ARGV.size == 3
 #   # === {{CMD}} cache read KEY

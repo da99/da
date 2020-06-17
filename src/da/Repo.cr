@@ -79,6 +79,18 @@ module DA
       Dir.cd(dir) { Git.dirty? }
     end # def
 
+    def previous
+      DA.each_after(repos_dir.repos.reverse, ->(x : Repo) { x.name == name}) { |r|
+        return r if yield(r)
+      }
+    end # def
+
+    def next
+      DA.each_after(repos_dir.repos, ->(x : Repo) { x.name == name}) { |r|
+        return r if yield(r)
+      }
+    end # def
+
   end # === class
 
 end # === module DA
