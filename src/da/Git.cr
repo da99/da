@@ -32,7 +32,7 @@ module DA
       return false if !is_committed
       has_origin = !`git remote -v`.strip.empty?
       if has_origin
-        return !!status["Your branch is up to date with 'origin/master'"]?
+        return !!status[/Your branch is up to date with 'origin\/(main|master)'/]?
       end
       true
     end # def git_is_clean
