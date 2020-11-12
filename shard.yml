@@ -3,9 +3,9 @@ name: da
 version: 5.3.1
 
 targets:
-  da_new:
+  da:
     main: bin/__.cr
-  my_new:
+  my:
     main: bin/my.cr
 
 development_dependencies:
@@ -13,3 +13,5 @@ development_dependencies:
     github: da99/da_spec
   microtest:
     github: ragmaanir/microtest
+  assert:
+    github: sam0x17/assert.cr

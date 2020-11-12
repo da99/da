@@ -97,6 +97,13 @@ when full_cmd == "update"
   # === {{CMD}} update
   DA::Git.update
 
+when full_cmd == "git is clean"
+  # === {{CMD}} update
+  if DA::Git::Repo.new(Dir.current).clean?
+    exit 0
+  end
+  exit 1
+
 when full_cmd == "git status"
   # === {{CMD}} status
   DA::Git.status
