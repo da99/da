@@ -17,15 +17,15 @@ module DA
 
     def compile
       Dir.mkdir_p(File.dirname bin)
-      DA.system!("mkdir -p tmp/out")
-      DA.system!("crystal build --warnings all #{src} -o #{bin}")
+      DA::Process::Inherit.new("mkdir -p tmp/out").success!
+      DA::Process::Inherit.new("crystal build --warnings all #{src} -o #{bin}").success!
       if File.exists?("specs/__.run.cr")
-        DA.system!("crystal build --warnings all specs/__.run.cr -o tmp/out/__.run")
+        DA::Process::Inherit.new("crystal build --warnings all specs/__.run.cr -o tmp/out/__.run").success!
       end
     end
 
     def run(args = [] of String)
-      DA.system!(bin, args)
+      DA::Process::Inherit.new([bin].concat args).success!
       DA.green! "=== {{DONE}}: BOLD{{#{bin}}} #{args.join ' '} ==="
     end # === def run
 

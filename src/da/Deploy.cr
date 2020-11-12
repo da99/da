@@ -181,7 +181,7 @@ module DA
         DA.orange! "!!! {{Not found}}: BOLD{{#{file}}}"
         exit 1
       end
-      DA.system!("rsync -v -e ssh --relative #{file} #{server_name}:/home/deployer/")
+      DA::Process::Inherit.new("rsync -v -e ssh --relative #{file} #{server_name}:/home/deployer/").success!
     end # === def init_server
 
     def upload_commit_to_remote(server_name : String)
@@ -189,8 +189,9 @@ module DA
       app_name   = File.basename(Dir.current)
       remote_dir = "/deploy/#{app_name}/#{release_id}"
 
-      if DA.success?("ssh #{server_name} test -d #{remote_dir}")
-        DA.exit!("!!! Already exists on server: #{remote_dir}")
+      if DA::Process::Inherit.new("ssh #{server_name} test -d #{remote_dir}").success?
+        DA.red!("!!! Already exists on server: #{remote_dir}")
+        exit 1
       end
 
       path = Dir.current
@@ -199,9 +200,9 @@ module DA
       Dir.cd(tmp) {
         clone_dir = "#{app_name}/#{release_id}"
         FileUtils.rm_rf(release_id)
-        DA.system!("git clone --depth 1 file://#{path} #{clone_dir}")
-        DA.system!("rm -rf #{clone_dir}/.git")
-        DA.system!("rsync -v -e ssh --relative --recursive #{clone_dir} #{server_name}:/deploy/")
+        DA::Process::Inherit.new("git clone --depth 1 file://#{path} #{clone_dir}").success!
+        DA::Process::Inherit.new("rm -rf #{clone_dir}/.git").success!
+        DA::Process::Inherit.new("rsync -v -e ssh --relative --recursive #{clone_dir} #{server_name}:/deploy/").success!
       }
     end # === def upload_commit_to_remote
 

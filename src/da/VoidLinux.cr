@@ -56,8 +56,8 @@ module DA
     end # === def service
 
     def upgrade
-      DA.system! "sudo xbps-install -Su"
-      DA.system! "sudo xbps-remove --yes --clean-cache --remove-orphans --verbose"
+      DA::Process::Inherit.new("sudo xbps-install -Su").success!
+      DA::Process::Inherit.new("sudo xbps-remove --yes --clean-cache --remove-orphans --verbose").success!
     end # === def upgrade
 
   end # === module VoidLinux

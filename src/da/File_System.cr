@@ -56,9 +56,9 @@ module DA
     end
 
     cmd = "ln -s -f --no-dereference #{original} #{target}"
-    return true if DA.success?(cmd)
+    return true if DA::Process::Inherit.new(cmd).success?
 
-    DA.system!("sudo #{cmd}")
+    DA::Process::Inherit.new("sudo #{cmd}").success!
     true
   end # === def symlink!
 

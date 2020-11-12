@@ -35,12 +35,12 @@ module DA
     end
 
     def da_dir
-      bin_dir = File.dirname(Process.executable_path.not_nil!)
+      bin_dir = File.dirname(::Process.executable_path.not_nil!)
       File.dirname(bin_dir)
     end
 
     def pid_file
-      bin_dir = File.dirname(Process.executable_path.not_nil!)
+      bin_dir = File.dirname(::Process.executable_path.not_nil!)
       da_dir  = File.dirname(bin_dir)
       File.join da_dir, "tmp/out/watch_pid.txt"
     end
@@ -58,7 +58,8 @@ module DA
       when da_cmd == "proc"
         DA.orange! "=== {{Process}}: BOLD{{#{full_cmd}}}"
         # args = "echo a".split
-        x = Process.new(args.shift, args, output: STDOUT, input: STDIN, error: STDERR)
+        _i = ::Process::Redirect::Inherit
+        x = ::Process.new(args.shift, args, output: _i, input: _i, error: _i)
         PROCESSES[x.pid] = x
         STDERR.puts "=== New process: #{x.pid}"
         x
@@ -130,30 +131,30 @@ module DA
         File.read("watch.pids").split.each { |pid|
           file = "/proc/#{pid}/cmdline"
           if File.exists?(file) && File.read(file)["da watch"]?
-            STDERR.puts "Process already exists: #{pid}"
-            Process.exit 2
+            DA.red! "{{Process already exists}}: #{pid}"
+            exit 2
           end
         }
-        File.write("watch.pids", Process.pid)
+        File.write("watch.pids", ::Process.pid)
       }
 
       Signal::TERM.trap do
         kill_scripts
         Signal::TERM.reset
         STDERR.puts "--- TERM ---"
-        Process.kill(Signal::TERM, Process.pid)
+        ::Process.kill(Signal::TERM, ::Process.pid)
       end
 
       Dir.cd da_dir
       pid_file = "tmp/out/watch_pid.txt"
       Dir.mkdir_p File.dirname(pid_file)
 
-      this_pid = Process.pid
+      this_pid = ::Process.pid
 
       if File.exists?(pid_file)
         old = File.read(pid_file).strip
         cmdline_file = "/proc/#{old}/cmdline"
-        if File.exists?(cmdline_file) && old.to_i != Process.pid.to_i && File.read(cmdline_file)[/da\ +watch/]?
+        if File.exists?(cmdline_file) && old.to_i != ::Process.pid.to_i && File.read(cmdline_file)[/da\ +watch/]?
           DA.red! "!!! {{Already running}}: pid BOLD{{#{old}}}"
           exit 1
         end
@@ -163,7 +164,7 @@ module DA
 
       system("reset")
 
-      puts "=== #{Process.pid}"
+      puts "=== #{::Process.pid}"
       DA.orange!("-=-= BOLD{{Watching}}: #{File.basename Dir.current} {{@}} #{time} #{"-=" * 10}")
 
       pattern = "tmp/out/__*.sh"
@@ -241,13 +242,13 @@ module DA
     end
 
     def process_exists?(pid : Int32)
-      return false if !Process.exists?(pid) || defunct?(pid)
-      Process.exists?(pid)
+      return false if !::Process.exists?(pid) || defunct?(pid)
+      ::Process.exists?(pid)
     end # === def process_exists?
 
     def defunct?(pid : Int32)
       data = IO::Memory.new
-      Process.new("ps", "--no-headers --pid #{pid}".split, output: data, error: data)
+      ::Process.new("ps", "--no-headers --pid #{pid}".split, output: data, error: data)
       sleep 0.1
       data.rewind
       line = data.to_s
@@ -265,7 +266,7 @@ module DA
         DA::Crystal.bin_compile(args)
       else
         STDERR.puts "!!! No acceptable bin file found in ./bin directory."
-        Process.exit 2
+        exit 2
       end
     end # === def
 

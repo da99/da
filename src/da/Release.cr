@@ -24,7 +24,7 @@ module DA
     def generate_id(dir) : String
       output = nil
       Dir.cd(dir) {
-        output = DA.output!("git show -s --format=%ct-%h")
+        output = DA::Process.new("git show -s --format=%ct-%h").success!.out_err
       }
       output.not_nil!
     end
@@ -36,7 +36,8 @@ module DA
     def latest!(app : App)
       r = DA::Release.list(app).last?
       if !r
-        DA.exit!("!!! No latest release found for #{app.dir}")
+        DA::Process.new("!!! No latest release found for #{app.dir}")
+        exit 1
       end
       r
     end # === def self.latest_release

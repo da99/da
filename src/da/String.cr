@@ -54,15 +54,13 @@ module DA
     colorize(raw, :yellow)
   end
 
-  def on_debug(s : String)
+  def debug(s : String)
     return false unless debug?
     case
     when STDERR.tty?
       STDERR.puts orange(s)
     when STDOUT.tty?
       STDOUT.puts orange(s)
-    else
-      STDERR.puts s
     end
   end # def
 

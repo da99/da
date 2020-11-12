@@ -27,7 +27,7 @@ module DA
     @done    : Bool = false
 
     getter owner : String
-    getter procs : Deque(Process) = Deque(Process).new
+    getter procs : Deque(::Process) = Deque(::Process).new
 
     def initialize(raw_dir : String, raw_file : String)
       @dir  = File.expand_path(raw_dir)
@@ -74,7 +74,7 @@ module DA
         if Script.process_exists?(proc.pid)
           DA.orange! "::: Killing: {{sudo}} BOLD{{kill -#{sig} #{proc.pid}}}" if debug?
           system "sudo", "/bin/kill -#{sig} #{proc.pid}".split
-          break if !DA.success?($?)
+          break if !($?.success?)
           sleep 0.5
 
           if proc_cmd == "sudo" && Script.process_exists?(proc.pid)
@@ -152,12 +152,12 @@ module DA
           raise Exception.new("No arguments for process.") if tokens.size < 1
           bin = tokens.shift
           args = tokens
-          process = Process.new(
+          process = ::Process.new(
             bin,
             args,
-            input:  Process::Redirect::Inherit,
-            output: Process::Redirect::Inherit,
-            error:  Process::Redirect::Inherit
+            input:  ::Process::Redirect::Inherit,
+            output: ::Process::Redirect::Inherit,
+            error:  ::Process::Redirect::Inherit
           )
           if debug?
             DA.orange! "=== PROCESS BOLD{{#{process.pid}}}: {{#{bin}}} BOLD{{#{args.join ' '}}}"
@@ -189,14 +189,14 @@ module DA
 
         else
           STDERR.puts "::: custom command: #{raw_line}" if debug?
-          stat = Process.run(
+          stat = ::Process.run(
             cmd,
             tokens,
-            input:  Process::Redirect::Inherit,
-            output: Process::Redirect::Inherit,
-            error:  Process::Redirect::Inherit
+            input:  ::Process::Redirect::Inherit,
+            output: ::Process::Redirect::Inherit,
+            error:  ::Process::Redirect::Inherit
           )
-          if !DA.success?(stat)
+          unless stat.success?
             raise Exception.new("Command failed: #{stat.exit_code}")
           end
 

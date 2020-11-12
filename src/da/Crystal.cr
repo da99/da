@@ -257,7 +257,8 @@ module DA
       shard_lock = "shard.lock"
 
       if !File.exists?(shard_yml)
-        DA.exit! "!!! No #{shard_yml} file found."
+        DA.red! "!!! No #{shard_yml} file found."
+        exit 1
       end
 
       if File.exists?(shard_lock) && File.info(shard_yml).modification_time < File.info(shard_lock).modification_time
@@ -266,9 +267,9 @@ module DA
       end
 
       lock = File.exists?(shard_lock) ? File.read(shard_lock) : ""
-      DA.system! "shards install"
-      DA.system! "shards update"
-      DA.system! "shards prune -v"
+      DA::Process::Inherit.new( "shards install" ).success!
+      DA::Process::Inherit.new( "shards update" ).success!
+      DA::Process::Inherit.new( "shards prune -v" ).success!
 
       # Sometimes no shard.lock is made if no shards are used.
       new_lock = if File.exists?(shard_lock)
@@ -288,7 +289,8 @@ module DA
         mime = raw.split[1].split("/").first?
         executable = raw[" executable, "]?
           if mime != "application" && !executable
-            DA.exit! " Non-binary file {{already exists}}: #{bin}"
+            DA.red! " Non-binary file {{already exists}}: #{bin}"
+            exit 1
         end
       end
 
@@ -296,11 +298,12 @@ module DA
       shards!
       new_args = "build -- --warnings all".split.concat(args)
       if !File.read("shard.yml")["targets:"]?
-          DA.exit! "!!! No {{targets}} set in {{shard.yml}}."
+          DA.red! "!!! No {{targets}} set in {{shard.yml}}."
+          exit 1
       end
 
       DA.orange! "=== {{shards}} #{new_args.join ' '}"
-      DA.success!("shards", new_args)
+      DA::Process::Inherit.new(["shards"].concat new_args).success!
     end # === def bin_compile
   end # === module Crystal
 end # === module DA

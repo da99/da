@@ -95,7 +95,7 @@ module DA
       # doc_string = {{ system("cat bin/__.cr").lines.select { |x| x =~ /^\ *# === / && !(x =~ /={3,}$/) } }}
       delim      = '{'
       delim_end  = '}'
-      bin_name   = "#{delim}#{delim}#{DA.bin_name}#{delim_end}#{delim_end}"
+      bin_name   = "#{delim}#{delim}#{DA::Process.bin_name}#{delim_end}#{delim_end}"
       groups = [] of Deque(String)
 
       while !lines.empty?
@@ -114,7 +114,7 @@ module DA
         groups = groups.select { |g| g.first[args.first]? }
         if groups.empty?
           DA.red! "!!! No help found for: #{args.first.inspect}"
-          Process.exit 1
+          exit 1
         end
       end
 

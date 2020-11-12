@@ -119,10 +119,11 @@ module DA
 
     def up!
       if !down?
-        DA.exit!("Service is not in \"down\" state: #{service_dir} -> #{status}")
+        DA.red!("Service is not in \"down\" state: #{service_dir} -> #{status}")
+        exit 1
       end
 
-      DA.system!("sudo sv up #{service_dir}")
+      DA::Process::Inherit.new("sudo sv up #{service_dir}").success!
       10.times do |i|
         if !run?
           sleep 1
@@ -132,7 +133,8 @@ module DA
       end
 
       if !run?
-        DA.exit!("Service is not in \"up\" state: #{service_dir} -> #{status}")
+        DA.red!("Service is not in \"up\" state: #{service_dir} -> #{status}")
+        exit 1
       end
       Runit.new(name, sv_dir, service_dir).pids.each { |pid|
         puts pid
@@ -141,11 +143,12 @@ module DA
 
     def down!
       if !run?
-        DA.exit!("Not running: #{service_dir}")
+        DA.red!("Not running: #{service_dir}")
+        exit 1
       end
 
       DA.orange! "PIDs: #{pids.join ' '}"
-      DA.system!("sudo sv down #{service_dir}")
+      DA::Process::Inherit.new("sudo sv down #{service_dir}").success!
       wait_pids
       if any_pids_up?
         DA.orange! "=== PIDs up: #{pids_up.join ", "}"
