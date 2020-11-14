@@ -96,7 +96,7 @@ module DA_SPEC
     end # === def full_name
 
     def print_pass
-      print "✔".colorize(:green)
+      print "✓".colorize(:green)
     end
 
     def print_fail
