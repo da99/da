@@ -170,7 +170,7 @@ module DA
 
       def staged?
         Dir.cd(dir) {
-          DA::Process.new("git diff --cached --exit-code").success?
+          !DA::Process.new("git diff --cached --exit-code").success?
         }
       end # def
 

@@ -120,7 +120,9 @@ when full_cmd["git commit"]?
     DA::Process.new(ARGV).success!
     exit 0
   end
-  DA.red! "Nothing has been {{staged}}."
+
+  DA.red! "!!! Nothing has been {{staged}}."
+  DA::Process::Inherit.new("git status".split)
   exit 1
 
 when full_cmd[/\Agit\ +committed\?\Z/]?
