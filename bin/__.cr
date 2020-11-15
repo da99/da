@@ -116,9 +116,11 @@ when full_cmd == "git status"
 when full_cmd["git commit"]?
   # === {{CMD} git commit ...
   repo = DA::Git::Repo.new(Dir.current)
-  unless repo.committed?
-    DA::Process::Inherit.new(ARGV).success!
+  if repo.staged?
+    DA::Process.new(ARGV).success!
+    exit 0
   end
+  DA.red! "Nothing has been {{staged}}."
   exit 1
 
 when full_cmd[/\Agit\ +committed\?\Z/]?

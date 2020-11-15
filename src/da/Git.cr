@@ -168,15 +168,15 @@ module DA
         }
       end # def
 
-      def committed?
+      def staged?
         Dir.cd(dir) {
-          DA::Process::Inherit.new("git diff --cached --exit-code").success?
+          DA::Process.new("git diff --cached --exit-code").success?
         }
       end # def
 
       def development_checkpoint
         Dir.cd(dir) {
-          if DA::Process::Inherit.new("git diff --cached --exit-code").success?
+          if staged?
             DA.red! "Nothing has been staged."
             exit 1
           end
