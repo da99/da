@@ -106,10 +106,23 @@ when full_cmd == "git is clean"
 
 when full_cmd == "git status"
   # === {{CMD}} status
-  DA::Git.status
+  DA::Process::Inherit.new("git status").success!
+  repo = DA::Git::Repo.new(Dir.current)
+  errs = repo.errors
+  errs.each { |e| DA.red!(e) }
+  exit 0 if errs.empty?
+  exit 1
+
+when full_cmd["git commit"]?
+  # === {{CMD} git commit ...
+  repo = DA::Git::Repo.new(Dir.current)
+  unless repo.committed?
+    DA::Process::Inherit.new(ARGV).success!
+  end
+  exit 1
 
 when full_cmd[/\Agit\ +committed\?\Z/]?
-  # === {{CMD}} commit pending
+  # === {{CMD}} git committed?
   if !DA::Git::Repo.new(Dir.current).commit_pending?
     exit 0
   end

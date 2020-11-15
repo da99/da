@@ -21,36 +21,6 @@ module DA
     def update
       DA::Process::Inherit.new("git add --all").success!
       DA::Process::Inherit.new("git status").success!
-      puts_url_origin
-    end
-
-    def status
-      DA::Process::Inherit.new("git status").success!
-      puts_url_origin
-    end
-
-    def puts_url_origin
-      origin = DA::Process.new("git remote get-url --all origin").out_err.strip
-
-      if origin.empty?
-        DA.red!("!!! No origin found.")
-        exit 1
-      end
-
-      urls = [] of String
-      origin.each_line { |line|
-        DA.bold!("=== {{#{line}}}")
-        urls << line
-      }
-
-      # Check if origin fetch/push URLs are the same:
-      total = urls.size
-      uniqs = urls.sort.uniq.size
-      if total != uniqs
-        DA.red!("!!! {{origin URL mismatch}} !!")
-        return false
-      end
-      true
     end
 
     def current_ref
@@ -198,6 +168,12 @@ module DA
         }
       end # def
 
+      def committed?
+        Dir.cd(dir) {
+          DA::Process::Inherit.new("git diff --cached --exit-code").success?
+        }
+      end # def
+
       def development_checkpoint
         Dir.cd(dir) {
           if DA::Process::Inherit.new("git diff --cached --exit-code").success?
@@ -230,6 +206,38 @@ module DA
 
           DA::Process::Inherit.new(["git", "commit"].concat(args)).success!
         }
+      end # def
+
+      def status
+        DA::Process.new("git status").success!.out_err
+      end # def status
+
+      def errors
+        errs = [] of String
+        Dir.cd(dir) {
+          if !Dir.exists?(".git")
+            errs << "Not a git repository."
+          end
+        }
+        urls = remote_origin_urls
+        # Check if origin fetch/push URLs are the same:
+        total = urls.size
+        uniqs = urls.sort.uniq.size
+        case
+        when urls.empty?
+          errs << "No remote {{origin}} specified."
+        when total != uniqs
+          errs << "!!! {{origin URL mismatch}} !!:\n #{urls.join '\n'}"
+        end # case
+
+        errs
+      end # def
+
+      def remote_origin_urls
+        urls = [] of String
+        origin = Dir.cd(dir) { DA::Process.new("git remote get-url --all origin").output.to_s.strip }
+        origin.each_line { |line| urls << line }
+        urls
       end # def
 
     end # === class Repo

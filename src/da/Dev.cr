@@ -1,19 +1,27 @@
 
 module DA
 
-  def test?
+  def self.test?
     (ENV["IS_TEST"]? || "").upcase == "YES"
   end
 
-  def debug?
+  def self.debug?
     (ENV["IS_DEBUG"]? || "").upcase == "YES"
   end
 
-  def development?
+  def self.debug(*args)
+    if debug?
+      args.each { |x| puts x }
+      return true
+    end
+    false
+  end # def
+
+  def self.development?
     (ENV["IS_DEVELOPMENT"]? || "").upcase == "YES"
   end # === def
 
-  def inspect!(*args)
+  def self.inspect!(*args)
     return false unless debug?
 
     STDERR.puts args.map(&.inspect).join(", ")
@@ -28,7 +36,6 @@ module DA
     MTIMES    = {} of String => Int64
     PROCESSES = {} of String => Process
     SCRIPTS   = {} of String => ::DA::Script
-
 
     def time
       `date +"%r"`.strip
@@ -124,19 +131,13 @@ module DA
     end # === def watch_run
 
     def watch
-      `mkdir -p /apps/da/tmp`
+      if `pgrep -a -f "da watch" | wc -l`.strip.to_i > 2
+        DA.red! "{{Process already exists}}:"
+        puts `pgrep -a -f "da watch"`.strip
+        exit 2
+      end
 
-      Dir.cd("/apps/da/tmp") {
-        `touch watch.pids`
-        File.read("watch.pids").split.each { |pid|
-          file = "/proc/#{pid}/cmdline"
-          if File.exists?(file) && File.read(file)["da watch"]?
-            DA.red! "{{Process already exists}}: #{pid}"
-            exit 2
-          end
-        }
-        File.write("watch.pids", ::Process.pid)
-      }
+      `mkdir -p /apps/da/tmp`
 
       Signal::TERM.trap do
         kill_scripts
@@ -146,21 +147,6 @@ module DA
       end
 
       Dir.cd da_dir
-      pid_file = "tmp/out/watch_pid.txt"
-      Dir.mkdir_p File.dirname(pid_file)
-
-      this_pid = ::Process.pid
-
-      if File.exists?(pid_file)
-        old = File.read(pid_file).strip
-        cmdline_file = "/proc/#{old}/cmdline"
-        if File.exists?(cmdline_file) && old.to_i != ::Process.pid.to_i && File.read(cmdline_file)[/da\ +watch/]?
-          DA.red! "!!! {{Already running}}: pid BOLD{{#{old}}}"
-          exit 1
-        end
-      end # if
-
-      File.write(pid_file, this_pid.to_s)
 
       system("reset")
 

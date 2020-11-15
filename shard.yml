@@ -11,7 +11,3 @@ targets:
 development_dependencies:
   da_spec:
     github: da99/da_spec
-  microtest:
-    github: ragmaanir/microtest
-  assert:
-    github: sam0x17/assert.cr
