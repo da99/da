@@ -63,7 +63,8 @@ DA::CLI.parse do |o|
   o.run_if(full_cmd[/^git commit /]?) {
     repo = DA::Git::Repo.new(Dir.current)
     if repo.staged?
-      DA::Process.new(ARGV).success!
+      DA::Process::Inherit.new(ARGV).success!
+      DA::Process::Inherit.new("git status".split)
       exit 0
     end
 
@@ -108,51 +109,68 @@ DA::CLI.parse do |o|
     DA::Dev.watch_run(ARGV[2])
   }
 
+  o.desc "is dev"
+  o.run_if(full_cmd == "is dev") {
+    exit 0 if DA.development?
+    exit 1
+  }
+
+  o.desc "link symbolic [origin] [new_location]"
+  o.run_if(full_cmd[/^link symbolic\!? .+ .+$/]?) {
+    DA::File_System.symlink!(ARGV[2], ARGV[3])
+  }
+
+  o.desc "build"
+  o.run_if(full_cmd == "build") {
+    langs = DA::Dev.build
+    if langs.empty?
+      DA.red! "!!! No acceptable languages."
+      exit 1
+    end
+  }
+
+  o.desc "first dirty repo [directory]?"
+  o.run_if(full_cmd[/^first dirty repo/]?) {
+    DA::Git::Repos.new(ARGV[3]? || Dir.current).repos.find { |r| r.dirty? }.try { |r| puts r.dir }
+  }
+
+  o.desc "next dirty repo [directory]?"
+  o.run_if(full_cmd[/^next dirty repo/]?) {
+    DA::Git::Repo.new(ARGV[3]? || Dir.current).next { |r| r.dirty? }.try { |r| puts r.dir }
+  }
+
+  # =============================================================================
+  # Linux:
+  # =============================================================================
+  o.desc "os create system user [string]"
+  o.run_if(full_cmd[/^os create system user .+$/]?) {
+    DA::Linux.useradd_system(ARGV.last)
+  }
+
+  # =============================================================================
+  # Void Linux:
+  # =============================================================================
+  o.desc "voidlinux upgrade"
+  o.run_if(full_cmd == "voidlinux upgrade") {
+    DA::VoidLinux.upgrade
+  }
+
+  # =============================================================================
+  # Network:
+  # =============================================================================
+  o.desc "network time"
+  o.run_if(full_cmd == "network time") {
+    puts DA::Network.time
+  }
 end # parse
 
-exit 0
+DA::CLI.exit!
+
 case
 
-# when full_cmd == "move mouse pointer to scroll bar"
-#   # === {{CMD}} move mouse pointer to scroll bar
-#   DA::Window.update_list
-#   win = DA::Window.focused
-#   if win
-#     geo = win.geo
-#     if geo
-#       mp = DA::Mouse_Pointer.new
-#       new_x = geo.x + geo.w - 5
-#       new_y = 0
-#       scroll_movement = (geo.h / 10).to_i
-#       if scroll_movement > 10
-#         if mp.x == new_x
-#           new_y = mp.y + scroll_movement
-#         else
-#           new_y = geo.y + scroll_movement
-#         end
-#         DA.system! "xdotool mousemove --clearmodifiers #{new_x} #{new_y}"
-#       else
-#         DA.orange! "--- Scroll movement is too small: #{scroll_movement}"
-#       end
-#     else
-#       puts "no geo found."
-#     end
-#   else
-#     puts "no focused window"
-#   end
 # === File_System =============================================================
 
-when ["is development", "is dev"].includes?(full_cmd)
-  # === {{CMD}} is development
-  if DA.development?
-    exit 0
-  else
-    exit 1
-  end
 
-when ARGV[0..1].join(' ') == "link symbolic!" && ARGV[2]? && ARGV[3]? && !ARGV[4]?
-  # === {{CMD}} link symbolic
-  DA::File_System.symlink!(ARGV[2], ARGV[3])
 
 # =============================================================================
 
@@ -202,17 +220,7 @@ when ARGV[0..1].join(' ') == "link symbolic!" && ARGV[2]? && ARGV[3]? && !ARGV[4
 #   # === {{CMD}} shards!
 #   DA::Crystal.shards!
 
-when full_cmd =~ /^bin compile( .+)?$/
-  # === {{CMD}} bin compile [args to compile]
-  DA::Dev.bin_compile(ARGV[2..-1])
 
-when full_cmd["first dirty repo"]?
-  # === {{CMD}} next dirty repo DIR
-  DA::Git::Repos.new(ARGV.last).repos.find { |r| r.dirty? }.try { |r| puts r.dir }
-
-when full_cmd["next dirty repo"]?
-  # === {{CMD}} next dirty repo DIR
-  DA::Git::Repo.new(ARGV.last).next { |r| r.dirty? }.try { |r| puts r.dir }
 
 # when ARGV[0..1].join(' ') == "cache read" && ARGV.size == 3
 #   # === {{CMD}} cache read KEY
@@ -224,9 +232,6 @@ when full_cmd["next dirty repo"]?
 #   cache = DA::Cache.new("raw")
 #   cache.write ARGV[2], ARGV[3]
 
-when full_cmd == "git zsh_prompt"
-  # === {{CMD}} git zsh_prompt
-  puts DA::Git.zsh_prompt
 
 # =============================================================================
 # Deploy
@@ -264,20 +269,6 @@ when full_cmd == "git zsh_prompt"
 # when full_cmd["upload shell config to "]?
 #   # === {{CMD}} upload shell config to app_name
 #   DA::Deploy.upload_shell_config_to(ARGV.last)
-
-# =============================================================================
-# Linux:
-# =============================================================================
-when full_cmd[/^create system user .+$/]?
-  # === {{CMD}} create system user ...
-  DA::Linux.useradd_system(ARGV.last)
-
-# =============================================================================
-# Void Linux:
-# =============================================================================
-when full_cmd == "voidlinux upgrade"
-  # === {{CMD}} voidlinux upgrade
-  DA::VoidLinux.upgrade
 
 # =============================================================================
 # Runit services:
@@ -344,13 +335,7 @@ when full_cmd[/^script run .+/]? && ARGV.size == 3
 #     puts "#{w.id} #{w.focused?} #{w.title.inspect}"
 #   }
 
-when full_cmd == "network time"
-  # === {{CMD}}
-  puts DA::Network.time.inspect
-
 else
-  DA.red! "!!! {{Invalid arguments}}: #{ARGV.map(&.inspect).join " "}"
-  exit 1
 
 end # case
 

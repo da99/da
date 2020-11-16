@@ -246,14 +246,13 @@ module DA
       PROCESSES.any? { |file, x| process_exists?(x.pid) }
     end
 
-    def bin_compile(args)
-      case
-      when File.exists?("bin/__.cr")
-        DA::Crystal.bin_compile(args)
-      else
-        STDERR.puts "!!! No acceptable bin file found in ./bin directory."
-        exit 2
+    def build
+      langs = [] of String
+      if File.exists?("bin/__.cr")
+        DA::Process::Inherit.new("shards build -- --warnings all --release".split).success!
+        langs << "crystal"
       end
+      langs
     end # === def
 
   end # === module

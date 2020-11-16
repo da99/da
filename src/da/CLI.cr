@@ -19,9 +19,12 @@ module DA
       File.dirname(Process.executable_path)
     end # === def apps_dir
 
+    def ran?
+      @@help_was_printed || @@action_was_executed
+    end # def
+
     def parse
       yield self
-      exit 0 if @@help_was_printed || @@action_was_executed
     end # def
 
     def desc(x : String)
@@ -44,6 +47,12 @@ module DA
         @@action_was_executed = true
         exit 0
       end # if
+    end # def
+
+    def exit!
+      exit 0 if ran?
+      DA.red! "!!! {{Invalid arguments}}: #{ARGV.map(&.inspect).join " "}"
+      exit 1
     end # def
 
   end # === module
