@@ -1,55 +1,117 @@
 
 require "../src/da"
-# require "../src/da/Window"
+require "../src/da/CLI"
 require "../src/da/Network"
-require "../src/da/Mouse_Pointer"
-
-module DA
-
-  extend self
-
-  def bin_dir
-    File.dirname(Process.executable_path)
-  end # === def apps_dir
-
-end # === module DA
-
-if 0 == ARGV.size
-  DA.red! "!!! BOLD{{No arguments specified}}."
-  exit 1
-end
 
 full_cmd = ARGV.map(&.strip).join(" ")
 
-case
+DA::CLI.parse do |o|
+  o.desc "fs list usb drives"
+  o.run_if(full_cmd == "list usb drives") {
+    DA::File_System.usb_drives.each { |x|
+      puts x
+    }
+  }
 
-when "-h --help help".split.includes?(ARGV.first)
-  # === {{CMD}} -h|--help|help
-  DA.print_help
-
-
-when full_cmd["list usb drives"]?
-  DA.cli_list_usb_drives
-
-when ARGV.size == 3 && full_cmd["set volume "]?
-  DA::OS.set_volume(ARGV.last)
-
-when full_cmd[/^run max \d+ .+/]?
-  # === {{CMD}} run max [seconds] cmd -with -args
-  max = (ARGV[2].to_i32 * 10)
-  if max < 1 || max > 250
-    DA.red!("Max is out of range: 1-250")
-    exit 1
-  end
-  cmd_with_args = ARGV[3..-1]
-  count = 0
-  while !DA::Process.new(cmd_with_args).success?
-    sleep 0.1
-    count += 1
-    if count > max
-      Process.exit 1
+  o.desc "run max [seconds] cmd -with args"
+  o.run_if(full_cmd[/^run max \d+ .+/]?) {
+    max = (ARGV[2].to_i32 * 10)
+    if max < 1 || max > 250
+      DA.red!("Max is out of range: 1-250")
+      exit 1
     end
-  end
+    cmd_with_args = ARGV[3..-1]
+    count = 0
+    while !DA::Process.new(cmd_with_args).success?
+      sleep 0.1
+      count += 1
+      if count > max
+        Process.exit 1
+      end
+    end
+  }
+
+  o.desc "backup"
+  o.run_if(full_cmd == "backup") {
+    DA.backup
+  }
+
+  o.desc "update"
+  o.run_if(full_cmd == "update") {
+    DA::Git.update
+  }
+
+  o.desc "git is clean"
+  o.run_if(full_cmd == "git is clean") {
+    if DA::Git::Repo.new(Dir.current).clean?
+      exit 0
+    end
+    exit 1
+  }
+
+  o.desc "git status"
+  o.run_if(full_cmd == "git status") {
+    DA::Process::Inherit.new("git status").success!
+    repo = DA::Git::Repo.new(Dir.current)
+    errs = repo.errors
+    errs.each { |e| DA.red!(e) }
+    exit 0 if errs.empty?
+    exit 1
+  }
+
+  o.desc "git commit ..."
+  o.run_if(full_cmd[/^git commit /]?) {
+    repo = DA::Git::Repo.new(Dir.current)
+    if repo.staged?
+      DA::Process.new(ARGV).success!
+      exit 0
+    end
+
+    DA.red! "!!! Nothing has been {{staged}}."
+    DA::Process::Inherit.new("git status".split)
+    exit 1
+  }
+
+  o.desc "git is committed"
+  o.run_if(full_cmd == "git is committed") {
+    if !DA::Git::Repo.new(Dir.current).commit_pending?
+      exit 0
+    end
+    exit 1
+  }
+
+  o.desc "git commit is pending"
+  o.run_if(full_cmd == "git commit is pending") {
+    if DA::Git::Repo.new(Dir.current).commit_pending?
+      exit 0
+    end
+    exit 1
+  }
+
+  o.desc "git commit ..."
+  o.run_if(full_cmd[/^git commit .+/]?) {
+    DA::Git::Repo.new(Dir.current).commit ARGV[2...-1]
+  }
+
+  o.desc "git development checkpoint"
+  o.run_if(full_cmd == "git development checkpoint") {
+    DA::Git::Repo.new(Dir.current).development_checkpoint
+  }
+
+  o.desc "watch"
+  o.run_if(full_cmd == "watch") {
+    DA::Dev.watch
+  }
+
+  o.desc "watch run [file]"
+  o.run_if(full_cmd[/^watch run .+/]?) {
+    DA::Dev.watch_run(ARGV[2])
+  }
+
+end # parse
+
+exit 0
+case
 
 # when full_cmd == "move mouse pointer to scroll bar"
 #   # === {{CMD}} move mouse pointer to scroll bar
@@ -78,91 +140,6 @@ when full_cmd[/^run max \d+ .+/]?
 #   else
 #     puts "no focused window"
 #   end
-
-
-when full_cmd[/^run .+/]?
-  # === {{CMD}} run my cmd -with -args
-  args = ARGV[1..-1]
-  DA::Process::Inherit.new(args).success!
-
-when "watch run" == "#{ARGV[0]?} #{ARGV[1]?}" && ARGV[2]?
-  # === {{CMD}} watch run [file]
-  DA::Dev.watch_run(ARGV[2])
-
-when full_cmd == "backup"
-  # === {{CMD}} backup
-  DA.backup
-
-when full_cmd == "update"
-  # === {{CMD}} update
-  DA::Git.update
-
-when full_cmd == "git is clean"
-  # === {{CMD}} update
-  if DA::Git::Repo.new(Dir.current).clean?
-    exit 0
-  end
-  exit 1
-
-when full_cmd == "git status"
-  # === {{CMD}} status
-  DA::Process::Inherit.new("git status").success!
-  repo = DA::Git::Repo.new(Dir.current)
-  errs = repo.errors
-  errs.each { |e| DA.red!(e) }
-  exit 0 if errs.empty?
-  exit 1
-
-when full_cmd["git commit"]?
-  # === {{CMD} git commit ...
-  repo = DA::Git::Repo.new(Dir.current)
-  if repo.staged?
-    DA::Process.new(ARGV).success!
-    exit 0
-  end
-
-  DA.red! "!!! Nothing has been {{staged}}."
-  DA::Process::Inherit.new("git status".split)
-  exit 1
-
-when full_cmd[/\Agit\ +committed\?\Z/]?
-  # === {{CMD}} git committed?
-  if !DA::Git::Repo.new(Dir.current).commit_pending?
-    exit 0
-  end
-  exit 1
-
-when full_cmd[/\Agit\ +?commit\ +pending\??\Z/]?
-  # === {{CMD}} commit pending
-  if DA::Git::Repo.new(Dir.current).commit_pending?
-    exit 0
-  end
-  exit 1
-
-when full_cmd == "development checkpoint"
-  # === {{CMD}} development checkpoint
-  DA::Git::Repo.new(Dir.current).development_checkpoint
-
-when full_cmd[/^commit .+/]?
-  # === {{CMD}} commit ...args
-  ARGV.shift
-  DA::Git::Repo.new(Dir.current).commit ARGV
-
-when full_cmd == "watch"
-  # === {{CMD}} watch
-  DA::Dev.watch
-
-# =============================================================================
-
-when full_cmd == "specs compile"
-  # === {{CMD}} specs compile
-  DA::Specs.compile
-
-when ARGV[0..2].join(' ') == "specs compile run"
-  # === {{CMD}} specs compile run
-  DA::Specs.compile
-  DA::Specs.run ARGV[3..-1]
-
 # === File_System =============================================================
 
 when ["is development", "is dev"].includes?(full_cmd)
@@ -175,21 +152,9 @@ when ["is development", "is dev"].includes?(full_cmd)
 
 when ARGV[0..1].join(' ') == "link symbolic!" && ARGV[2]? && ARGV[3]? && !ARGV[4]?
   # === {{CMD}} link symbolic
-  DA.symlink!(ARGV[2], ARGV[3])
+  DA::File_System.symlink!(ARGV[2], ARGV[3])
 
 # =============================================================================
-
-when ARGV[0]? == "exec"
-  # === {{CMD}} exec ...
-  args = ARGV.clone
-  args.shift
-  if args.empty?
-    DA.orange! "no arguments found."
-    exit 1
-  end
-  cmd = args.shift
-  DA.orange! "{{#{cmd}}} BOLD{{#{args.join ' '}}}"
-  ::Process.exec(cmd, args)
 
 # =============================================================================
 # when full_cmd[/void install .+/]?
@@ -381,7 +346,7 @@ when full_cmd[/^script run .+/]? && ARGV.size == 3
 
 when full_cmd == "network time"
   # === {{CMD}}
-  puts DA::Network.time
+  puts DA::Network.time.inspect
 
 else
   DA.red! "!!! {{Invalid arguments}}: #{ARGV.map(&.inspect).join " "}"
