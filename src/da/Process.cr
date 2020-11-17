@@ -90,7 +90,9 @@ module DA
 
         @cmd = full_cmd.shift
         @args = full_cmd
-        DA.debug "=== {{Running}}: #{@cmd} #{@args.join ' '}"
+        if STDERR.tty? || DA.debug?
+          DA.orange! "=== {{Running}}: #{@cmd} #{@args.join ' '}"
+        end
         @status = ::Process.run(@cmd, @args, output: ::Process::Redirect::Inherit, error: ::Process::Redirect::Inherit, input: ::Process::Redirect::Inherit)
       end # === def initialize
 
