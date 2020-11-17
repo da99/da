@@ -1,5 +1,7 @@
 
 
+require "./VoidLinux"
+require "./Ubuntu"
 
 module DA
   module OS
@@ -41,6 +43,26 @@ module DA
         nil
       end
     end
+
+    def name
+      o = DA::Process.new("lsb_release -a -s").out_err
+      case
+      when o["Ubuntu"]?
+        "Ubuntu"
+      else
+        raise Exception.new("Unknown os")
+      end
+    end # def
+
+    def upgrade
+      name = self.name
+      case name
+      when "Ubuntu"
+        Ubuntu.upgrade
+      when "VoidLinux"
+        VoidLinux.upgrade
+      end
+    end # def
 
   end # === module OS
 end # === module DA_Dev

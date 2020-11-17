@@ -147,6 +147,16 @@ DA::CLI.parse do |o|
     DA::Linux.useradd_system(ARGV.last)
   }
 
+  o.desc "os name"
+  o.run_if(full_cmd == "os name") {
+    puts DA::OS.name
+  }
+
+  o.desc "os upgrade"
+  o.run_if(full_cmd == "os upgrade") {
+    DA::OS.upgrade
+  }
+
   # =============================================================================
   # Void Linux:
   # =============================================================================
