@@ -102,17 +102,6 @@ module DA
       DA.system! "shards", args
     end
 
-    def init
-      VoidLinux.install("
-        git llvm
-        gc-devel libatomic_ops pcre-devel libevent-devel libyaml-devel
-        libxml2-devel
-        gc-devel libatomic_ops pcre-devel libevent-devel libyaml-devel
-        libxml2-devel gmp-devel libressl-devel llvm gcc pkg-config
-        readline-devel libyaml-devel gmp-devel libressl-devel
-      ".split)
-    end # === def init
-
     def install
       Dir.cd "/progs"
       host = "https://github.com"
@@ -161,7 +150,7 @@ module DA
       init_bin(shard_name, repo_name)
       init_gitignore
       Dir.mkdir_p("src")
-      Dir.mkdir_p("specs")
+      Dir.mkdir_p("spec")
       init_shard_yml(shard_name, repo_name)
     end
 

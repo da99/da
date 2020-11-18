@@ -99,6 +99,11 @@ DA::CLI.parse do |o|
     DA::Git::Repo.new(Dir.current).development_checkpoint
   }
 
+  o.desc "git latest tag"
+  o.run_if(full_cmd == "git latest tag") {
+    puts DA::Git::Repo.new(Dir.current).latest_tag
+  }
+
   o.desc "watch"
   o.run_if(full_cmd == "watch") {
     DA::Dev.watch
@@ -172,6 +177,15 @@ DA::CLI.parse do |o|
   o.run_if(full_cmd == "network time") {
     puts DA::Network.time
   }
+
+  # =============================================================================
+  # Release:
+  # =============================================================================
+  o.desc "bump [major|minor|patch]"
+  o.run_if(full_cmd[/^bump (major|minor|patch)$/]?) {
+    DA::Git::Repo.new(Dir.current).bump(ARGV.last)
+  }
+
 end # parse
 
 DA::CLI.exit!
@@ -308,22 +322,22 @@ when "service up" == "#{ARGV[0]?} #{ARGV[1]?}" && ARGV[2]?
   # === {{CMD}} service up dir_service
   DA::Runit.new(ARGV[2]).up!
 
-when "inspect" == ARGV[0]? && ARGV[1]? && !ARGV[2]?
-  # === {{CMD}} inspect app_name
-  app = DA::App.new(ARGV[1])
+# when "inspect" == ARGV[0]? && ARGV[1]? && !ARGV[2]?
+#   # === {{CMD}} inspect app_name
+#   app = DA::App.new(ARGV[1])
 
-  puts "name:       #{app.name}"
-  puts "dir:        #{app.dir}"
-  puts "latest:     #{DA::Release.latest(app).inspect}"
-  puts "releases:   #{DA::Release.list(app).inspect}"
+#   puts "name:       #{app.name}"
+#   puts "dir:        #{app.dir}"
+#   puts "latest:     #{DA::Release.latest(app).inspect}"
+#   puts "releases:   #{DA::Release.list(app).inspect}"
 
-when "#{ARGV[0]?} #{ARGV[1]?} #{ARGV[2]?}" == "upload binary to"
-  # === {{CMD}} upload binary to remote_name
-  DA::Deploy.upload_binary_to_remote ARGV[3]
+# when "#{ARGV[0]?} #{ARGV[1]?} #{ARGV[2]?}" == "upload binary to"
+#   # === {{CMD}} upload binary to remote_name
+#   DA::Deploy.upload_binary_to_remote ARGV[3]
 
-when "#{ARGV[0]?} #{ARGV[1]?} #{ARGV[2]?}" == "upload commit to"
-  # === {{CMD}} upload commit to remote_name
-  DA::Deploy.upload_commit_to_remote ARGV[3]
+# when "#{ARGV[0]?} #{ARGV[1]?} #{ARGV[2]?}" == "upload commit to"
+#   # === {{CMD}} upload commit to remote_name
+#   DA::Deploy.upload_commit_to_remote ARGV[3]
 
 # when full_cmd[/^pg migrate .+/]?
 #   # === {{CMD}} pg migrate [-args to psql] dir

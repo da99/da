@@ -162,6 +162,14 @@ module DA
         }
       end # def
 
+      def tags
+        `git tag`.strip.split('\n')
+      end # def
+
+      def latest_tag
+        tags.reverse.find { |x| x[/^v\d+\.\d+\.\d+$/] }.not_nil!
+      end # def
+
       def next
         DA.each_after(repos_dir.repos, ->(x : Repo) { x.name == name}) { |r|
           return r if yield(r)
@@ -238,6 +246,65 @@ module DA
         origin = Dir.cd(dir) { DA::Process.new("git remote get-url --all origin").output.to_s.strip }
         origin.each_line { |line| urls << line }
         urls
+      end # def
+
+      def bump(target)
+        case target
+        when "major"
+        when "minor"
+        when "patch"
+        else
+          raise Exception.new("Invalid target name: #{target.inspect}")
+        end # case
+
+        if !clean?
+          DA.red! "Repo is {{not}} clean."
+          exit 1
+        end
+
+        Dir.cd(dir) {
+          is_crystal = File.exists?("shard.yml")
+          old_version = begin
+                          case
+                          when is_crystal
+                            `shards version`.strip
+                          else
+                            latest_tag.split("v").last || ""
+                          end # case
+                        end
+
+          if old_version.empty?
+            raise Exception.new("Version not found.")
+          end
+
+          pieces = old_version.split('.').map { |x| x.to_i32 }
+          new_version = begin
+                          case target
+                          when "major"
+                            pieces[0] = pieces.first + 1
+                          when "minor"
+                            pieces[1] = pieces[1] + 1
+                          else
+                            pieces[2] = pieces[2] + 1
+                          end
+                          pieces.join '.'
+                        end # begin
+          if is_crystal
+            File.write(
+              "shard.yml",
+              File.read("shard.yml").sub("version: #{old_version}", "version: #{new_version}")
+            )
+            Process::Inherit.new("git add shard.yml".split).success!
+            Process::Inherit.new(["git", "commit", "-am", "Bump: v#{new_version}"]).success!
+          else
+            DA.red! "Unknown repo tag to bump."
+            exit 1
+          end
+
+          Process::Inherit.new(["git", "tag", "v#{new_version}"]).success!
+          Process::Inherit.new(["git", "push", "--tag"]).success!
+
+        }
       end # def
 
     end # === class Repo
