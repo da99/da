@@ -36,17 +36,20 @@ DA::CLI.parse do |o|
     DA.backup
   }
 
-  o.desc "update"
-  o.run_if(full_cmd == "update") {
-    DA::Git.update
-  }
-
+  # =============================================================================
+  # Git:
+  # =============================================================================
   o.desc "git is clean"
   o.run_if(full_cmd == "git is clean") {
     if DA::Git::Repo.new(Dir.current).clean?
       exit 0
     end
     exit 1
+  }
+
+  o.desc "git update"
+  o.run_if(full_cmd == "update") {
+    DA::Git::Repo.new(Dir.current).update_tree
   }
 
   o.desc "git status"
@@ -104,16 +107,24 @@ DA::CLI.parse do |o|
     puts DA::Git::Repo.new(Dir.current).latest_tag
   }
 
-  o.desc "git repo update"
-  o.run_if(full_cmd == "git repo update") {
-    repo = DA::Git::Repo.new(Dir.current)
-    if repo.crystal?
-      DA::Process::Inherit.new("shards install".split).success!
-      DA::Process::Inherit.new("shards update".split).success!
-      DA::Process::Inherit.new("shards prune".split).success!
-    end
+  o.desc "repo update packages"
+  o.run_if(full_cmd == "repo update packages") {
+    DA::Git::Repo.new(Dir.current).update_packages
   }
 
+  o.desc "first dirty repo [directory]?"
+  o.run_if(full_cmd[/^first dirty repo/]?) {
+    DA::Git::Repos.new(ARGV[3]? || Dir.current).repos.find { |r| r.dirty? }.try { |r| puts r.dir }
+  }
+
+  o.desc "next dirty repo [directory]?"
+  o.run_if(full_cmd[/^next dirty repo/]?) {
+    DA::Git::Repo.new(ARGV[3]? || Dir.current).next { |r| r.dirty? }.try { |r| puts r.dir }
+  }
+
+  # =============================================================================
+  # Dev:
+  # =============================================================================
   o.desc "watch"
   o.run_if(full_cmd == "watch") {
     DA::Dev.watch
@@ -130,11 +141,6 @@ DA::CLI.parse do |o|
     exit 1
   }
 
-  o.desc "link symbolic [origin] [new_location]"
-  o.run_if(full_cmd[/^link symbolic\!? .+ .+$/]?) {
-    DA::File_System.symlink!(ARGV[2], ARGV[3])
-  }
-
   o.desc "build"
   o.run_if(full_cmd == "build") {
     langs = DA::Dev.build
@@ -142,16 +148,6 @@ DA::CLI.parse do |o|
       DA.red! "!!! No acceptable languages."
       exit 1
     end
-  }
-
-  o.desc "first dirty repo [directory]?"
-  o.run_if(full_cmd[/^first dirty repo/]?) {
-    DA::Git::Repos.new(ARGV[3]? || Dir.current).repos.find { |r| r.dirty? }.try { |r| puts r.dir }
-  }
-
-  o.desc "next dirty repo [directory]?"
-  o.run_if(full_cmd[/^next dirty repo/]?) {
-    DA::Git::Repo.new(ARGV[3]? || Dir.current).next { |r| r.dirty? }.try { |r| puts r.dir }
   }
 
   # =============================================================================
@@ -170,6 +166,11 @@ DA::CLI.parse do |o|
   o.desc "os upgrade"
   o.run_if(full_cmd == "os upgrade") {
     DA::OS.upgrade
+  }
+
+  o.desc "link symbolic [origin] [new_location]"
+  o.run_if(full_cmd[/^link symbolic\!? .+ .+$/]?) {
+    DA::File_System.symlink!(ARGV[2], ARGV[3])
   }
 
   # =============================================================================

@@ -18,11 +18,6 @@ module DA
       end
     end
 
-    def update
-      DA::Process::Inherit.new("git add --all").success!
-      DA::Process::Inherit.new("git status").success!
-    end
-
     def current_ref
       head = DA::Process.new("git symbolic-ref --quiet HEAD")
       val = if head.success?
@@ -309,6 +304,23 @@ module DA
 
       def crystal?
         Dir.cd(dir) { File.exists?("shard.yml") }
+      end # def
+
+      def update_tree
+        Dir.cd(dir) {
+          DA::Process::Inherit.new("git add --all").success!
+          DA::Process::Inherit.new("git status").success!
+        }
+      end # def
+
+      def update_packages
+        Dir.cd(dir) {
+          if crystal?
+            DA::Process::Inherit.new("shards install".split).success!
+            DA::Process::Inherit.new("shards update".split).success!
+            DA::Process::Inherit.new("shards prune".split).success!
+          end
+        }
       end # def
 
     end # === class Repo
