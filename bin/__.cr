@@ -104,6 +104,16 @@ DA::CLI.parse do |o|
     puts DA::Git::Repo.new(Dir.current).latest_tag
   }
 
+  o.desc "git repo update"
+  o.run_if(full_cmd == "git repo update") {
+    repo = DA::Git::Repo.new(Dir.current)
+    if repo.crystal?
+      DA::Process::Inherit.new("shards install".split).success!
+      DA::Process::Inherit.new("shards update".split).success!
+      DA::Process::Inherit.new("shards prune".split).success!
+    end
+  }
+
   o.desc "watch"
   o.run_if(full_cmd == "watch") {
     DA::Dev.watch

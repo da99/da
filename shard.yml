@@ -1,6 +1,6 @@
 ---
 name: da
-version: 5.4.1
+version: 0.0.0
 
 targets:
   da:
@@ -11,3 +11,4 @@ targets:
 development_dependencies:
   da_spec:
     github: da99/da_spec
+    branch: master

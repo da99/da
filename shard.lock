@@ -2,9 +2,5 @@ version: 2.0
 shards:
   da_spec:
     git: https://github.com/da99/da_spec.git
-    version: 1.1.2
-
-  microtest:
-    git: https://github.com/ragmaanir/microtest.git
-    version: 1.2.3
+    version: 1.1.2+git.commit.58528ad6fd4399d7ae0c0943070bd2bfaeb4ddd4
 

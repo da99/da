@@ -307,6 +307,10 @@ module DA
         }
       end # def
 
+      def crystal?
+        Dir.cd(dir) { File.exists?("shard.yml") }
+      end # def
+
     end # === class Repo
   end # === module Git
 end # === module DA
