@@ -257,8 +257,8 @@ module DA
           raise Exception.new("Invalid target name: #{target.inspect}")
         end # case
 
-        if !clean?
-          DA.red! "Repo is {{not}} clean."
+        if commit_pending?
+          DA.red! "Repo has {{pending commits}}."
           exit 1
         end
 
