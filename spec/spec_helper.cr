@@ -5,43 +5,29 @@ require "da_spec"
   # DA_Spec.pattern "name of test"
   # DA_Spec.pattern /name of test/
 
-require "../src/da/Dev"
-require "../src/da/Git"
-require "../src/da/Process"
+# require "../src/da/Dev"
+# require "../src/da/Git"
+# require "../src/da/Process"
 extend DA_SPEC
 
 
-# require "microtest"
-
-# module Microtest
-#   module DSL
-#     macro describe(cls, focus = :nofocus, &block)
-#       class {{cls.camelcase.gsub(/[^a-z0-9]/i, "_").id}}Test < Microtest::Test
-#         {{block.body}}
-#       end
-#     end
-#   end
-#   module TestClassDSL
-#     macro test(name = "anonymous", focus = :nofocus, &block)
-#       {%
-#        testname = name.gsub(/[^a-z0-9]/i, "_").id
-#       focus_str = focus == :focus ? "f" : ""
-#       %}
-
-#       def __test{{focus_str.id}}__{{testname}}
-#         {% if block %}
-#           {{block.body}}
-#         {% else %}
-#           skip "not implemented"
-#         {% end %}
-#       end
-#     end
-#   end
-# end # Microtest
 
 class SPEC
 
   DIR = Dir.current
+
+  # def self.io_capture
+  #   io = IO::Memory.new
+  #   origin_err = STDERR
+  #   origin_out = STDOUT
+  #   STDERR = io
+  #   STDOUT = io
+  #   yield
+  #   STDERR = origin_err
+  #   STDOUT = origin_out
+  #   io.rewind
+  #   io.to_s
+  # end # def
 
   def self.dir
     "/tmp/da_spec"

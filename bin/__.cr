@@ -1,7 +1,17 @@
 
 require "../src/da"
 require "../src/da/CLI"
+require "../src/da/Git"
+require "../src/da/Enumerable"
 require "../src/da/Network"
+require "../src/da/CLI"
+require "../src/da/File_System"
+require "../src/da/String"
+require "../src/da/Process"
+require "../src/da/Dev"
+require "../src/da/Script"
+require "../src/da/OS"
+require "../src/da/Linux"
 
 full_cmd = ARGV.map(&.strip).join(" ")
 
@@ -71,7 +81,7 @@ DA::CLI.parse do |o|
       exit 0
     end
 
-    DA.red! "!!! Nothing has been {{staged}}."
+    DA.red! "BOLD{{!!!}} Nothing has been {{staged}}."
     DA::Process::Inherit.new("git status".split)
     exit 1
   }
@@ -112,11 +122,6 @@ DA::CLI.parse do |o|
     DA::Git::Repo.new(Dir.current).update_packages
   }
 
-  o.desc "first dirty repo [directory]?"
-  o.run_if(full_cmd[/^first dirty repo/]?) {
-    DA::Git::Repos.new(ARGV[3]? || Dir.current).repos.find { |r| r.dirty? }.try { |r| puts r.dir }
-  }
-
   o.desc "next dirty repo [directory]? [directory]? ..."
   o.run_if(full_cmd[/^next dirty repo/]?) {
     repo = DA::Git::Repo.new(Dir.current)
@@ -127,9 +132,10 @@ DA::CLI.parse do |o|
     DA.round_about(repos, ->(r : DA::Git::Repo) { r.dir == repo.dir }) { |r|
       if r.dirty?
         puts r.name
-        true
+        exit 0
       end
     }
+    DA.green! "All repos {{clean}}."
   }
 
   # =============================================================================
@@ -315,33 +321,33 @@ case
 #   # === {{CMD}} upload shell config to app_name
 #   DA::Deploy.upload_shell_config_to(ARGV.last)
 
-# =============================================================================
-# Runit services:
-# =============================================================================
+# # =============================================================================
+# # Runit services:
+# # =============================================================================
 
-when "service inspect" == "#{ARGV[0]?} #{ARGV[1]?}" && ARGV[2]?
-  # === {{CMD}} service inspect dir_service
-  service = if File.directory?(ARGV[2])
-              DA::Runit.new(File.basename(ARGV[2]), ARGV[2], ARGV[2])
-            else
-              DA::Runit.new(ARGV[2])
-            end
-  puts "name        #{service.name.inspect}"
-  puts "sv_dir      #{service.sv_dir.inspect}"
-  puts "service_dir #{service.service_dir.inspect}"
-  puts "pids        #{service.pids.inspect}"
-  puts "status      #{service.status.inspect}"
-  puts "run?        #{service.run?.inspect}"
-  puts "down?       #{service.down?.inspect}"
-  puts "exit?       #{service.exit?.inspect}"
+# when "service inspect" == "#{ARGV[0]?} #{ARGV[1]?}" && ARGV[2]?
+#   # === {{CMD}} service inspect dir_service
+#   service = if File.directory?(ARGV[2])
+#               DA::Runit.new(File.basename(ARGV[2]), ARGV[2], ARGV[2])
+#             else
+#               DA::Runit.new(ARGV[2])
+#             end
+#   puts "name        #{service.name.inspect}"
+#   puts "sv_dir      #{service.sv_dir.inspect}"
+#   puts "service_dir #{service.service_dir.inspect}"
+#   puts "pids        #{service.pids.inspect}"
+#   puts "status      #{service.status.inspect}"
+#   puts "run?        #{service.run?.inspect}"
+#   puts "down?       #{service.down?.inspect}"
+#   puts "exit?       #{service.exit?.inspect}"
 
-when "service down" == "#{ARGV[0]?} #{ARGV[1]?}" && ARGV[2]? && !ARGV[3]?
-  # === {{CMD}} service down dir_service
-  DA::Runit.new(ARGV[2]).down!
+# when "service down" == "#{ARGV[0]?} #{ARGV[1]?}" && ARGV[2]? && !ARGV[3]?
+#   # === {{CMD}} service down dir_service
+#   DA::Runit.new(ARGV[2]).down!
 
-when "service up" == "#{ARGV[0]?} #{ARGV[1]?}" && ARGV[2]?
-  # === {{CMD}} service up dir_service
-  DA::Runit.new(ARGV[2]).up!
+# when "service up" == "#{ARGV[0]?} #{ARGV[1]?}" && ARGV[2]?
+#   # === {{CMD}} service up dir_service
+#   DA::Runit.new(ARGV[2]).up!
 
 # when "inspect" == ARGV[0]? && ARGV[1]? && !ARGV[2]?
 #   # === {{CMD}} inspect app_name

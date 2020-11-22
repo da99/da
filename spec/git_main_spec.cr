@@ -1,5 +1,7 @@
 
 require "./spec_helper.cr"
+require "../src/da/Git"
+
 describe "da git status" do
 
   it "exists with status code 0" do

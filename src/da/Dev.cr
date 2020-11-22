@@ -1,4 +1,6 @@
 
+require "file_utils"
+
 module DA
 
   def self.test?
