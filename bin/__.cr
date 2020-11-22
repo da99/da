@@ -117,9 +117,19 @@ DA::CLI.parse do |o|
     DA::Git::Repos.new(ARGV[3]? || Dir.current).repos.find { |r| r.dirty? }.try { |r| puts r.dir }
   }
 
-  o.desc "next dirty repo [directory]?"
+  o.desc "next dirty repo [directory]? [directory]? ..."
   o.run_if(full_cmd[/^next dirty repo/]?) {
-    DA::Git::Repo.new(ARGV[3]? || Dir.current).next { |r| r.dirty? }.try { |r| puts r.dir }
+    repo = DA::Git::Repo.new(Dir.current)
+    repos = [repo.parent_dir].concat(ARGV[3..-1]).
+      uniq.
+      map { |dir| DA::Git::Repos.new(dir).repos }.
+      flatten
+    DA.round_about(repos, ->(r : DA::Git::Repo) { r.dir == repo.dir }) { |r|
+      if r.dirty?
+        puts r.name
+        true
+      end
+    }
   }
 
   # =============================================================================

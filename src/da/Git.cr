@@ -165,8 +165,13 @@ module DA
         tags.reverse.find { |x| x[/^v\d+\.\d+\.\d+$/] }.not_nil!
       end # def
 
-      def next
-        DA.each_after(repos_dir.repos, ->(x : Repo) { x.name == name}) { |r|
+      def next(dirs : Array(String)?)
+        repos = (dirs || [] of String).unshift(parent_dir).
+          uniq.
+          map { |d| Repos.new(d) }.
+          map { |rd| rd.repos }.
+          flatten
+        DA.each_after(repos, ->(x : Repo) { x.dir == dir }) { |r|
           return r if yield(r)
         }
       end # def
