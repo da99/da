@@ -60,7 +60,7 @@ module DA_SPEC
           with x yield
         rescue ex
           x.print_fail
-          puts "  #{ex.class.to_s}: #{ex.message.colorize.mode(:bold)}"
+          puts "  #{ex.class.to_s}: #{ex.message.colorize.bold}"
           line_count = 0
           ex.backtrace.each { |line|
             print "  "
@@ -72,7 +72,9 @@ module DA_SPEC
         end
         ending_assert_count = Describe.asserts.size
         if beginning_assert_count == ending_assert_count
-          raise Exception.new("No assertions for 'it'.")
+          print '\n'
+          STDERR.puts "No assertions were specified.".colorize.yellow.bold
+          exit 1
         end
         print '\n'
       end
@@ -96,11 +98,11 @@ module DA_SPEC
     end # === def full_name
 
     def print_pass
-      print "✓".colorize(:green)
+      print "✓".colorize.green
     end
 
     def print_fail
-      print "✗".colorize(:red), '\n'
+      print "✗".colorize.red, '\n'
     end # === def print_fail
 
     def assert_raises(error_class, msg : Nil | String | Regex = nil)
@@ -137,7 +139,7 @@ module DA_SPEC
   def describe(*args)
     return if DA_SPEC.skip_all?
     d = Describe.new(*args)
-    print d.name.colorize.mode(:bold), ":", "\n"
+    print d.name.colorize.bold, ":", "\n"
     Describe.names.push d.name
     with d yield
     Describe.names.pop
@@ -165,8 +167,8 @@ module DA_SPEC
       print_pass
     else
       print_fail
-      puts "  #{line.colorize.mode(:bold)}: #{file}"
-      puts "  #{%origin.colorize.mode(:bold)} -> #{%result.inspect.colorize(:red).mode(:bold)}"
+      puts "  #{line.colorize.bold}: #{file}"
+      puts "  #{%origin.colorize.bold} -> #{%result.inspect.colorize.red.bold}"
       examine({ {{func_call.receiver.stringify}}, %a}, { {{func_call.args.first.stringify}}, %b})
       exit 1
     end
@@ -176,7 +178,7 @@ end # === module DA_SPEC
 
 at_exit {
   if DA_SPEC::Describe.asserts.empty?
-    STDERR.puts "!!! No assertions were run."
+    STDERR.puts "!!! No assertions were run.".colorize.yellow.bold
     exit 1
   end
 }
