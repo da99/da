@@ -4,9 +4,6 @@ module DA
   module File_System
     extend self
 
-    class Exception < ::DA::Exception
-    end
-
     def usb_drives
       `lsblk -l`.strip.split('\n').select { |line|
         # NAME      MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
@@ -36,7 +33,7 @@ module DA
 
     def symlink!(original, target)
       if !File.exists?(original)
-        raise File_System::Exception.new "Symbolic link origin does not exist: #{original}"
+        raise Exception.new "Symbolic link origin does not exist: #{original}"
       end
 
       if File.symlink?(target) && !File.exists?(target)
@@ -44,7 +41,7 @@ module DA
       end
 
       if File.exists?(target) && !File.symlink?(target)
-        raise File_System::Exception.new("Symbolic link target already exists: #{target}")
+        raise Exception.new("Symbolic link target already exists: #{target}")
       end
 
       if File.symlink?(target) && File.exists?(target) && File.real_path(original) == File.real_path(target)

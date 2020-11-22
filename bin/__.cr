@@ -131,7 +131,7 @@ DA::CLI.parse do |o|
       flatten
     DA.round_about(repos, ->(r : DA::Git::Repo) { r.dir == repo.dir }) { |r|
       if r.dirty?
-        puts r.name
+        puts r.dir
         exit 0
       end
     }
