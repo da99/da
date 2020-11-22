@@ -72,8 +72,8 @@ module DA_SPEC
         end
         ending_assert_count = Describe.asserts.size
         if beginning_assert_count == ending_assert_count
-          print '\n'
-          STDERR.puts "No assertions were specified.".colorize.yellow.bold
+          It.print_fail
+          STDERR.puts "  No assertions were specified.".colorize.yellow.bold
           exit 1
         end
         print '\n'
@@ -97,12 +97,20 @@ module DA_SPEC
       Describe.names.map(&.strip).join(' ')
     end # === def full_name
 
-    def print_pass
+    def self.print_pass
       print "✓".colorize.green
     end
 
-    def print_fail
+    def print_pass
+      self.class.print_pass
+    end
+
+    def self.print_fail
       print "✗".colorize.red, '\n'
+    end # === def print_fail
+
+    def print_fail
+      self.class.print_fail
     end # === def print_fail
 
     def assert_raises(error_class, msg : Nil | String | Regex = nil)
