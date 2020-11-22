@@ -141,13 +141,6 @@ module DA
 
       `mkdir -p /apps/da/tmp`
 
-      Signal::TERM.trap do
-        kill_scripts
-        Signal::TERM.reset
-        STDERR.puts "--- TERM ---"
-        ::Process.kill(Signal::TERM, ::Process.pid)
-      end
-
       Dir.cd da_dir
 
       system("reset")
@@ -156,6 +149,8 @@ module DA
       DA.orange!("-=-= BOLD{{Watching}}: #{File.basename Dir.current} {{@}} #{time} #{"-=" * 10}")
 
       pattern = "tmp/out/__*.sh"
+
+      # Remove any previous scripts:
       Dir.glob(pattern).each { |f|
         if File.file?(f)
           DA.orange! "=== Ignoring previous file: #{File.read(f).split('\n').first?} (#{f})"
@@ -168,35 +163,28 @@ module DA
           Dir.glob(pattern).each { |raw_file|
             file = File.expand_path(raw_file)
             next if !File.file?(file)
-            DA.orange! "=== Running: {{#{file}}} in {{#{Dir.current}}} #{"-=" * 6}"
 
             raw = File.read(file).strip
+            FileUtils.rm(file)
             if raw[/Error: /i]?
               DA.red! raw
               FileUtils.rm(file)
               next
             end
 
-            raw_lines = raw.split('\n').map(&.strip)
-            dir, script_file = raw_lines
+            dir, script_file = raw.split('\n').map(&.strip)
             key = dir
+            DA.orange! "\n============ {{#{Dir.current}}} #{"-=" * 6}"
 
             Dir.cd(dir) {
               # Kill previous script:
-              script = SCRIPTS[key]?
-              if script && script.running?
-                STDERR.puts "=== Killing: #{key}"
-                script.kill(Signal::INT)
-                sleep 0.5
-              end
-
-              # Setup new script:
-              script = SCRIPTS[key] = Script.new(dir, script_file)
-              DA.orange!("=== removing: {{#{file}}}") if script && script.debug?
-              FileUtils.rm(file)
-
               begin
-                script.run
+                proc = DA::Process::Inherit.new(["zsh", "-e", "-u", "--pipefail", script_file])
+                if proc.success?
+                  DA.green! "============ {{DONE}} ============"
+                else
+                  DA.red! "=== {{FAILED}}: #{proc.status.exit_code} ==="
+                end
               rescue e
                 DA.inspect! e
               end

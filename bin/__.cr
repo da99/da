@@ -9,7 +9,6 @@ require "../src/da/File_System"
 require "../src/da/String"
 require "../src/da/Process"
 require "../src/da/Dev"
-require "../src/da/Script"
 require "../src/da/OS"
 require "../src/da/Linux"
 
@@ -217,14 +216,7 @@ end # parse
 
 DA::CLI.exit!
 
-case
-
 # === File_System =============================================================
-
-
-
-# =============================================================================
-
 # =============================================================================
 # when full_cmd[/void install .+/]?
 #   # === {{CMD}} void install ...packages...
@@ -374,19 +366,10 @@ case
 #   # === {{CMD}} sql inspect file.sql
 #   DA.sql_inspect(ARGV.last)
 
-when full_cmd[/^script run .+/]? && ARGV.size == 3
-  # === {{CMD}} script run file
-  file = ARGV.last
-  DA::Script.new(file).run
-
 # when full_cmd == "list windows"
 #   # === {{CMD}} list windows
 #   DA::Window.update_list
 #   DA::Window.list.each { |w|
 #     puts "#{w.id} #{w.focused?} #{w.title.inspect}"
 #   }
-
-else
-
-end # case
 
