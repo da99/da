@@ -18,11 +18,15 @@ class Result
 end # === class Result
 
 def run(raw)
-  cmd    = Process.executable_path.not_nil!
   args   = raw.split
   output = IO::Memory.new
 
-  stat = Process.run(cmd, args, output: output, error: output)
+  stat = Process.run(
+    Process.executable_path.not_nil!,
+    args,
+    output: output,
+    error: output
+  )
   return(Result.new(stat, stat.exit_code, output.rewind.to_s))
 end # === def shell_out
 
@@ -34,6 +38,5 @@ if !in_spec?
   DA_SPEC.pattern ORIGIN_ARGS.join(' ')
 end
 
-require "./specs/*"
 
 

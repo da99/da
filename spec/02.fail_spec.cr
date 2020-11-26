@@ -1,3 +1,4 @@
+require "./spec_helper"
 
 if !in_spec?
   describe("Bad") {
@@ -14,7 +15,7 @@ else
 
     it("shows the file:") {
       actual = result.output.lines.find { |x| x[__FILE__]? }
-      expected = "  #{"4".colorize.mode(:bold)}: #{__FILE__}"
+      expected = "  #{"8".colorize.mode(:bold)}: #{__FILE__}"
       assert actual == expected
     }
 

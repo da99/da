@@ -5,6 +5,18 @@ module DA_SPEC
 
   @@pattern : String | Symbol | Regex | Nil = nil
 
+  def self.print_pass
+    print "✓".colorize.green
+  end
+
+  def self.print_fail
+    print "✗".colorize.red, '\n'
+  end # === def print_fail
+
+  def self.blok
+    yield
+  end # def
+
   def self.pattern
     @@pattern
   end
@@ -21,16 +33,15 @@ module DA_SPEC
     @@pattern == :skip_all
   end
 
-  def self.matches?(a)
+  def self.matches?(full_name)
     return false if skip_all?
 
-    full_name = a.full_name
     target = pattern
     case target
     when String
-      a.full_name[target]?
+      full_name[target]?
     when Regex
-      target =~ a.full_name
+      target =~ full_name
     when Nil
       true
     else
@@ -43,122 +54,56 @@ module DA_SPEC
     class_getter names = Deque(String).new
     class_getter asserts = Deque(String).new
 
-    getter name : String
-
-    def initialize(*args)
-      @name = args.map(&.to_s).join(" ")
-      @already_printed_header = false
-    end # === def initalize
-
-    def it(name : String, file = __FILE__, line = __LINE__)
-      x = It.new(name, file: file, line: line)
-      Describe.names.push x.name
-      if DA_SPEC.matches?(x)
-        beginning_assert_count = Describe.asserts.size
-        print "- ", x.name, ": "
-        begin
-          with x yield
-        rescue ex
-          x.print_fail
-          puts "  #{ex.class.to_s}: #{ex.message.colorize.bold}"
-          line_count = 0
-          ex.backtrace.each { |line|
-            print "  "
-            puts line
-            line_count += 1
-            break if line_count > 15
-          }
-          exit 1
-        end
-        ending_assert_count = Describe.asserts.size
-        if beginning_assert_count == ending_assert_count
-          It.print_fail
-          STDERR.puts "  No assertions were specified.".colorize.yellow.bold
-          exit 1
-        end
-        print '\n'
-      end
-      Describe.names.pop
-    end # === def it
-
   end # === class Describe
-
-  class It
-
-    getter? header_written : Bool = false
-    getter name : String
-    getter file : String
-    getter line : Int32
-
-    def initialize(@name, @file, @line)
-    end # === def initialize
-
-    def full_name
-      Describe.names.map(&.strip).join(' ')
-    end # === def full_name
-
-    def self.print_pass
-      print "✓".colorize.green
-    end
-
-    def print_pass
-      self.class.print_pass
-    end
-
-    def self.print_fail
-      print "✗".colorize.red, '\n'
-    end # === def print_fail
-
-    def print_fail
-      self.class.print_fail
-    end # === def print_fail
-
-    def assert_raises(error_class, msg : Nil | String | Regex = nil)
-      Describe.asserts.push(error_class.to_s)
-      begin
-        yield
-        print_fail
-        examine({"Expected", error_class.name}, {"Actual", "[none]"})
-        exit 1
-      rescue e
-        case
-        when e.class == error_class && !msg
-          print_pass
-        when e.class == error_class && msg.is_a?(String) && e.message == msg
-          print_pass
-        when e.class == error_class && msg.is_a?(Regex) && e.message =~ msg
-          print_pass
-        else
-          print_fail
-          if msg
-            examine({"Expected: ", error_class.name + ": " + msg.inspect}, {"Actual: ", e.class.name + ": " + e.message.inspect})
-          else
-            examine({"Expected: ", error_class}, {"Actual: ", e.class})
-          end
-          exit 1
-        end
-        e
-      end
-    end # === def assert_raises
-
-
-  end # === class It
-
-  def describe(*args)
-    return if DA_SPEC.skip_all?
-    d = Describe.new(*args)
-    print d.name.colorize.bold, ":", "\n"
-    Describe.names.push d.name
-    with d yield
-    Describe.names.pop
-    d
-  end # === def describe
 
   def examine(*args)
     args.each { |pair|
       puts "  #{pair.first.colorize.mode(:bold)}: #{pair.last.inspect}"
     }
   end # def
+
+  def describe(*args, &blok)
+    return if DA_SPEC.skip_all?
+    name = args.map { |x| x.to_s.strip }.join(' ')
+    print name.colorize.bold, ":", "\n"
+    Describe.names.push name
+    yield
+    Describe.names.pop
+  end # === def describe
+
+  def it(name : String)
+    full_name = [Describe.names.last, name.strip].join(' ')
+    Describe.names.push name
+    if DA_SPEC.matches?(full_name)
+      beginning_assert_count = Describe.asserts.size
+      print "- ", name, ": "
+      begin
+        yield
+      rescue ex
+        DA_SPEC.print_fail
+        puts "  #{ex.class.to_s}: #{ex.message.colorize.bold}"
+        line_count = 0
+        ex.backtrace.each { |line|
+          print "  "
+          puts line
+          line_count += 1
+          break if line_count > 15
+        }
+        exit 1
+      end
+      ending_assert_count = Describe.asserts.size
+
+      if beginning_assert_count == ending_assert_count
+        DA_SPEC.print_fail
+        STDERR.puts "  No assertions were specified.".colorize.yellow.bold
+        exit 1
+      end
+
+      print '\n'
+    end
+
+    Describe.names.pop
+  end # === def
 
   macro assert(func_call)
     %origin   = {{func_call.stringify}}
@@ -172,15 +117,43 @@ module DA_SPEC
     Describe.asserts.push %origin
 
     if %result
-      print_pass
+      DA_SPEC.print_pass
     else
-      print_fail
-      puts "  #{line.colorize.bold}: #{file}"
+      DA_SPEC.print_fail
+      puts "  #{__LINE__.colorize.bold}: #{__FILE__}"
       puts "  #{%origin.colorize.bold} -> #{%result.inspect.colorize.red.bold}"
       examine({ {{func_call.receiver.stringify}}, %a}, { {{func_call.args.first.stringify}}, %b})
       exit 1
     end
   end # === macro assert
+
+  def assert_raises(error_class, msg : Nil | String | Regex = nil)
+    Describe.asserts.push(error_class.to_s)
+    begin
+      yield
+      DA_SPEC.print_fail
+      examine({"Expected", error_class.name}, {"Actual", "[none]"})
+      exit 1
+    rescue e
+      case
+      when e.class == error_class && !msg
+        DA_SPEC.print_pass
+      when e.class == error_class && msg.is_a?(String) && e.message == msg
+        DA_SPEC.print_pass
+      when e.class == error_class && msg.is_a?(Regex) && e.message =~ msg
+        DA_SPEC.print_pass
+      else
+        DA_SPEC.print_fail
+        if msg
+          examine({"Expected: ", error_class.name + ": " + msg.inspect}, {"Actual: ", e.class.name + ": " + e.message.inspect})
+        else
+          examine({"Expected: ", error_class}, {"Actual: ", e.class})
+        end
+        exit 1
+      end
+      e
+    end
+  end # === def assert_raises
 
 end # === module DA_SPEC
 

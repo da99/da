@@ -1,3 +1,4 @@
+require "./spec_helper"
 
 if in_spec?
   result = run("Describe_Header")

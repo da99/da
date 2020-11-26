@@ -1,4 +1,6 @@
 
+require "./spec_helper"
+
 if in_spec?
   results = run("Good")
   describe "Good" do

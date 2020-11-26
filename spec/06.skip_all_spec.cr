@@ -1,3 +1,4 @@
+require "./spec_helper"
 
 if in_spec?
   describe "DA_SPEC.skill_all!" do
