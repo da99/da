@@ -137,6 +137,27 @@ DA::CLI.parse do |o|
     DA.green! "All repos {{clean}}."
   }
 
+  o.desc "gitignore"
+  o.run_if(full_cmd == "gitignore") {
+    repo = DA::Git::Repo.new(Dir.current)
+    origin = File.exists?(".gitignore") ? File.read(".gitignore").split('\n') : Array(String).new
+    if repo.crystal?
+      origin << "/lib/"
+    end
+
+    if repo.nodejs?
+      origin << "/node_modules/"
+    end
+
+    if repo.wrangler?
+      origin << "/dist/"
+      origin << "/worker/"
+    end
+
+    origin.uniq!
+    File.write(".gitignore", origin.join('\n'))
+  } # run_if
+
   # =============================================================================
   # Dev:
   # =============================================================================

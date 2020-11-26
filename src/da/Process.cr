@@ -1,4 +1,7 @@
 
+require "./Dev"
+require "./String"
+
 module DA
 
   # =============================================================================
@@ -55,7 +58,13 @@ module DA
 
       @cmd = full_cmd.shift
       @args = full_cmd
-      DA.debug "=== {{Running}}: #{@cmd} #{@args.join ' '}"
+      if DA.debug?
+        if STDERR.tty?
+          DA.orange! "=== {{Running}}: #{@cmd} #{@args.join ' '}"
+        else
+          STDERR.puts "=== Running: #{@cmd} #{@args.join ' '}"
+        end
+      end
       @status = ::Process.run(@cmd, @args, output: @output, error: @error)
       @output.rewind
       @error.rewind

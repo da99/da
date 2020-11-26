@@ -151,7 +151,7 @@ module DA
 
       def initialize(raw_dir)
         @dir = Dir.cd(raw_dir) { `git rev-parse --show-toplevel 2>/dev/null`.strip }
-        raise("Git repo not found for: #{raw_dir.inspect}") if raw_dir.empty?
+        raise("Git repo not found for: #{raw_dir.inspect}") if @dir.empty?
       end # def
 
       def name
@@ -294,10 +294,9 @@ module DA
         end
 
         Dir.cd(dir) {
-          is_crystal = File.exists?("shard.yml")
           old_version = begin
                           case
-                          when is_crystal
+                          when crystal?
                             `shards version`.strip
                           else
                             latest_tag.split("v").last || ""
@@ -320,7 +319,7 @@ module DA
                           end
                           pieces.join '.'
                         end # begin
-          if is_crystal
+          if crystal?
             File.write(
               "shard.yml",
               File.read("shard.yml").sub("version: #{old_version}", "version: #{new_version}")
@@ -342,6 +341,14 @@ module DA
         Dir.cd(dir) { File.exists?("shard.yml") }
       end # def
 
+      def nodejs?
+        Dir.cd(dir) { File.exists?("package.json") }
+      end # def
+
+      def wrangler?
+        Dir.cd(dir) { File.exists?("wrangler.toml") }
+      end # def
+
       def update_tree
         Dir.cd(dir) {
           DA::Process::Inherit.new("git add --all").success!
@@ -355,6 +362,10 @@ module DA
             DA::Process::Inherit.new("shards install".split).success!
             DA::Process::Inherit.new("shards update".split).success!
             DA::Process::Inherit.new("shards prune".split).success!
+          end
+          if nodejs?
+            DA::Process::Inherit.new("npm update".split).success!
+            DA::Process::Inherit.new("npm prune".split).success!
           end
         }
       end # def
