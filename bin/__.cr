@@ -155,6 +155,7 @@ DA::CLI.parse do |o|
     end
 
     origin.uniq!
+    origin << ""
     File.write(".gitignore", origin.join('\n'))
   } # run_if
 
