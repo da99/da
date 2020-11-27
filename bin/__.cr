@@ -145,6 +145,10 @@ DA::CLI.parse do |o|
       origin << "/lib/"
     end
 
+    if repo.typescript?
+      origin << "/build/"
+    end
+
     if repo.nodejs?
       origin << "/node_modules/"
     end

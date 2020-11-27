@@ -345,6 +345,10 @@ module DA
         Dir.cd(dir) { File.exists?("package.json") }
       end # def
 
+      def typescript?
+        Dir.cd(dir) { File.exists?("tsconfig.json") }
+      end # def
+
       def wrangler?
         Dir.cd(dir) { File.exists?("wrangler.toml") }
       end # def
