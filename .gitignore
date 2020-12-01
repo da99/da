@@ -2,3 +2,6 @@
 /tmp/
 /shard.lock
 /.shards/
+
+/lib/
+/node_modules/

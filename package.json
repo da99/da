@@ -1,0 +1,20 @@
+{
+  "private": true,
+  "name": "da_html",
+  "version": "1.0.0",
+  "description": "da\\_html.cr =========",
+  "main": "template.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "jsdom": "*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://github/da99/da_html.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
