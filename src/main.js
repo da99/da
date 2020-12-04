@@ -1,6 +1,6 @@
 
 
-class DA_HTML {
+export class DA_HTML {
   constructor(window) {
     this.window = window;
     this.document = this.window.document;
@@ -148,4 +148,3 @@ class DA_HTML {
   } // function
 } // class
 
-module.exports = DA_HTML;

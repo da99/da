@@ -1,11 +1,13 @@
 {
   "private": true,
+  "type": "module",
   "name": "da_html",
   "version": "0.0.0",
   "description": "My own way of adding elements to the DOM.",
   "main": "src/main.js",
   "scripts": {
-    "test": "npx jest"
+    "test": "NODE_OPTIONS=--experimental-vm-modules npx jest --verbose --bail"
+
   },
   "repository": {
     "type": "git",
