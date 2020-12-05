@@ -4,6 +4,10 @@
   "name": "da_spec",
   "version": "0.0.0",
   "description": "I like tiny libraries so I used this because I am not smart enough for Jest.",
+  "main": "src/index.mjs",
+  "dependencies": {
+    "chalk": "*"
+  },
   "scripts": {
     "test": "node spec/*.spec.mjs"
   },
@@ -17,8 +21,5 @@
   ],
   "keywords": [],
   "author": "da99",
-  "license": "MIT",
-  "devDependencies": {
-    "chalk": "*"
-  }
+  "license": "MIT"
 }
