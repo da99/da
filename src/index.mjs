@@ -2,20 +2,19 @@
 import chalk from "chalk";
 
 export function describe(name, f) {
-  console.error("Desribe: " + chalk.yellow.bold(name));
+  console.error(chalk.bold("Describe: ") + chalk.yellow.bold(name));
   f();
 } // function
 
 export function it(name, f) {
-  process.stderr.write("  - it ");
-  process.stderr.write(chalk.yellow.bold(name));
+
   try {
     f();
+    console.error(chalk.bold("  - ") + chalk.green.bold("✓ " + name));
   } catch (err) {
-    console.error(chalk.red.bold(" ✗"));
+    console.error(chalk.bold("  - ") + chalk.red.bold("✗ " + name));
     throw err;
   }
-  console.error(chalk.green.bold(" ✓"));
 } // function
 
 import assert from 'assert/strict';
