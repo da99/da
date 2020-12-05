@@ -121,15 +121,10 @@ module DA
         return false
       end
 
-      run_contents = File.read(file_path)
-      if run_contents.strip.empty?
-        File.write(new_file, "echo empty contents: #{raw_path}; exit 1")
-      else
-        File.write(new_file, %<
-          #{app_dir}
-          #{file_path}
-        >.strip)
-      end
+      File.write(new_file, %<
+        #{app_dir}
+        #{file_path}
+      >.strip)
     end # === def watch_run
 
     def watch
@@ -172,18 +167,29 @@ module DA
               next
             end
 
-            dir, script_file = raw.split('\n').map(&.strip)
+            begin
+              dir, script_file = raw.split('\n').map(&.strip)
+            rescue e : IndexError
+              STDERR.puts "=== Error in reading file: #{raw.inspect}"
+              next
+            end
+
             key = dir
             DA.orange! "\n============ {{#{Dir.current}}} #{"-=" * 6}"
 
             Dir.cd(dir) {
               # Kill previous script:
               begin
-                proc = DA::Process::Inherit.new(["zsh", "-e", "-u", "--pipefail", script_file])
-                if proc.success?
+                if File.read(script_file).strip.empty?
+                  DA.orange! "=== {{File was empty}}: #{script_file} ==="
                   DA.green! "============ {{DONE}} ============"
                 else
-                  DA.red! "=== {{FAILED}}: #{proc.status.exit_code} ==="
+                  proc = DA::Process::Inherit.new(["zsh", "-e", "-u", "--pipefail", script_file])
+                  if proc.success?
+                    DA.green! "============ {{DONE}} ============"
+                  else
+                    DA.red! "=== {{FAILED}}: #{proc.status.exit_code} ==="
+                  end
                 end
               rescue e
                 DA.inspect! e

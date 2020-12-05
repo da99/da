@@ -155,7 +155,12 @@ DA::CLI.parse do |o|
 
     if repo.wrangler?
       origin << "/dist/"
-      origin << "/worker/"
+      entry_point = File.read("wrangler.toml")
+      match = File.read("wrangler.toml").match(/entry-point\s+=\s+"(.+)"/)
+      if match
+        origin <<  File.expand_path(File.join(match[1], "worker/"), "/")
+        origin <<  File.expand_path(File.join(match[1], "node_modules/"), "/")
+      end
     end
 
     origin.uniq!
