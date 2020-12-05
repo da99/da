@@ -9,7 +9,7 @@
     "chalk": "*"
   },
   "scripts": {
-    "test": "node spec/*.spec.mjs"
+    "test": "echo -n spec/*.spec.mjs | xargs -d ' ' -I NAME node NAME"
   },
   "repository": {
     "type": "git",
