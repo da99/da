@@ -4,10 +4,8 @@
   "name": "da_html",
   "version": "0.0.0",
   "description": "My own way of adding elements to the DOM.",
-  "main": "src/main.js",
   "scripts": {
-    "test": "NODE_OPTIONS=--experimental-vm-modules npx jest --verbose --bail"
-
+    "test": "echo -n spec/*.spec.mjs | xargs -d ' ' -I NAME node NAME"
   },
   "repository": {
     "type": "git",
@@ -17,7 +15,7 @@
   "author": "da99",
   "license": "MIT",
   "devDependencies": {
-    "jest": "*",
+    "da_spec": "github:da99/da_spec#master",
     "jsdom": "*"
   }
 }
