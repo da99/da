@@ -9,7 +9,7 @@
     "chalk": "*"
   },
   "scripts": {
-    "test": "echo -n spec/*.spec.mjs | xargs -d ' ' -I NAME node NAME"
+    "test": "find spec -type f -name '*.spec.mjs' | xargs -I FILE node FILE"
   },
   "repository": {
     "type": "git",
