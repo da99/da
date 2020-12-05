@@ -1,0 +1,24 @@
+{
+  "private": true,
+  "type": "module",
+  "name": "da_spec",
+  "version": "0.0.0",
+  "description": "I like tiny libraries so I used this because I am not smart enough for Jest.",
+  "scripts": {
+    "test": "node spec/*.spec.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://github/da99/da_spec.git"
+  },
+  "files": [
+    "src/*.mjs",
+    "spec/*.mjs"
+  ],
+  "keywords": [],
+  "author": "da99",
+  "license": "MIT",
+  "devDependencies": {
+    "chalk": "*"
+  }
+}
