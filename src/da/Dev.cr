@@ -116,10 +116,6 @@ module DA
       file_path = File.expand_path(raw_path)
       Dir.cd da_dir
       new_file = "tmp/out/#{app_dir.gsub('/', "__")}.sh"
-      if !File.exists?(file_path)
-        File.write(new_file, "ERROR: File does not exist: #{file_path}")
-        return false
-      end
 
       File.write(new_file, %<
         #{app_dir}
@@ -157,20 +153,21 @@ module DA
         loop {
           Dir.glob(pattern).each { |raw_file|
             file = File.expand_path(raw_file)
-            next if !File.file?(file)
+            if !File.file?(file)
+              STDERR.puts "=== Skipping non-existent file: #{file}"
+              DA.orange! "============ {{DONE}} ============"
+              next
+            end
 
             raw = File.read(file).strip
             FileUtils.rm(file)
-            if raw[/Error: /i]?
-              DA.red! raw
-              FileUtils.rm(file)
-              next
-            end
 
             begin
               dir, script_file = raw.split('\n').map(&.strip)
             rescue e : IndexError
-              STDERR.puts "=== Error in reading file: #{raw.inspect}"
+              DA.orange! "== {{#{e.class}}}: BOLD{{#{e.message}}}"
+              DA.orange! raw.split.inspect
+              DA.orange! "============ {{DONE}} ============"
               next
             end
 
@@ -192,7 +189,8 @@ module DA
                   end
                 end
               rescue e
-                DA.inspect! e
+                DA.orange! "== {{#{e.class}}}: BOLD{{#{e.message}}}"
+                DA.orange! "============ {{DONE}} ============"
               end
             } # Dir.cd
           } # files.each
