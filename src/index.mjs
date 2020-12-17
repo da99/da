@@ -1,4 +1,19 @@
 
+class DA_Element {
+  constructor(html, tagName) {
+    this.element = (typeof tagName == "string") ? html.document.createElement(tagName) : tagName;
+    this.html = html;
+  }
+
+  attributes(o) {
+    for (const [k, v] of Object.entries(o)) {
+      let attr = this.html.document.createAttribute(k);
+      attr.value = v;
+      this.element.setAttributeNode(attr);
+    }
+    return this;
+  }
+} // class
 
 export class DA_HTML {
   constructor(window) {
@@ -131,8 +146,33 @@ export class DA_HTML {
     error();
   } // function
 
-  title(...args) {
-    return this.new_tag("title", ...args);
+  title(raw_text) {
+    let title = this.document.querySelectorAll("title")[0];
+    while(title.firstChild) {
+      title.removeChild(title.firstChild);
+    }
+    title.appendChild(this.text_node(raw_text));
+    return title;
+  }
+
+  link(attrs) {
+    let l = new DA_Element(this, "link");
+    l.attributes(attrs);
+    this.document.querySelector("head").appendChild(l.element);
+    return l.element;
+  }
+
+  meta(attrs) {
+    let m;
+    if (attrs["charset"]) {
+      m = new DA_Element(this, this.document.querySelector("meta[charset]") || "meta");
+      m.attributes(attrs);
+    } else {
+      m = new DA_Element(this, "meta");
+      m.attributes(attrs);
+      this.document.querySelector("head").appendChild(m.element);
+    }
+    return m.element;
   }
 
   div(...args) {
