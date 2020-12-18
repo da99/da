@@ -6,13 +6,42 @@ class DA_Element {
   }
 
   attributes(o) {
-    for (const [k, v] of Object.entries(o)) {
-      let attr = this.html.document.createAttribute(k);
-      attr.value = v;
-      this.element.setAttributeNode(attr);
-    }
+    let doc = this.html.document;
+    let ele = this.element;
+
+    if (typeof o === "string") {
+      let classes = [];
+      o.split(".").forEach((y) => {
+        if (y.length === 0) { return; }
+
+        if (y.indexOf("#") === 0) {
+          let attr = doc.createAttribute("id");
+          attr.value = y.split("#")[1];
+          ele.setAttributeNode(attr);
+          return;
+        }
+
+        classes.push(y);
+      });
+      classes = classes.join(" ");
+      if (classes.length > 0) {
+        let attr = doc.createAttribute("class");
+        attr.value = classes;
+        ele.setAttributeNode(attr);
+      }
+      return this;
+    } // if
+
+    if (typeof o === "object") {
+      for (const [k, v] of Object.entries(o)) {
+        let attr = doc.createAttribute(k);
+        attr.value = v;
+        ele.setAttributeNode(attr);
+      }
+    } // if
+
     return this;
-  }
+  } // function
 } // class
 
 export class DA_HTML {
@@ -51,36 +80,8 @@ export class DA_HTML {
   } // function
 
   set_attributes(x) {
-    let target = this.target();
-    if (typeof x === "string") {
-      let classes = [];
-      x.split(".").forEach((y) => {
-        if (y.length === 0) { return; }
-
-        if (y.indexOf("#") === 0) {
-          let attr = this.document.createAttribute("id");
-          attr.value = y.split("#")[1];
-          target.setAttributeNode(attr);
-          return;
-        }
-
-        classes.push(y);
-      });
-      classes = classes.join(" ");
-      if (classes.length > 0) {
-        let attr = this.document.createAttribute("class");
-        attr.value = classes;
-        target.setAttributeNode(attr);
-      }
-      return this;
-    } // if
-
-    for (const [k, v] of Object.entries(x)) {
-      let attr = this.document.createAttribute(k);
-      attr.value = v;
-      target.setAttributeNode(attr);
-    }
-
+    let ele = new DA_Element(this, this.target());
+    ele.attributes(x);
     return this;
   } // function
 
@@ -173,7 +174,31 @@ export class DA_HTML {
       this.document.querySelector("head").appendChild(m.element);
     }
     return m.element;
-  }
+  } // method
+
+  body(...args) {
+    let doc = this.document.querySelector("body");
+    this.current.push(doc);
+    let ele = new DA_Element(this, doc);
+    let this_o = this;
+    args.forEach(function (x) {
+      if (typeof x === "function") {
+        x(this_o);
+      } else {
+        if (typeof x === "string" || typeof x === "object") {
+          ele.attributes(x);
+        } else {
+          throw new Error(`Unknown argument type: ${typeof x} -> ${x}`);
+        }
+      }
+    });
+    this.current.pop();
+    return this;
+  } // method
+
+  script(...args) {
+    return this.new_tag("script", ...args);
+  } // function
 
   div(...args) {
     return this.new_tag("div", ...args);

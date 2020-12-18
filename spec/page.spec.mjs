@@ -40,3 +40,31 @@ describe("DA_HTML#meta", function() {
     );
   });
 }); // describe
+
+describe("DA_HTML#body", function() {
+
+  it("updates the attributes of the BODY element", function (){
+    const dom = new_dom();
+    let h = new DA_HTML(dom.window);
+    h.body(".ready-now", function() {
+    });
+    assert.equal(
+      dom.window.document.querySelector('body').getAttribute("class"),
+      `ready-now`
+    );
+  }); // it
+
+  it("allows child nodes", function (){
+    const dom = new_dom();
+    let h = new DA_HTML(dom.window);
+    h.body(function () {
+      h.script({src: "/script.js"});
+    });
+    assert.equal(
+      dom.window.document.querySelector("script").parentNode.tagName,
+      "BODY"
+    );
+  }); // it
+
+}); // describe
+

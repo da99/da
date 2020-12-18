@@ -1,0 +1,8 @@
+#!/usr/bin/env zsh
+#
+#
+set -u -e -o pipefail
+
+for file in $(find spec -type f -name '*.spec.mjs') ; do
+  node $file
+done

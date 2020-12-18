@@ -5,7 +5,7 @@
   "version": "0.0.0",
   "description": "My own way of adding elements to the DOM.",
   "scripts": {
-    "test": "find spec -type f -name '*.spec.mjs' | xargs -I FILE node FILE"
+    "test": "sh/test"
   },
   "repository": {
     "type": "git",
