@@ -45,11 +45,24 @@ class DA_Element {
 } // class
 
 export class DA_HTML {
-  constructor(window) {
-    this.window = window;
+
+  constructor(page) {
+    if (page && (page.window || page.document)) {
+      if (page.window) {
+        this.dom = page;
+        this.window = this.dom.window;
+      } else {
+        this.dom = null;
+        this.window = page;
+      }
+      this.document = this.dom.window.document;
+    } else {
+      throw new Error("No valid page found.")
+    }
+
     this.document = this.window.document;
-    this.fragment = this.document.createDocumentFragment();
-    this.current = [this.fragment];
+    this._fragment = this.document.createDocumentFragment();
+    this.current = [this._fragment];
     this.is_finish = false;
   }
 
@@ -62,13 +75,19 @@ export class DA_HTML {
 
     // process args
     args.forEach(function (x, i) {
-      if (typeof x === "string") {
-        if (i === 0 && (x.indexOf('#') === 0 || x.indexOf('.') === 0)) {
+      if (typeof x === "string" && i === 0 && (x.indexOf('#') == 0 || x.indexOf('.') === 0)) {
           this_o.set_attributes(x);
-          return;
-        }
-      } // if
-      this_o.append_child(x);
+      } else if (typeof x === "string") {
+        element.appendChild(this_o.text_node(x));
+      } else if (typeof x === "function") {
+        x(this_o);
+      } else if (typeof x === "object" && x.wholeText) { // it's a TextNode
+        element.appendChild(x);
+      } else if (typeof x === "object") { // it's a TextNode
+        this_o.set_attributes(x);
+      } else {
+        throw new Error("Invalid argument for new tag: " + x);
+      }
     });
 
     target.appendChild(this.current.pop());
@@ -105,7 +124,6 @@ export class DA_HTML {
 
   finish(selector) {
     this.is_finish = true;
-    this.document.querySelector(selector).appendChild(this.fragment);
     return;
   }
 
@@ -176,6 +194,27 @@ export class DA_HTML {
     return m.element;
   } // method
 
+  serialize() {
+    if (this._fragment.firstElementChild) {
+      let e = this.document.createElement("div");
+      e.appendChild(this._fragment);
+      return e.innerHTML;
+    } else if (this.dom) {
+      return this.dom.serialize();
+    }
+  } // method
+
+  fragment(func) {
+    if (func) {
+      this.current.push(this._fragment);
+      func(this);
+      this.current.pop();
+      return this;
+    } else {
+      return this._fragment;
+    }
+  } // method
+
   body(...args) {
     let doc = this.document.querySelector("body");
     this.current.push(doc);
@@ -211,6 +250,11 @@ export class DA_HTML {
   strong(...args) {
     return this.new_tag("strong", ...args);
   } // function
+
+  a(...args) {
+    return this.new_tag("a", ...args);
+  } // method
+
 } // class
 
 

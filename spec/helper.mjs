@@ -25,15 +25,10 @@ export function new_window() {
 export function to_html(x) {
   const dom = new JSDOM(HTML5);
   let e = dom.window.document.createElement("div");
-  e.appendChild(x.fragment);
+  e.appendChild(x.fragment());
   return e.innerHTML;
 } // function
 
-export function to_page(x) {
-  const dom = new JSDOM(HTML5);
-  dom.window.document.appendChild(x.fragment);
-  return e.serialize();
-} // function
 
 export { DA_HTML, describe, it, assert };
 
