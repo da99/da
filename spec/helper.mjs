@@ -22,13 +22,6 @@ export function new_window() {
   return dom.window;
 } // function
 
-export function to_html(x) {
-  const dom = new JSDOM(HTML5);
-  let e = dom.window.document.createElement("div");
-  e.appendChild(x.fragment());
-  return e.innerHTML;
-} // function
-
 
 export { DA_HTML, describe, it, assert };
 

@@ -243,6 +243,10 @@ export class DA_HTML {
     return this.new_tag("div", ...args);
   } // function
 
+  p(...args) {
+    return this.new_tag("p", ...args);
+  } // function
+
   text_node(raw_txt) {
     return this.document.createTextNode(raw_txt);
   } /// function
@@ -253,6 +257,14 @@ export class DA_HTML {
 
   a(...args) {
     return this.new_tag("a", ...args);
+  } // method
+
+  render(...args) {
+    for (let i = 0; i < args.length; i++) {
+      let x = args[i];
+      x(this);
+    } // for
+    return this;
   } // method
 
 } // class
