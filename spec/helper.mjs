@@ -13,15 +13,6 @@ const HTML5 = `<!doctype html>
   <body></body>
 </html>`;
 
-export function new_dom() {
-  return new JSDOM(HTML5);
-} // function
 
-export function new_window() {
-  const dom = new JSDOM(HTML5);
-  return dom.window;
-} // function
-
-
-export { DA_HTML, describe, it, assert };
+export { HTML5, JSDOM, DA_HTML, describe, it, assert };
 

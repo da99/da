@@ -46,20 +46,8 @@ class DA_Element {
 
 export class DA_HTML {
 
-  constructor(page) {
-    if (page && (page.window || page.document)) {
-      if (page.window) {
-        this.dom = page;
-        this.window = this.dom.window;
-      } else {
-        this.dom = null;
-        this.window = page;
-      }
-      this.document = this.dom.window.document;
-    } else {
-      throw new Error("No valid page found.")
-    }
-
+  constructor(window) {
+    this.window = window;
     this.document = this.window.document;
     this._fragment = this.document.createDocumentFragment();
     this.current = [this._fragment];
@@ -195,13 +183,9 @@ export class DA_HTML {
   } // method
 
   serialize() {
-    if (this._fragment.firstElementChild) {
-      let e = this.document.createElement("div");
-      e.appendChild(this._fragment);
-      return e.innerHTML;
-    } else if (this.dom) {
-      return this.dom.serialize();
-    }
+    let e = this.document.createElement("div");
+    e.appendChild(this._fragment);
+    return e.innerHTML;
   } // method
 
   fragment(func) {
@@ -257,14 +241,6 @@ export class DA_HTML {
 
   a(...args) {
     return this.new_tag("a", ...args);
-  } // method
-
-  render(...args) {
-    for (let i = 0; i < args.length; i++) {
-      let x = args[i];
-      x(this);
-    } // for
-    return this;
   } // method
 
 } // class
