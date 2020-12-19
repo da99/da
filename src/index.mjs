@@ -44,7 +44,7 @@ class DA_Element {
   } // function
 } // class
 
-export class DA_HTML {
+class DA_HTML {
 
   constructor(window) {
     this.window = window;
@@ -223,21 +223,9 @@ export class DA_HTML {
     return this.new_tag("script", ...args);
   } // function
 
-  div(...args) {
-    return this.new_tag("div", ...args);
-  } // function
-
-  p(...args) {
-    return this.new_tag("p", ...args);
-  } // function
-
   text_node(raw_txt) {
     return this.document.createTextNode(raw_txt);
   } /// function
-
-  strong(...args) {
-    return this.new_tag("strong", ...args);
-  } // function
 
   a(...args) {
     return this.new_tag("a", ...args);
@@ -245,4 +233,10 @@ export class DA_HTML {
 
 } // class
 
+"div p strong textarea input".split(/ +/).forEach((name) => {
+  DA_HTML.prototype[name] = function (...args) {
+    return this.new_tag(name, ...args);
+  };
+});
 
+export { DA_HTML };
