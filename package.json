@@ -20,7 +20,7 @@
   "author": "da99",
   "license": "MIT",
   "devDependencies": {
-    "da_spec": "github:da99/da_spec#master",
+    "da_spec": "github:da99/da_spec#HEAD",
     "jsdom": "*"
   }
 }
