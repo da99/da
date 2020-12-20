@@ -16,7 +16,9 @@
     "url": "ssh://github/da99/da_spec.git"
   },
   "files": [
-    "src/*.mjs"
+    "src/*.mjs",
+    "LICENSE",
+    "README.md"
   ],
   "keywords": [],
   "author": "da99",
