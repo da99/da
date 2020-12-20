@@ -2,7 +2,7 @@
   "private": true,
   "type": "module",
   "name": "da_spec",
-  "version": "2.0.0",
+  "version": "0.0.0",
   "description": "I like tiny libraries so I used this because I am not smart enough for Jest.",
   "main": "src/index.mjs",
   "dependencies": {
