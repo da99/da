@@ -4,6 +4,7 @@ module DA
     extend self
 
     def upgrade
+      DA::Process::Inherit.new("sudo journalctl --vacuum-time=1d").success!
       DA::Process::Inherit.new("sudo apt-get update").success!
       DA::Process::Inherit.new("sudo apt-get upgrade").success!
       DA::Process::Inherit.new("sudo apt autoremove").success!
