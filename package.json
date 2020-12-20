@@ -5,6 +5,10 @@
   "version": "0.0.0",
   "description": "My own way of adding elements to the DOM.",
   "main": "./src/index.mjs",
+  "files": [
+    "LICENSE",
+    "src/index.mjs"
+  ],
   "scripts": {
     "test": "sh/test"
   },
