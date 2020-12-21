@@ -20,10 +20,11 @@
   "author": "da99",
   "license": "MIT",
   "dependencies": {
-    "da_spec": "da99/da_spec",
+    "da_spec": "da99/da_spec"
+  },
+  "devDependencies": {
     "jsdom": "*"
   },
-  "devDependencies": {},
   "jshintConfig": {
     "esversion": 6
   }
