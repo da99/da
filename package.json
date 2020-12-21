@@ -19,8 +19,12 @@
   "keywords": [],
   "author": "da99",
   "license": "MIT",
-  "devDependencies": {
-    "da_spec": "github:da99/da_spec#HEAD",
+  "dependencies": {
+    "da_spec": "da99/da_spec",
     "jsdom": "*"
+  },
+  "devDependencies": {},
+  "jshintConfig": {
+    "esversion": 6
   }
 }
