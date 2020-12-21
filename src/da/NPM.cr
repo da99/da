@@ -95,9 +95,9 @@ module DA
       def update!
         DA::Process::Inherit.new("npm remove #{name}").success!
         if dev?
-          DA::Process::Inherit.new("npm install --save-dev #{_requested.raw}").success!
+          DA::Process::Inherit.new("npm install --save-dev #{_requested.rawSpec}").success!
         else
-          DA::Process::Inherit.new("npm install --save     #{_requested.raw}").success!
+          DA::Process::Inherit.new("npm install --save     #{_requested.rawSpec}").success!
         end
       end # def
     end # === class
