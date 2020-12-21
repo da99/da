@@ -1,5 +1,6 @@
 
 require "./Process"
+require "./NPM"
 
 module DA
 
@@ -368,8 +369,11 @@ module DA
             DA::Process::Inherit.new("shards prune".split).success!
           end
           if nodejs?
+            DA::Process::Inherit.new("npm install".split).success!
             DA::Process::Inherit.new("npm update".split).success!
             DA::Process::Inherit.new("npm prune".split).success!
+            npm_dir = DA::NPM::Package_JSON.from_dir(Dir.current)
+            npm_dir.git_modules.each { |x| x.update! if x.update? }
           end
         }
       end # def
