@@ -240,14 +240,5 @@ module DA
       PROCESSES.any? { |file, x| process_exists?(x.pid) }
     end
 
-    def build
-      langs = [] of String
-      if File.exists?("bin/__.cr")
-        DA::Process::Inherit.new("shards build -- --warnings all --release".split).success!
-        langs << "crystal"
-      end
-      langs
-    end # === def
-
   end # === module
 end # === module DA

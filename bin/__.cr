@@ -188,18 +188,18 @@ DA::CLI.parse do |o|
     exit 1
   }
 
-  o.desc "build"
-  o.run_if(full_cmd == "build www_modules") {
-    DA::Build.www_modules
-  }
-
-  o.desc "build"
+  o.desc "build (Build everything.)"
   o.run_if(full_cmd == "build") {
-    langs = DA::Dev.build
+    langs = DA::Build.all(Dir.current)
     if langs.empty?
-      DA.red! "!!! No acceptable languages."
+      DA.red! "!!! No builds found."
       exit 1
     end
+  }
+
+  o.desc "build nodejs"
+  o.run_if(full_cmd == "build nodejs") {
+    DA::Build.nodejs(Dir.current)
   }
 
   # =============================================================================

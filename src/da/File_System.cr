@@ -1,4 +1,6 @@
 
+require "file_utils"
+
 module DA
 
   module File_System
@@ -60,6 +62,43 @@ module DA
       true
     end # === def symlink!
 
+    class DIR
+      getter raw : String
+
+      def initialize(@raw = Dir.current)
+      end # def
+
+      def exist!
+        raise Exception.new("Directory does not exist: #{@raw.inspect}") unless Dir.exists?(@raw)
+        self
+      end # def
+
+      def dirs(level : Int32)
+        new_raw = Process
+          .new(["find", raw].concat("-mindepth #{level} -maxdepth #{level} -type d".split))
+          .success!
+          .output.to_s.strip.split('\n')
+        DIRS.new(new_raw)
+      end # def
+
+      def files
+        FILES.new(
+          Process
+          .new(["find", raw].concat("-mindepth #{level} -maxdepth #{level} -type f".split))
+          .success!
+          .output.to_s.strip.split('\n')
+        )
+      end # def
+
+      def exists
+        if Dir.exists?(@raw)
+          return(yield self)
+        end
+        self
+      end # def
+
+    end # === class
+
     class DIRS
       getter raw : Array(String)
 
@@ -80,9 +119,18 @@ module DA
         FILES.new(self)
       end # def
 
-      def copy_files
-        DA.inspect! files
+      def basename
+        @raw.map! { |x| File.basename x }
         self
+      end # def
+
+      def copy(src_base : String | Path, dest_base : String | Path)
+        @raw.each { |dir|
+          FileUtils.cp_r(
+            File.join(src_base, dir),
+            File.join(dest_base, dir)
+          )
+        }
       end # def
 
     end # === class
