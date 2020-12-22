@@ -4,6 +4,10 @@ module DA
   module File_System
     extend self
 
+    def dirs(raw : Array(String))
+      DIRS.new(raw)
+    end # def
+
     def usb_drives
       `lsblk -l`.strip.split('\n').select { |line|
         # NAME      MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
@@ -56,5 +60,99 @@ module DA
       true
     end # === def symlink!
 
+    class DIRS
+      getter raw : Array(String)
+
+      def initialize(@raw = Array(String).new)
+      end # def
+
+      def prefix(raw)
+        @raw.map! { |x| File.join raw, x }
+        self
+      end # def
+
+      def exists
+        @raw.select! { |x| Dir.exists?(x) }
+        self
+      end # def
+
+      def files
+        FILES.new(self)
+      end # def
+
+      def copy_files
+        DA.inspect! files
+        self
+      end # def
+
+    end # === class
+
+    module FILE
+      def self.copy(src, dest)
+        src_content    = File.read(src)
+        if File.exists?(dest) && File.read(dest) == src_content
+          if DA.debug?
+            DA.orange! "=== {{File already copied}}: BOLD{{#{src}}} -> #{dest}"
+          end
+          return false
+        end # if
+        Dir.mkdir_p(File.dirname(dest))
+        File.copy(src, dest)
+      end # def
+    end # === module
+
+    class FILES
+
+      def self.find(raw_dirs : Array(String), pattern)
+        dirs = raw_dirs.select { |x| Dir.exists?(x) }
+        return([] of String) if dirs.empty?
+        args = ["find"].concat( dirs ).concat("-readable -type f".split)
+        Process::Inherit.new(args).success!.output.to_s.strip.split('\n').select { |x| x[pattern]? }
+      end # def
+
+      include Enumerable(String)
+
+      getter raw : Array(String)
+
+      def initialize(dirs : DIRS)
+        args = ["find"].concat( dirs.raw ).concat("-readable -type f".split)
+        @raw = Process.new(args).success!.output.to_s.strip.split('\n')
+      end # def
+
+      def initialize(dir : String = Dir.current)
+        @raw = if Dir.exists?(dir)
+                   f = Process.new(%{find #{dir} -type f -print})
+                   f.success!
+                   f.output.to_s.strip.split('\n')
+                 else
+                   [] of String
+                 end
+      end # def
+
+      def select(r : Regex)
+        @raw.select! { |f| f[r]? }
+        self
+      end # def
+
+      def relative_to(str : String)
+        @raw.map! { |f| Path.posix(f).relative_to(str).to_s }
+        self
+      end # def
+
+      def copy(src : String, dest : String)
+        @raw.each { |file|
+          FILE.copy(File.join(src, file), File.join(dest, file))
+        }
+      end # def
+
+      def copy(dest : String)
+        @raw.each { |file| FILE.copy(file, File.join(dest, file)) }
+      end # def
+
+      def each
+        files.each { |x| yield x }
+      end # def
+
+    end # === struct
   end # module
 end # === module DA

@@ -16,9 +16,8 @@ module DA
       include JSON::Serializable
 
       getter dependencies :  Hash(String, String)?
-
       getter devDependencies : Hash(String, String)?
-
+      getter wwwDependencies : Hash(String, String)?
       property dir : String = Dir.current
 
       def git_modules

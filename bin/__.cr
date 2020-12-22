@@ -11,6 +11,7 @@ require "../src/da/Process"
 require "../src/da/Dev"
 require "../src/da/OS"
 require "../src/da/Linux"
+require "../src/da/Build"
 
 full_cmd = ARGV.map(&.strip).join(" ")
 
@@ -185,6 +186,11 @@ DA::CLI.parse do |o|
   o.run_if(full_cmd == "is dev") {
     exit 0 if DA.development?
     exit 1
+  }
+
+  o.desc "build"
+  o.run_if(full_cmd == "build www_modules") {
+    DA::Build.www_modules
   }
 
   o.desc "build"
