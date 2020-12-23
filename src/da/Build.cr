@@ -56,9 +56,16 @@ module DA
         FileUtils.cp_r("src/worker/", "dist/worker")
       }
 
+      # Needed to help TypeScript find imported files:
+      dist_www_modules(dir)
+
       Dir.cd(dir) {
-        Process::Inherit.new("tsc --project dist/worker".split).success!
-        Process::Inherit.new("tsc --project dist/Public/apps".split).success!
+        %w[dist/worker dist/Public/apps].each { |dist_dir|
+          if File_System::DIR.new(dist_dir).files().any?(/\.ts$/)
+            Process::Inherit.new("tsc --project #{dist_dir}".split).success!
+          end
+        }
+
         File_System::DIRS.new(%w[dist/Public/apps dist/worker])
           .files()
           .select(/\.ts$/)
@@ -73,14 +80,52 @@ module DA
           }
       } # Dir.cd
 
-      dist_www_modules(dir)
       dist_html_mjs(dir)
 
+      # Workaround: Set all import statements to use .mjs or .js
+      File_System::DIR.new("dist/Public/apps")
+        .files
+        .raw
+        .each { |f|
+          content = File.read(f)
+          new_content = content.gsub(/import .+['"](?<file>.+)['"]/) { |full_match, m|
+            js = "#{m["file"]}.js"
+            mjs = "#{m["file"]}.mjs"
+            Dir.cd(File.dirname(f)) {
+              case
+              when File.exists?(mjs)
+                full_match.sub(m["file"], mjs)
+              when File.exists?(js)
+                full_match.sub(m["file"], js)
+              else
+                full_match
+              end
+            }
+          } # .gsub
+          if new_content != content
+            File.write(f, new_content)
+          end
+        } # each
+
+      # Delete any redundant .js files if .mjs version exists.
+      File_System::DIR.new("dist/Public/")
+        .files
+        .select(/\.js/)
+        .raw
+        .each { |f|
+          mjs = File_System::FILE.change_extension(f, ".js", ".mjs")
+          if File.exists?(mjs)
+            FileUtils.rm f
+          end
+        }
+
+      # Remove TypeScript related files.
       File_System::DIR.new("dist")
         .files
         .raw
         .each { |f|
-          FileUtils.rm(f) if File.basename(f) == "tsconfig.json"
+          basename = File.basename(f)
+          FileUtils.rm(f) if basename == "tsconfig.json" || basename[/\.ts$/]?
         }
     end # def
 
@@ -96,7 +141,7 @@ module DA
           .prefix(node_modules)
           .exists
           .files
-          .select(/\.m?js$/)
+          .select(/\.(m?js|ts)$/)
           .relative_to(node_modules)
           .copy(node_modules, www_modules)
       } # Dir.cd

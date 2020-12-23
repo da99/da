@@ -181,6 +181,10 @@ module DA
                  end
       end # def
 
+      def any?(pattern)
+        @raw.any? { |x| x[pattern]? }
+      end # def
+
       def select(r : Regex)
         @raw.select! { |f| f[r]? }
         self
