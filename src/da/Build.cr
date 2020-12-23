@@ -50,27 +50,43 @@ module DA
     end # def
 
     def nodejs(dir : String)
-      dist_apps_js(dir)
-      dist_www_modules(dir)
-    end # def
-
-    def dist_apps_js(dir)
-      dist_files = "dist/files"
-      src_apps  = "src/apps"
-      return unless Dir.exists?(src_apps)
       Dir.cd(dir) {
-        Dir.mkdir_p(dist_files)
-        File_System::DIR
-          .new("src/apps")
-          .dirs(1)
-          .basename
-          .copy(src_apps, dist_files)
+        FileUtils.mkdir_p("dist/Public")
+        FileUtils.cp_r("src/apps", "dist/Public/apps")
+        FileUtils.cp_r("src/worker/", "dist/worker")
       }
+
+      Dir.cd(dir) {
+        Process::Inherit.new("tsc --project dist/worker".split).success!
+        Process::Inherit.new("tsc --project dist/Public/apps".split).success!
+        File_System::DIRS.new(%w[dist/Public/apps dist/worker])
+          .files()
+          .select(/\.ts$/)
+          .raw
+          .each { |ts|
+            js = File_System::FILE.change_extension(ts, ".ts", ".js")
+            mjs = File_System::FILE.change_extension(ts, ".ts", ".mjs")
+            if File.exists?(js)
+              FileUtils.mv js, mjs
+            end
+            FileUtils.rm(ts)
+          }
+      } # Dir.cd
+
+      dist_www_modules(dir)
+      dist_html_mjs(dir)
+
+      File_System::DIR.new("dist")
+        .files
+        .raw
+        .each { |f|
+          FileUtils.rm(f) if File.basename(f) == "tsconfig.json"
+        }
     end # def
 
     def dist_www_modules(dir)
       node_modules = "node_modules/"
-      www_modules  = "dist/files/www_modules/"
+      www_modules  = "dist/Public/www_modules/"
       return unless Dir.exists?(node_modules) && File.exists?("package.json")
       Dir.cd(dir) {
         package = NPM::Package_JSON.from_dir(dir)
@@ -83,6 +99,32 @@ module DA
           .select(/\.m?js$/)
           .relative_to(node_modules)
           .copy(node_modules, www_modules)
+      } # Dir.cd
+    end # def
+
+    def dist_html_mjs(dir)
+      Dir.cd(dir) {
+        header = IO::Memory.new
+        header << "import fs from \"fs\";\n"
+        body = IO::Memory.new
+
+        templates = File_System::DIR
+          .new("dist/Public/apps/")
+          .files
+          .select(/\.html\.mjs$/)
+          .reject(/\.partial\.html\.mjs$/)
+
+        templates
+          .raw
+          .each_with_index { |template, i|
+            new_file = File_System::FILE.change_extension(template, ".html.mjs", ".html")
+            header << %[ import { html as html#{i} } from "./#{template}"; ] << '\n'
+            body << %[ fs.writeFileSync("#{new_file}", html#{i}); ] << '\n'
+          }
+
+        Process::Inherit.new(["node", "--input-type=module", "-e", (header << body).to_s]).success!
+
+        templates.remove()
       } # Dir.cd
     end # def
 

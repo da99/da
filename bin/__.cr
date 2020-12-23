@@ -47,6 +47,14 @@ DA::CLI.parse do |o|
   }
 
   # =============================================================================
+  # NPM:
+  # =============================================================================
+  o.desc "npm install globals"
+  o.run_if(full_cmd == "npm install globals") {
+    DA::Process::Inherit.new(%w[npm install -g typescript jshint stylelint stylelint-config-standard])
+  }
+
+  # =============================================================================
   # Git:
   # =============================================================================
   o.desc "git is clean"

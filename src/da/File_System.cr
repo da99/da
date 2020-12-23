@@ -6,10 +6,6 @@ module DA
   module File_System
     extend self
 
-    def dirs(raw : Array(String))
-      DIRS.new(raw)
-    end # def
-
     def usb_drives
       `lsblk -l`.strip.split('\n').select { |line|
         # NAME      MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
@@ -82,12 +78,7 @@ module DA
       end # def
 
       def files
-        FILES.new(
-          Process
-          .new(["find", raw].concat("-mindepth #{level} -maxdepth #{level} -type f".split))
-          .success!
-          .output.to_s.strip.split('\n')
-        )
+        FILES.new( self )
       end # def
 
       def exists
@@ -137,7 +128,7 @@ module DA
 
     module FILE
       def self.copy(src, dest)
-        src_content    = File.read(src)
+        src_content = File.read(src)
         if File.exists?(dest) && File.read(dest) == src_content
           if DA.debug?
             DA.orange! "=== {{File already copied}}: BOLD{{#{src}}} -> #{dest}"
@@ -146,6 +137,14 @@ module DA
         end # if
         Dir.mkdir_p(File.dirname(dest))
         File.copy(src, dest)
+      end # def
+
+      def self.change_extension(file, old : String, new)
+        file.sub(/#{old}$/, new)
+      end # def
+
+      def self.change_extension(file, old : Regexp, new)
+        file.sub(old, new)
       end # def
     end # === module
 
@@ -161,6 +160,11 @@ module DA
       include Enumerable(String)
 
       getter raw : Array(String)
+
+      def initialize(dir : DIR)
+        args = ["find", dir.raw].concat("-readable -type f".split)
+        @raw = Process.new(args).success!.output.to_s.strip.split('\n')
+      end # def
 
       def initialize(dirs : DIRS)
         args = ["find"].concat( dirs.raw ).concat("-readable -type f".split)
@@ -182,6 +186,11 @@ module DA
         self
       end # def
 
+      def reject(r : Regex)
+        @raw.reject! { |f| f[r]? }
+        self
+      end # def
+
       def relative_to(str : String)
         @raw.map! { |f| Path.posix(f).relative_to(str).to_s }
         self
@@ -199,6 +208,11 @@ module DA
 
       def each
         files.each { |x| yield x }
+      end # def
+
+      def remove
+        @raw.each { |x| FileUtils.rm x }
+        self
       end # def
 
     end # === struct
