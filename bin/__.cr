@@ -51,7 +51,11 @@ DA::CLI.parse do |o|
   # =============================================================================
   o.desc "npm install globals"
   o.run_if(full_cmd == "npm install globals") {
-    DA::Process::Inherit.new(%w[npm install -g typescript jshint stylelint stylelint-config-standard])
+    DA::Process::Inherit.new(%w[
+      npm install -g typescript jshint stylelint stylelint-config-standard
+      postcss stylelint postcss-reporter autoprefixer precss
+      @cloudflare/workers-types @types/node
+    ])
   }
 
   # =============================================================================

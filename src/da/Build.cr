@@ -56,6 +56,8 @@ module DA
         FileUtils.cp_r("src/worker/", "dist/worker")
       }
 
+      dist_postcss
+
       # Needed to help TypeScript find imported files:
       dist_www_modules(dir)
 
@@ -171,6 +173,11 @@ module DA
 
         templates.remove()
       } # Dir.cd
+    end # def
+
+    def dist_postcss
+      postcss = File.join(File.dirname(__FILE__), "../../sh/build.postcss.mjs")
+      Process::Inherit.new("node #{postcss}".split).success!
     end # def
 
   end # === module
