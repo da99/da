@@ -2,6 +2,7 @@
 require "./Process"
 require "./NPM"
 require "./File_System"
+require "./Default"
 
 module DA
 
@@ -32,6 +33,12 @@ module DA
   module Build
     extend self
 
+    FU    = FileUtils
+    F     = File_System::FILE
+    FILES = File_System::FILES
+    DIR   = File_System::DIR
+    DIRS  = File_System::DIRS
+
     def crystal_shard(dir)
       Dir.cd(dir) {
         DA::Process::Inherit.new("shards build -- --warnings all --release".split).success!
@@ -47,7 +54,7 @@ module DA
         end
 
         if File.exists?("package.json") && File.exists?("src/apps")
-          DA::Build.nodejs(dir)
+          DA::Build.nodejs_www_app(dir)
           langs << "js"
         end
 
@@ -60,46 +67,33 @@ module DA
       langs
     end # def
 
-    def nodejs(dir : String)
-      Dir.cd(dir) {
-        FileUtils.mkdir_p("dist/Public")
-        FileUtils.cp_r("src/apps", "dist/Public/apps")
-        FileUtils.cp_r("src/worker/", "dist/worker")
-      }
-
-      dist_postcss
-
-      # Needed to help TypeScript find imported files:
-      dist_www_modules(dir)
+    def cloudflare_worker(dir : String)
+      tsconfig = "tsconfig.json"
+      dist_worker = "dist/worker"
 
       Dir.cd(dir) {
-        %w[dist/worker dist/Public/apps].each { |dist_dir|
-          if File_System::DIR.new(dist_dir).files().any?(/\.ts$/)
-            Process::Inherit.new("tsc --project #{dist_dir}".split).success!
-          end
-        }
+        FU.mkdir_p("dist")
+        FU.cp_r("src/worker", dist_worker)
 
-        File_System::DIRS.new(%w[dist/Public/apps dist/worker])
-          .files()
-          .select(/\.ts$/)
-          .raw
-          .each { |ts|
-            js = File_System::FILE.change_extension(ts, ".ts", ".js")
-            mjs = File_System::FILE.change_extension(ts, ".ts", ".mjs")
-            if File.exists?(js)
-              FileUtils.mv js, mjs
-            end
-            FileUtils.rm(ts)
-          }
+        DIR.new(dist_worker)
+          .copy_unless_exists(tsconfig, DA.default_path("config/tsconfig.cloudflare.worker.json"))
+          .link_unless_exists("node_modules", DA.default_path("node_modules"))
+
+        Dir.cd(dist_worker) {
+          DA::Process::Inherit.new("tsc")
+          ts_js_mjs(".")
+          FU.rm "node_modules"
+          fix_mjs_import_extensions(Dir.current)
+        } # Dir.cd dist_worker
       } # Dir.cd
+    end # def
 
-      dist_html_mjs(dir)
-
-      # Workaround: Set all import statements to use .mjs or .js
-      File_System::DIR.new("dist/Public/apps")
-        .files
-        .raw
-        .each { |f|
+    # Workaround because TypeScript, NodeJS + Browsers handle
+    # paths differently:
+    # Set all import statements to use .mjs or .js
+    def fix_mjs_import_extensions(dir)
+      Dir.cd(dir) {
+        DIR.new(".").files.select(/\.mjs$/).each { |f|
           content = File.read(f)
           new_content = content.gsub(/import .+['"](?<file>.+)['"]/) { |full_match, m|
             js = "#{m["file"]}.js"
@@ -118,28 +112,58 @@ module DA
           if new_content != content
             File.write(f, new_content)
           end
-        } # each
-
-      # Delete any redundant .js files if .mjs version exists.
-      File_System::DIR.new("dist/Public/")
-        .files
-        .select(/\.js/)
-        .raw
-        .each { |f|
-          mjs = File_System::FILE.change_extension(f, ".js", ".mjs")
-          if File.exists?(mjs)
-            FileUtils.rm f
-          end
         }
+      }
+    end # def
 
-      # Remove TypeScript related files.
-      File_System::DIR.new("dist")
-        .files
-        .raw
-        .each { |f|
-          basename = File.basename(f)
-          FileUtils.rm(f) if basename == "tsconfig.json" || basename[/\.ts$/]?
-        }
+    def nodejs_www_app(dir : String)
+      tsconfig = "tsconfig.json"
+      Dir.cd(dir) {
+        FileUtils.mkdir_p("dist/Public")
+        FileUtils.cp_r("src/apps", "dist/Public/apps")
+
+        # Needed to help TypeScript find imported files:
+        dist_www_modules(dir)
+
+        Dir.cd("dist/Public/apps") {
+          DIR.new
+            .copy_unless_exists(tsconfig, DA.default_path("config/tsconfig.www.json"))
+            .link_unless_exists("node_modules", DA.default_path("node_modules"))
+
+          Process::Inherit.new("tsc".split).success!
+
+          DIR.new
+            .files
+            .select(/\.ts$/)
+            .each_file { |ts|
+              js, mjs = ts.new_ext(".ts", ".js", ".mjs")
+              js.mv mjs if js.exists?
+              ts.rm
+            }
+
+          dist_html_mjs(Dir.current)
+          ts_js_mjs(".")
+          fix_mjs_import_extensions(".")
+
+          ts_js_mjs("../www_modules")
+        } # cd apps
+      } # Dir.cd
+    end # def
+
+    # Deletes any tsconfig.json
+    # Deletes any .ts files.
+    # Renames .js to .mjs
+    def ts_js_mjs(dir)
+      Dir.cd(dir) {
+        files = File_System::DIR.new.files
+        files.new.select_basename(/^tsconfig\.json$/).rm
+        files.new.select(/\.ts$/).each_file do |ts|
+          ts.rm
+          js, mjs = ts.new_ext(".ts", ".js", ".mjs")
+          # We check in case this is a .d.ts file w/o .js counterpart
+          js.mv(mjs) if js.exists?
+        end
+      }
     end # def
 
     def dist_www_modules(dir)
@@ -156,7 +180,14 @@ module DA
           .files
           .select(/\.(m?js|ts)$/)
           .relative_to(node_modules)
-          .copy(node_modules, www_modules)
+          .each { |file|
+            www_file = File.join(www_modules, file)
+            FileUtils.mkdir_p File.dirname(www_file)
+            FileUtils.cp(
+              File.join(node_modules, file),
+              www_file
+            )
+          }
       } # Dir.cd
     end # def
 
@@ -167,22 +198,23 @@ module DA
         body = IO::Memory.new
 
         templates = File_System::DIR
-          .new("dist/Public/apps/")
+          .new
           .files
+          .relative_to(Dir.current)
           .select(/\.html\.mjs$/)
           .reject(/\.partial\.html\.mjs$/)
 
         templates
           .raw
           .each_with_index { |template, i|
-            new_file = File_System::FILE.change_extension(template, ".html.mjs", ".html")
-            header << %[ import { html as html#{i} } from "./#{template}"; ] << '\n'
+            new_file = F.new(template).ext(".html.mjs", ".html")
+            header << %[ import { html as html#{i} } from "#{File.join ".", template}"; ] << '\n'
             body << %[ fs.writeFileSync("#{new_file}", html#{i}); ] << '\n'
           }
 
         Process::Inherit.new(["node", "--input-type=module", "-e", (header << body).to_s]).success!
 
-        templates.remove()
+        templates.rm
       } # Dir.cd
     end # def
 

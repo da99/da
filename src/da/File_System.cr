@@ -69,6 +69,22 @@ module DA
         self
       end # def
 
+      def copy_unless_exists(desired, default)
+        Dir.cd(raw) {
+          return self if File.exists?(desired)
+          FileUtils.cp(default, desired)
+        }
+        self
+      end # def
+
+      def link_unless_exists(desired, default)
+        Dir.cd(raw) {
+          return self if Dir.exists?(desired)
+          FileUtils.ln_s(default, desired)
+        }
+        self
+      end # def
+
       def dirs(level : Int32)
         new_raw = Process
           .new(["find", raw].concat("-mindepth #{level} -maxdepth #{level} -type d".split))
@@ -124,10 +140,87 @@ module DA
         }
       end # def
 
+      def each
+        @raw.each { |x| yield x }
+        self
+      end # def
+
+      def select(pattern)
+        @raw.select! { |x| x[pattern]? }
+        self
+      end # def
+
+      def select
+        @raw.select! { |x| yield x }
+        self
+      end # def
+
+      def map
+        @raw.map! { |x| yield x }
+        self
+      end # def
+
     end # === class
 
-    module FILE
-      def self.copy(src, dest)
+    class FILE
+
+      getter raw : String
+      def initialize(@raw)
+      end # def
+
+      def new
+        self.class.new(raw)
+      end # def
+
+      def new
+        x = self.class.new(raw)
+        yield x
+        x
+      end # def
+
+      def mv(f : FILE)
+        mv(f.raw)
+      end # def
+
+      def mv(new_file : String)
+        FileUtils.mv(raw, new_file)
+        self
+      end # def
+
+      def mv_new(new_file : String)
+        FileUtils.mv(raw, new_file)
+        new(new_file)
+      end # def
+
+      def exists?
+        File.exists?(raw)
+      end # def
+
+      def rm
+        FileUtils.rm(raw)
+        self
+      end
+
+      def ext(old : Regex, new : String)
+        @raw = raw.sub(old, new)
+        self
+      end # def
+
+      def ext(old : String, new : String)
+        base = raw.rchop(old)
+        if base == raw
+          raise Exception.new("File with extension #{old.inspect} not found: #{raw.inspect}")
+        end
+        @raw = "#{base}#{new}"
+        self
+      end # def
+
+      def new_ext(old, *args)
+        args.map { |e| new.ext old, e }
+      end # def
+
+      def copy(dest)
+        src = raw
         src_content = File.read(src)
         if File.exists?(dest) && File.read(dest) == src_content
           if DA.debug?
@@ -136,16 +229,18 @@ module DA
           return false
         end # if
         Dir.mkdir_p(File.dirname(dest))
-        File.copy(src, dest)
+        FileUtil.cp(src, dest)
+        self
       end # def
 
-      def self.change_extension(file, old : String, new)
-        file.sub(/#{old}$/, new)
+      def basename
+        File.basename raw
       end # def
 
-      def self.change_extension(file, old : Regexp, new)
-        file.sub(old, new)
+      def to_s(io)
+        @raw.to_s(io)
       end # def
+
     end # === module
 
     class FILES
@@ -156,8 +251,6 @@ module DA
         args = ["find"].concat( dirs ).concat("-readable -type f".split)
         Process::Inherit.new(args).success!.output.to_s.strip.split('\n').select { |x| x[pattern]? }
       end # def
-
-      include Enumerable(String)
 
       getter raw : Array(String)
 
@@ -181,13 +274,12 @@ module DA
                  end
       end # def
 
-      def any?(pattern)
-        @raw.any? { |x| x[pattern]? }
+      def initialize(files : FILES)
+        @raw = files.raw.dup
       end # def
 
-      def select(r : Regex)
-        @raw.select! { |f| f[r]? }
-        self
+      def new
+        self.class.new(self)
       end # def
 
       def reject(r : Regex)
@@ -200,22 +292,37 @@ module DA
         self
       end # def
 
-      def copy(src : String, dest : String)
-        @raw.each { |file|
-          FILE.copy(File.join(src, file), File.join(dest, file))
-        }
-      end # def
-
-      def copy(dest : String)
-        @raw.each { |file| FILE.copy(file, File.join(dest, file)) }
-      end # def
-
       def each
-        files.each { |x| yield x }
+        @raw.each { |x| yield x }
+        self
       end # def
 
-      def remove
+      def each_file
+        @raw.each { |x| yield FILE.new(x) }
+        self
+      end # def
+
+      def any?(pattern)
+        @raw.any? { |x| x[pattern]? }
+      end # def
+
+      def select(r)
+        @raw.select! { |f| f[r]? }
+        self
+      end # def
+
+      def select_basename(r)
+        @raw.select! { |f| File.basename(f)[r]? }
+        self
+      end # def
+
+      def rm
         @raw.each { |x| FileUtils.rm x }
+        self
+      end # def
+
+      def basename
+        @raw.map! { |x| File.basename x }
         self
       end # def
 

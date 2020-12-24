@@ -30,6 +30,11 @@ module DA
     true
   end # === def inspect!
 
+  def self.inspect!
+    return false unless debug?
+    yield
+  end # def
+
   module Dev
     extend self
 

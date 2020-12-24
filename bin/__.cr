@@ -217,11 +217,12 @@ DA::CLI.parse do |o|
 
   o.desc "build crystal shard"
   o.run_if(full_cmd == "build crystal shard") {
-    langs = DA::Build.all(Dir.current)
-    if langs.empty?
-      DA.red! "!!! No builds found."
-      exit 1
-    end
+    DA::Build.crystal_shard(Dir.current)
+  }
+
+  o.desc "build nodejs www app"
+  o.run_if(full_cmd == "build nodejs www app") {
+    DA::Build.nodejs_www_app(Dir.current)
   }
 
   o.desc "build (Build everything.)"
@@ -233,9 +234,9 @@ DA::CLI.parse do |o|
     end
   }
 
-  o.desc "build nodejs"
-  o.run_if(full_cmd == "build nodejs") {
-    DA::Build.nodejs(Dir.current)
+  o.desc "build cloudflare worker"
+  o.run_if(full_cmd == "build cloudflare worker") {
+    DA::Build.cloudflare_worker(Dir.current)
   }
 
   # =============================================================================
