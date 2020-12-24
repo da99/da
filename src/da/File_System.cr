@@ -104,6 +104,10 @@ module DA
         self
       end # def
 
+      def to_s(io)
+        @raw.to_s(io)
+      end # def
+
     end # === class
 
     class DIRS

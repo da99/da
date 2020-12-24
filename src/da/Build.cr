@@ -82,7 +82,6 @@ module DA
         Dir.cd(dist_worker) {
           DA::Process::Inherit.new("tsc")
           ts_js_mjs(".")
-          FU.rm "node_modules"
           fix_mjs_import_extensions(Dir.current)
         } # Dir.cd dist_worker
       } # Dir.cd
@@ -163,6 +162,7 @@ module DA
           # We check in case this is a .d.ts file w/o .js counterpart
           js.mv(mjs) if js.exists?
         end
+        FileUtils.rm("node_modules") if File.exists?("node_modules")
       }
     end # def
 
