@@ -16,12 +16,25 @@ require "../src/da/Build"
 full_cmd = ARGV.map(&.strip).join(" ")
 
 DA::CLI.parse do |o|
-  o.desc "fs list usb drives"
-  o.run_if(full_cmd == "list usb drives") {
-    DA::File_System.usb_drives.each { |x|
-      puts x
+
+  o.desc "fs list editable files [DIR]"
+  o.run_if(full_cmd[/^fs list editable files/]?) {
+    dir = ARGV[4]? || Dir.current
+    Dir.cd(dir) {
+      if Dir.exists?(".git")
+        DA::Process::Inherit.new("git --git-dir=#{dir}/.git ls-files -oc --exclude-standard")
+      else
+        DA::Process::Inherit.new(<<-EOF.split).success!
+          find ./ -maxdepth 5          \
+            ! -path "*/lib/*"     \
+            ! -path "*/.shards/*"     \
+            ! -path "*/tmp/*"     \
+            ! -path "*/node_modules/*"     \
+            ! -path "*/bower_components/*"
+        EOF
+      end
     }
-  }
+  } # run_if
 
   o.desc "run max [seconds] cmd -with args"
   o.run_if(full_cmd[/^run max \d+ .+/]?) {
@@ -52,9 +65,11 @@ DA::CLI.parse do |o|
   o.desc "npm install globals"
   o.run_if(full_cmd == "npm install globals") {
     DA::Process::Inherit.new(%w[
-      npm install -g typescript jshint stylelint stylelint-config-standard
-      postcss stylelint postcss-reporter autoprefixer precss
-      @cloudflare/workers-types @types/node
+      npm install -g
+      typescript
+      jshint
+      stylelint
+      stylelint-config-standard
     ])
   }
 
@@ -198,6 +213,15 @@ DA::CLI.parse do |o|
   o.run_if(full_cmd == "is dev") {
     exit 0 if DA.development?
     exit 1
+  }
+
+  o.desc "build crystal shard"
+  o.run_if(full_cmd == "build crystal shard") {
+    langs = DA::Build.all(Dir.current)
+    if langs.empty?
+      DA.red! "!!! No builds found."
+      exit 1
+    end
   }
 
   o.desc "build (Build everything.)"

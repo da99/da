@@ -4,17 +4,12 @@
   "version": "0.0.0",
   "description": "Utilites for software development.",
   "type": "module",
-  "dependencies": {},
-  "devDependencies": {
+  "dependencies": {
+    "@cloudflare/workers-types": "*",
     "@cloudflare/wrangler": "*",
-    "@types/node": "^14.14.14",
-    "autoprefixer": "*",
-    "postcss": "*",
-    "postcss-reporter": "*",
-    "precss": "*",
-    "stylelint": "*",
-    "stylelint-config-standard": "*"
+    "@types/node": "*"
   },
+  "devDependencies": {},
   "scripts": {},
   "author": "da99",
   "license": "MIT"

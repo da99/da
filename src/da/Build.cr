@@ -32,17 +32,28 @@ module DA
   module Build
     extend self
 
+    def crystal_shard(dir)
+      Dir.cd(dir) {
+        DA::Process::Inherit.new("shards build -- --warnings all --release".split).success!
+      }
+    end # def
+
     def all(dir)
       langs = [] of String
       Dir.cd(dir) {
-        if File.exists?("bin/__.cr")
-          DA::Process::Inherit.new("shards build -- --warnings all --release".split).success!
+        if File.exists?("shard.yml")
+          crystal_shard(dir)
           langs << "crystal"
         end
 
         if File.exists?("package.json") && File.exists?("src/apps")
           DA::Build.nodejs(dir)
-            langs << "js"
+          langs << "js"
+        end
+
+        if File.exists?("sh/build")
+          DA::Process::Inherit.new("sh/build").success!
+          langs << "sh/build"
         end
       }
 
