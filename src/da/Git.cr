@@ -216,12 +216,12 @@ module DA
 
       def development_checkpoint
         Dir.cd(dir) {
-          if staged?
+          if !staged?
             DA.red! "Nothing has been staged."
             exit 1
           end
-          DA::Process::Inherit.new("git add --all").success!
-          DA::Process::Inherit.new("git commit -m Development checkpoint.").success!
+          DA::Process::Inherit.new(["git", "status"]).success!
+          DA::Process::Inherit.new(["git", "commit", "-m", "Development checkpoint."]).success!
         }
       end
 

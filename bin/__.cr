@@ -140,6 +140,9 @@ DA::CLI.parse do |o|
 
   o.desc "git development checkpoint"
   o.run_if(full_cmd == "git development checkpoint") {
+    if File.exists?("sh/devcheck")
+      DA::Process::Inherit.new("sh/devcheck".split)
+    end
     DA::Git::Repo.new(Dir.current).development_checkpoint
   }
 
