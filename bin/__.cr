@@ -64,6 +64,10 @@ DA::CLI.parse do |o|
   # =============================================================================
   o.desc "npm install globals"
   o.run_if(full_cmd == "npm install globals") {
+    # NOTE: Security: Prevent arbitiary code from running.
+    DA::Process::Inherit.new(%w[
+      npm config set ignore-scripts true
+    ])
     DA::Process::Inherit.new(%w[
       npm install -g
       typescript
