@@ -16,7 +16,6 @@ require "../src/da/Build"
 full_cmd = ARGV.map(&.strip).join(" ")
 
 DA::CLI.parse do |o|
-
   o.desc "fs list editable files [DIR]"
   o.run_if(full_cmd[/^fs list editable files/]?) {
     dir = ARGV[4]? || Dir.current
@@ -34,6 +33,27 @@ DA::CLI.parse do |o|
         EOF
       end
     }
+  } # run_if
+
+  o.desc "fs remove files with ext [.ext]"
+  o.run_if(full_cmd[/^fs remove files with ext (\.[\.a-zA-Z0-9\-]+)$/]?) {
+    DA::File_System::FILES
+      .new(Dir.current)
+      .select_ext(ARGV.last)
+      .each_file { |f|
+        f.remove
+        puts f.raw
+      }
+  } # run_if
+
+  o.desc "fs rename files with ext [.ext1] [.ext2]"
+  o.run_if(full_cmd[/^fs rename files with ext (\.[\.a-zA-Z0-9\-]+)\ +(\.[\.a-zA-Z0-9\-]+)$/]?) {
+    DA::File_System::FILES.new(Dir.current)
+      .select_ext(ARGV[-2])
+      .each_file { |f|
+        f.move f.rename_ext(ARGV[-2], ARGV.last)
+        puts f.raw
+      }
   } # run_if
 
   o.desc "run max [seconds] cmd -with args"

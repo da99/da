@@ -154,10 +154,10 @@ module DA
         files = File_System::DIR.new.files
         files.new.select_basename(/^tsconfig\.json$/).rm
         files.new.select(/\.ts$/).each_file do |ts|
-          ts.rm
-          js, mjs = ts.new_ext(".ts", ".js", ".mjs")
+          ts.remove
+          js, mjs = ts.rename_ext(".ts", ".js .mjs".split)
           # We check in case this is a .d.ts file w/o .js counterpart
-          js.mv(mjs) if js.exists?
+          js.move(mjs) if js.exists?
         end
         FileUtils.rm("node_modules") if File.exists?("node_modules")
       }
@@ -204,7 +204,7 @@ module DA
         templates
           .raw
           .each_with_index { |template, i|
-            new_file = F.new(template).ext(".html.mjs", ".html")
+            new_file = F.new(template).rename_ext(".html.mjs", ".html")
             header << %[ import { html as html#{i} } from "#{File.join ".", template}"; ] << '\n'
             body << %[ fs.writeFileSync("#{new_file}", html#{i}); ] << '\n'
           }
@@ -224,7 +224,7 @@ module DA
       new_dir = "src/apps/#{dirname}"
       FU.mkdir_p(new_dir)
       Dir.cd(new_dir) {
-        html, ts, css = F.new("index").new_append_exts(".html", ".ts", ".css")
+        html, ts, css = F.new("index").append_ext(".html .ts .css".split)
         html.default_content(<<-EOF)
         <!doctype html>
 

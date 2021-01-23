@@ -167,8 +167,8 @@ module DA
     end # === class
 
     class FILE
-
       getter raw : String
+
       def initialize(@raw)
       end # def
 
@@ -194,58 +194,56 @@ module DA
         self
       end # def
 
-      def mv(f : FILE)
-        mv(f.raw)
+      def move(f : FILE)
+        move(f.raw)
       end # def
 
-      def mv(new_file : String)
-        FileUtils.mv(raw, new_file)
+      def move(new_file : String)
+        FileUtils.mv(raw, new_file) unless File.expand_path(raw) == File.expand_path(new_file)
         self
-      end # def
-
-      def mv_new(new_file : String)
-        FileUtils.mv(raw, new_file)
-        new(new_file)
       end # def
 
       def exists?
         File.exists?(raw)
       end # def
 
-      def rm
+      def remove
         FileUtils.rm(raw)
         self
       end
 
-      def ext(old : Regex, new : String)
-        @raw = raw.sub(old, new)
-        self
-      end # def
-
-      def ext(old : String, new : String)
+      def rename_ext(old, new : String)
         base = raw.rchop(old)
         if base == raw
           raise Exception.new("File with extension #{old.inspect} not found: #{raw.inspect}")
         end
-        @raw = "#{base}#{new}"
-        self
+        self.class.new "#{base}#{new}"
       end # def
 
-      def new_ext(old, *args)
-        args.map { |e| new.ext old, e }
+      def rename_ext(old, new : Enumerable(String))
+        new.map { |new_e| rename_ext(old, new_e) }
       end # def
 
-      def new_append_exts(*args)
-        args.map { |str| self.class.new "#{raw}#{str}" }
+      def append_ext(new_e : String)
+        self.class.new "#{raw}#{new_e}"
       end # def
 
-      def copy(dest)
+      def append_ext(new : Enumerable(String))
+        new.map { |new_e| append_ext(new_e) }
+      end # def
+
+      def copy(dest_file : FILE)
         src = raw
+        dest = dest_file.raw
         src_content = File.read(src)
-        if File.exists?(dest) && File.read(dest) == src_content
-          if DA.debug?
-            DA.orange! "=== {{File already copied}}: BOLD{{#{src}}} -> #{dest}"
-          end
+        if File.exists?(dest)
+          if File.read(dest) == src_content
+            DA.orange!(%[=== {{File already copied}}: #{src} -> #{dest}]) if DA.debug?
+            return false
+          else
+            DA.orange!(%[=== {{File already exists}}: #{src} -> #{dest}]) if DA.debug?
+            exit 1
+          end # if
           return false
         end # if
         Dir.mkdir_p(File.dirname(dest))
@@ -333,6 +331,32 @@ module DA
 
       def select_basename(r)
         @raw.select! { |f| File.basename(f)[r]? }
+        self
+      end # def
+
+      def select_ext(ext)
+        r = /#{Regex.escape ext}$/
+        @raw.select! { |f| f[r]? }
+        self
+      end # def
+
+      def rename_ext(old_e, new_e)
+        r = /#{Regex.escape(old_e)}$/
+        @raw.map! { |f|
+          f.sub(r, new_e)
+        }
+        self
+      end # def
+
+      def move_ext(old_e : String, new_e)
+        move_ext(/#{Regex.escape old_e}$/, new_e)
+      end # def
+
+      def move_ext(old_e : Regex, new_e)
+        each_file { |f|
+          new_f = f.new.ext(old_e, new_e)
+          f.mv(new_f) unless new_f.raw == f.raw
+        }
         self
       end # def
 
