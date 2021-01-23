@@ -182,6 +182,18 @@ module DA
         x
       end # def
 
+      def touch
+        File.touch(raw)
+        self
+      end # def
+
+      def default_content(raw_content : String)
+        if !exists?
+          File.write(raw, raw_content)
+        end
+        self
+      end # def
+
       def mv(f : FILE)
         mv(f.raw)
       end # def
@@ -221,6 +233,10 @@ module DA
 
       def new_ext(old, *args)
         args.map { |e| new.ext old, e }
+      end # def
+
+      def new_append_exts(*args)
+        args.map { |str| self.class.new "#{raw}#{str}" }
       end # def
 
       def copy(dest)

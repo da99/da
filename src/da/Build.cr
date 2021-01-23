@@ -117,35 +117,31 @@ module DA
 
     def nodejs_www_app(dir : String)
       tsconfig = "tsconfig.json"
+      src_apps = "src/apps"
+      dist_public_apps = "dist/Public/apps"
       Dir.cd(dir) {
         FileUtils.mkdir_p("dist/Public")
-        FileUtils.cp_r("src/apps", "dist/Public/apps")
+        if Dir.exists?(src_apps)
+          FileUtils.cp_r(src_apps, "dist/Public/apps")
+        end
 
         # Needed to help TypeScript find imported files:
         dist_www_modules(dir)
 
-        Dir.cd("dist/Public/apps") {
-          DIR.new
-            .copy_unless_exists(tsconfig, DA.default_path("config/tsconfig.www.json"))
-            .link_unless_exists("node_modules", DA.default_path("node_modules"))
+        if Dir.exists?(dist_public_apps)
+          Dir.cd(dist_public_apps) {
+            DIR.new
+              .copy_unless_exists(tsconfig, DA.default_path("config/tsconfig.www.json"))
+              .link_unless_exists("node_modules", DA.default_path("node_modules"))
 
-          Process::Inherit.new("tsc".split).success!
+            Process::Inherit.new("tsc".split).success!
 
-          DIR.new
-            .files
-            .select(/\.ts$/)
-            .each_file { |ts|
-              js, mjs = ts.new_ext(".ts", ".js", ".mjs")
-              js.mv mjs if js.exists?
-              ts.rm
-            }
-
-          dist_html_mjs(Dir.current)
-          ts_js_mjs(".")
-          fix_mjs_import_extensions(".")
-
-          ts_js_mjs("../www_modules")
-        } # cd apps
+            dist_html_templates(Dir.current)
+            ts_js_mjs(".")
+            fix_mjs_import_extensions(".")
+            ts_js_mjs("../www_modules")
+          } # cd apps
+        end # if
       } # Dir.cd
     end # def
 
@@ -191,7 +187,7 @@ module DA
       } # Dir.cd
     end # def
 
-    def dist_html_mjs(dir)
+    def dist_html_templates(dir)
       Dir.cd(dir) {
         header = IO::Memory.new
         header << "import fs from \"fs\";\n"
@@ -221,6 +217,41 @@ module DA
     def dist_postcss
       postcss = File.join(File.dirname(__FILE__), "../../sh/build.postcss.mjs")
       Process::Inherit.new("node #{postcss}".split).success!
+    end # def
+
+    def create_src_app(dirname : String)
+      new_dir = "src/apps/#{dirname}"
+      FU.mkdir_p(new_dir)
+      Dir.cd(new_dir) {
+        html, mjs, css = F.new("index").new_append_exts(".html", ".mjs", ".css")
+        html.default_content(<<-EOF)
+        <!doctype html>
+
+        <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <title>#{dirname}</title>
+            <link rel="stylesheet" href="apps/#{dirname}/index.css?v=1.0">
+          </head>
+
+          <body>
+            <p>loading...</p>
+            <script type="module" src="apps/#{dirname}/index.mjs"></script>
+          </body>
+        </html>
+
+        EOF
+
+        mjs.default_content(<<-EOF)
+          console.log("#{dirname}");
+
+        EOF
+
+        css.default_content(<<-EOF)
+          p { font-size: 2em; align-text: center; }
+
+        EOF
+      } # Dir.cd
     end # def
 
   end # === module

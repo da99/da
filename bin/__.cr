@@ -232,6 +232,12 @@ DA::CLI.parse do |o|
     DA::Build.nodejs_www_app(Dir.current)
   }
 
+  o.desc "build src/apps [NAME]"
+  o.run_if(full_cmd[/^build src\/apps ([A-Za-z0-9\.\-]+)$/]?) {
+    DA::Build.create_src_app(ARGV.last)
+    DA::Process::Inherit.new("tree src/apps/#{ARGV.last}".split)
+  }
+
   o.desc "build (Build everything.)"
   o.run_if(full_cmd == "build") {
     langs = DA::Build.all(Dir.current)
