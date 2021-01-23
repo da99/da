@@ -118,6 +118,7 @@ module DA
     def nodejs_www_app(dir : String)
       tsconfig = "tsconfig.json"
       src_apps = "src/apps"
+      www_modules = "../www_modules"
       dist_public_apps = "dist/Public/apps"
       Dir.cd(dir) {
         FileUtils.mkdir_p("dist/Public")
@@ -139,7 +140,7 @@ module DA
             dist_html_templates(Dir.current)
             ts_js_mjs(".")
             fix_mjs_import_extensions(".")
-            ts_js_mjs("../www_modules")
+            ts_js_mjs(www_modules) if Dir.exists?(www_modules)
           } # cd apps
         end # if
       } # Dir.cd
@@ -223,7 +224,7 @@ module DA
       new_dir = "src/apps/#{dirname}"
       FU.mkdir_p(new_dir)
       Dir.cd(new_dir) {
-        html, mjs, css = F.new("index").new_append_exts(".html", ".mjs", ".css")
+        html, ts, css = F.new("index").new_append_exts(".html", ".ts", ".css")
         html.default_content(<<-EOF)
         <!doctype html>
 
@@ -242,7 +243,7 @@ module DA
 
         EOF
 
-        mjs.default_content(<<-EOF)
+        ts.default_content(<<-EOF)
           console.log("#{dirname}");
 
         EOF
