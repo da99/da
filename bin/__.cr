@@ -97,6 +97,16 @@ DA::CLI.parse do |o|
     ])
   }
 
+  o.desc "stylelint (uses default config file and \"**/*.css\")"
+  o.run_if(full_cmd == "stylelint") {
+    DA::Process::Inherit.new(["stylelint", "--config", DA.default_path("config/.stylelintrc.json"), "**/*.css"]).success!
+  }
+
+  o.desc "stylelint (uses default config file)"
+  o.run_if(full_cmd[/^stylelint .+/]?) {
+    DA::Process::Inherit.new(["stylelint", "--config", DA.default_path("config/.stylelintrc.json")].concat(ARGV[1..-1])).success!
+  }
+
   # =============================================================================
   # Git:
   # =============================================================================
