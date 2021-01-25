@@ -27,7 +27,7 @@ describe "da git status" do
     SPEC.tmp_dir {
       ` git init `
       proc = DA::Process.new([SPEC.da_bin, "git", "status"])
-      assert(proc.out_err["No remote {{origin}} specified"]?)
+      assert(proc.out_err["No remote origin specified"]?)
     }
   end
 end # describe

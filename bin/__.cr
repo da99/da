@@ -315,6 +315,21 @@ DA::CLI.parse do |o|
     DA::File_System.symlink!(ARGV[2], ARGV[3])
   }
 
+  o.desc "GREEN .... text ... [STDOUT]"
+  o.run_if(full_cmd[/^GREEN .+$/]?) {
+    DA.green! ARGV[1..-1].join(' ')
+  }
+
+  o.desc "ORANGE .... text ... [STDERR]"
+  o.run_if(full_cmd[/^ORANGE .+$/]?) {
+    DA.orange! ARGV[1..-1].join(' ')
+  }
+
+  o.desc "RED .... text ... [STDERR]"
+  o.run_if(full_cmd[/^RED .+$/]?) {
+    DA.red! ARGV[1..-1].join(' ')
+  }
+
   # =============================================================================
   # Void Linux:
   # =============================================================================

@@ -36,13 +36,4 @@ describe "da gitignore" do
     }
   end
 
-  it "adds to wrangler repos: /worker/" do
-    SPEC.tmp_dir {
-      `git init`
-      `touch wrangler.toml`
-      File.write(GITIGNORE, "")
-      DA::Process.new([SPEC.da_bin, "gitignore"]).success!
-      assert(File.read(GITIGNORE).split.includes?("/worker/") == true)
-    }
-  end
 end # describe

@@ -1,16 +1,15 @@
 
+
 require "da_spec"
+require "../src/da"
+require "../src/da/String"
 
-# ENV["IS_DEBUG"] = "YES"
-  # DA_Spec.pattern "name of test"
-  # DA_Spec.pattern /name of test/
-
-# require "../src/da/Dev"
-# require "../src/da/Git"
-# require "../src/da/Process"
 extend DA_SPEC
 
-
+if !ARGV.empty?
+  DA_SPEC.pattern /#{ARGV.join ' '}/
+  DA.orange! "=== {{Pattern}}: #{DA_SPEC.pattern.inspect}"
+end
 
 class SPEC
 
@@ -46,8 +45,14 @@ class SPEC
     `rm -rf #{tmp}`
   end # def
 
-end # === class
+  def reset_file_system
+    `rm -rf   /tmp/specs_deploy`
+    `mkdir -p /tmp/specs_deploy/var/service`
+    `mkdir -p /tmp/specs_deploy/etc/sv`
+    Dir.cd("/tmp/specs_deploy") {
+      yield
+    }
+  end # === def reset_file_system
 
-# include Microtest::DSL
-# Microtest.run!
+end # === class
 

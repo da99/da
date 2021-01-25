@@ -5,6 +5,8 @@ require "./Dev"
 module DA
 
   module Color_String
+    extend self
+
     PATTERN = /\{\{([^\}]+)\}\}/
     BOLD_PATTERN = /BOLD{{([^\}]+)}}/
 
@@ -15,6 +17,16 @@ module DA
         match.captures.first.not_nil!.colorize.bold
       }
     end
+
+    def strip(raw : String)
+      raw
+        .gsub(BOLD_PATTERN) { |raw, match|
+        match.captures.first.not_nil!
+      }
+        .gsub(PATTERN) { |raw, match|
+        match.captures.first.not_nil!
+      }
+    end # def
 
     def colorize(color : Symbol, raw : String)
       color = :yellow if color == :orange
@@ -54,26 +66,6 @@ module DA
       e
     end # === def
 
-    def red!(raw)
-      stderr!(:red, raw)
-    end # def
-
-    def orange!(raw)
-      stderr!(:yellow, raw)
-    end # === def orange!
-
-    def green!(raw)
-      stderr! :green, raw
-    end # === def green
-
-    def stderr!(color, raw)
-      if STDERR.tty?
-        return(STDERR.puts colorize(color, raw))
-      end # if
-
-      STDERR.puts(raw)
-    end # def
-
     def sections(content : String, pattern)
       pieces = content.split(pattern).map(&.strip).reject(&.empty?)
       case
@@ -96,6 +88,24 @@ module DA
     end # === def
   end # === module
 
-  extend Color_String
+  def red!(raw)
+    stderr!(:red, raw)
+  end # def
+
+  def orange!(raw)
+    stderr!(:yellow, raw)
+  end # === def orange!
+
+  def green!(raw)
+    stderr! :green, raw
+  end # === def green
+
+  def stderr!(color, raw)
+    if STDERR.tty?
+      return(STDERR.puts Color_String.colorize(color, raw))
+    end # if
+
+    STDERR.puts(Color_String.strip raw)
+  end # def
 
 end # === module DA
