@@ -3,6 +3,17 @@ module DA
   module VoidLinux
     extend self
 
+    def update_time
+      current_time = `sudo date +"%c"`.strip
+      new_time     = `my_os time get`.strip
+      if new_time.empty?
+        raise "Unable to get new time."
+      end
+    # From:
+    # https://askubuntu.com/questions/81293/what-is-the-command-to-update-time-and-date-from-internet
+      DA::Process::Inherit.new(["sudo", "date", "-s", "#{new_time}Z"]).success!
+    end # def
+
     def install(pkg_name : String)
       install [pkg_name]
     end # === def install
@@ -58,6 +69,13 @@ module DA
     def upgrade
       DA::Process::Inherit.new("sudo xbps-install -Su").success!
       DA::Process::Inherit.new("sudo xbps-remove --yes --clean-cache --remove-orphans --verbose").success!
+      DA::Process::Inherit.new("vkpurge list".split).success!
+      DA::Process::Inherit.new("my_browser google-chrome --install".split).success!
+      x = (DA::File_System.free_space("/tmp") / 1024).to_i
+      if x < 1000
+        raise "!!! Not enough free space in /tmp: #{x} MB"
+      end
+      DA::OS.free_space_check
     end # === def upgrade
 
   end # === module VoidLinux

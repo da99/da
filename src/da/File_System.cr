@@ -6,6 +6,14 @@ module DA
   module File_System
     extend self
 
+    def free_space(x : String)
+      val = `df #{x} | tail -n 1 | tr -s ' ' | cut -d' ' -f4`.strip
+      if val.empty?
+        raise "free_space could not be determined for #{x.inspect}"
+      end
+      val.to_i
+    end # def
+
     def usb_drives
       `lsblk -l`.strip.split('\n').select { |line|
         # NAME      MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT

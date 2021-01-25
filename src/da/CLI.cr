@@ -15,6 +15,10 @@ module DA
                 end # if
               end
 
+    def interactive?
+      STDOUT.tty?
+    end # def
+
     def bin_dir
       File.dirname(Process.executable_path)
     end # === def apps_dir

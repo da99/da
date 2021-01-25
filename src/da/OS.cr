@@ -1,13 +1,29 @@
 
 
+require "./File_System"
 require "./VoidLinux"
 require "./Ubuntu"
 
 module DA
   module OS
+    @@lsb_release = ""
     extend self
 
     NOLOGIN_SHELL = "/bin/nologin"
+
+    def free_space_check
+      ["/var 100", "/boot/efi 100", "/ 400" ].each { |x|
+        dir, min = x.split
+        empty = (File_System.free_space(dir) / 1024).to_i
+        if empty < min.to_i
+          raise "!!! Not enough space in #{dir.inspect}: #{empty} MB"
+        end
+        if CLI.interactive?
+          DA.orange! "  #{dir} : #{empty} MB free"
+        end
+      }
+      true
+    end # def
 
     def create_system_user(name)
       if !user?(name)
@@ -44,23 +60,38 @@ module DA
       end
     end
 
+    def ubuntu?
+      name == "Ubuntu"
+    end # def
+
+    def void_linux?
+      name == "Void Linux"
+    end # def
+
     def name
-      o = DA::Process.new("lsb_release -a -s").out_err
+      if @@lsb_release.empty?
+        @@lsb_release = `lsb_release -a 2>/dev/null`.strip
+      end
+
       case
-      when o["Ubuntu"]?
+      when @@lsb_release["Ubuntu"]?
         "Ubuntu"
+      when @@lsb_release["Void"]?
+        "Void Linux"
       else
-        raise Exception.new("Unknown os")
+        STDERR.puts "!!! Unknown OS: #{@@lsb_release.inspect}"
+        exit 2
       end
     end # def
 
     def upgrade
-      name = self.name
-      case name
-      when "Ubuntu"
+      case
+      when ubuntu?
         Ubuntu.upgrade
-      when "VoidLinux"
+      when void_linux?
         VoidLinux.upgrade
+      else
+        raise "!!! Unknown os: #{name}"
       end
     end # def
 
