@@ -133,6 +133,16 @@ DA::CLI.parse do |o|
     exit 1
   }
 
+  o.desc "git is staged"
+  o.run_if(full_cmd == "git is staged") {
+    repo = DA::Git::Repo.new(Dir.current)
+    if repo.staged?
+      exit 0
+    else
+      exit 1
+    end
+  }
+
   o.desc "git commit ..."
   o.run_if(full_cmd[/^git commit /]?) {
     repo = DA::Git::Repo.new(Dir.current)
