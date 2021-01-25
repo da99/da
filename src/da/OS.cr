@@ -3,6 +3,7 @@
 require "./File_System"
 require "./VoidLinux"
 require "./Ubuntu"
+require "./CLI"
 
 module DA
   module OS
