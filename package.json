@@ -12,7 +12,8 @@
     "@types/node": "*"
   },
   "scripts": {
-    "test": "find spec -type f -name '*.spec.mjs' | xargs -I FILE node FILE"
+    "test": "sh/test",
+    "build": "sh/build"
   },
   "repository": {
     "type": "git",
