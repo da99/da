@@ -1,0 +1,13 @@
+
+{
+  "compilerOptions": {
+    "target": "ES2016",
+    "moduleResolution": "node",
+    "noImplicitAny": false,
+    "removeComments": true,
+    "sourceMap": false,
+    "strict": true,
+    "lib": ["ES2016", "ES2017", "dom"],
+    "types": []
+  }
+}
