@@ -1,0 +1,12 @@
+#!/usr/bin/env zsh
+#
+#
+set -u -e -o pipefail
+
+cd "$(dirname "$0")"/..
+
+rm -rf dist
+mkdir dist
+cp -r src dist/src
+cd dist
+tsc
