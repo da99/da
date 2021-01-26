@@ -8,8 +8,10 @@
     "sourceMap": false,
     "strict": true,
     "lib": ["ES2016", "ES2017", "dom"],
-    "types": [],
+    "types": ["node"],
     "declaration": true,
-    "outDir": "dist/src"
-  }
+    "outDir": "dist/",
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["src/", "spec/"]
 }

@@ -8,6 +8,9 @@
   "dependencies": {
     "chalk": "*"
   },
+  "devDependencies": {
+    "@types/node": "*"
+  },
   "scripts": {
     "test": "find spec -type f -name '*.spec.mjs' | xargs -I FILE node FILE"
   },
@@ -16,7 +19,8 @@
     "url": "git+https://github.com/da99/da_spec.git"
   },
   "files": [
-    "src/*.mjs",
+    "dist/src/*.mjs",
+    "dist/src/*.d.ts",
     "LICENSE",
     "README.md"
   ],

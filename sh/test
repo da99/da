@@ -1,0 +1,11 @@
+#!/usr/bin/env zsh
+#
+#
+set -u -e -o pipefail
+local +x THIS_DIR="$( dirname "$(realpath "$0")" )/.."
+
+cd "$THIS_DIR"
+
+sh/build
+set -x
+find dist/spec/ -type f -name "*.spec.mjs" | xargs -I F node F

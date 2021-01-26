@@ -1,5 +1,5 @@
 
-import { describe, it, assert } from "../src/index.mjs";
+import { describe, it, assert } from "../src/index";
 
 describe("Describe", function () {
 

@@ -6,7 +6,8 @@ set -u -e -o pipefail
 cd "$(dirname "$0")"/..
 
 rm -rf dist
-mkdir dist
-cp -r src dist/src
-cd dist
 tsc
+cd dist
+da fs rename files with ext .js .mjs
+da fs fix mjs import from extensions
+tree

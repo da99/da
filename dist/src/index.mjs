@@ -13,5 +13,5 @@ export function it(name, f) {
         throw err;
     }
 }
-import assert from 'assert/strict';
+import { strict as assert } from "assert";
 export { assert, chalk };

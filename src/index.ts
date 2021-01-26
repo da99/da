@@ -17,5 +17,5 @@ export function it(name, f) {
   }
 } // function
 
-import assert from 'assert/strict';
+import { strict as assert } from "assert";
 export { assert, chalk };
