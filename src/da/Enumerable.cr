@@ -1,7 +1,5 @@
 
 module DA
-  extend self
-
   def round_about(e, target)
     index = case target
             when Proc
