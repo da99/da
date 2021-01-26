@@ -1,8 +1,14 @@
 {
+  "private": true,
+  "type": "module",
   "name": "da_message",
   "version": "0.0.0",
   "description": "My personal way of message oriented design for apps.",
-  "main": "dist/src/DA_MESSAGE.mjs",
+  "main": "dist/src/",
+  "devDependencies": {
+    "@types/node": "*",
+    "da_spec": "github:da99/da_spec"
+  },
   "scripts": {
     "test": "sh/test"
   },
@@ -10,16 +16,14 @@
     "type": "git",
     "url": "git+https://github.com/da99/da_message.git"
   },
-  "devDependencies": {
-    "da_spec": "github:da99/da_spec"
-  },
-  "author": "da99",
-  "license": "MIT",
   "files": [
     "dist/src/*.mjs",
+    "dist/src/*.d.ts",
     "LICENSE",
     "README.md"
   ],
+  "author": "da99",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/da99/da_message/issues"
   },

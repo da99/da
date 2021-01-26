@@ -1,6 +1,6 @@
 
 
-import { describe, it, assert } from "da_spec";
+import { describe, it, assert } from "da_spec/dist/src/index";
 import { DA_MESSAGE } from "../src/DA_MESSAGE";
 
 describe("new DA_MESSAGE", function () {

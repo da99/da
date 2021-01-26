@@ -3,9 +3,7 @@
 #
 set -u -e -o pipefail
 cd $(dirname "$0")/..
-
 sh/build
-cd dist
 
-set -x
-find spec -type f -name '*.spec.mjs' | xargs -I FILE node FILE
+node dist/spec/*.mjs
+# find dist/spec/ -type f -name '*.spec.mjs' | xargs -I FILE node FILE

@@ -4,15 +4,12 @@
 set -u -e -o pipefail -x
 
 cd $(dirname "$0")/..
-
 rm -f -r dist
-mkdir dist
-cp -r src dist/src
-cp -r spec dist/spec
+tsc
+
 
 cd dist
-tsc
 da fs rename files with ext .js .mjs
-da fs remove files with ext .ts
+da fs fix mjs import from extensions
 cd ..
 tree dist

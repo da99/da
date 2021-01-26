@@ -1,4 +1,4 @@
-import { describe, it, assert } from "da_spec";
+import { describe, it, assert } from "da_spec/dist/src/index.mjs";
 import { DA_MESSAGE } from "../src/DA_MESSAGE.mjs";
 describe("new DA_MESSAGE", function () {
     it("creates an object", function () {
