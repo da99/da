@@ -5,9 +5,7 @@
   "version": "0.0.0",
   "description": "I like tiny libraries so I used this because I am not smart enough for Jest.",
   "main": "dist/src/",
-  "dependencies": {
-    "chalk": "*"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/node": "*"
   },
