@@ -5,18 +5,14 @@
   "description": "Utilites for software development.",
   "type": "module",
   "main": "dist/src/",
-  "scripts": {
-    "test": "sh/test"
-  },
+  "scripts": {},
   "dependencies": {
     "@cloudflare/workers-types": "*",
-    "@cloudflare/wrangler": "*",
-    "@types/node": "*"
+    "@cloudflare/wrangler": "*"
   },
   "devDependencies": {
     "@types/node": "*"
   },
-  "scripts": {},
   "author": "da99",
   "license": "MIT",
   "repository": {
@@ -29,7 +25,6 @@
     "LICENSE",
     "README.md"
   ],
-  "author": "da99",
   "bugs": {
     "url": "https://github.com/da99/da_message/issues"
   },

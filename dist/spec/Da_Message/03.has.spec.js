@@ -1,5 +1,5 @@
-import { describe, it, assert } from "da_spec/dist/src/index.mjs";
-import { Da_Message } from "../src/Da_Message.mjs";
+import { describe, it, assert } from "da_spec/dist/src/index";
+import { Da_Message } from "../../src/Da_Message";
 describe("Da_Message#has", function () {
     it("returns a string if message is handled", function () {
         const m = new Da_Message();

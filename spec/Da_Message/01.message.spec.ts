@@ -1,7 +1,7 @@
 
 
 import { describe, it, assert } from "da_spec/dist/src/index";
-import { Da_Message } from "../src/Da_Message";
+import { Da_Message } from "../../src/Da_Message";
 
 describe("Da_Message#message", function () {
   it("runs all handlers", function () {
