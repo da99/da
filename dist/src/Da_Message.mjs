@@ -1,37 +1,42 @@
+const ASTERISK = "*";
+const WHITESPACE = /(\s+)/;
 class Da_Message {
     constructor() {
         this._messages = {};
     }
-    push(msg, func) {
-        let key = msg.toString();
-        if (!this._messages[key]) {
-            if (typeof msg === "string") {
-                this._messages[key] = { "key_type": "string", "key": msg, "values": [] };
-            }
-            else {
-                if (typeof msg === "object" && msg.constructor === RegExp) {
-                    this._messages[key] = { "key_type": "RegExp", "key": msg, "values": [] };
-                }
-            }
+    push(raw_key, func) {
+        let new_key = this._standard_msg(raw_key);
+        if (!this._messages[new_key]) {
+            this._messages[new_key] = [];
         }
-        this._messages[key].values.push(func);
+        this._messages[new_key].push(func);
     }
-    message(msg, ...args) {
-        let key = msg.toString();
-        for (const [_key, meta] of Object.entries(this._messages)) {
-            switch (meta.key_type) {
-                case "string":
-                    if (msg !== key) {
-                        continue;
-                    }
-                    break;
-                case "RegExp":
-                    if (!msg.match(meta.key)) {
-                        continue;
-                    }
-                    break;
-            }
-            meta.values.forEach((x) => { x(...args); });
+    has(raw_key) {
+        const key = this._standard_msg(raw_key);
+        if (this._messages[ASTERISK]) {
+            return ASTERISK;
+        }
+        if (this._messages[key]) {
+            return key;
+        }
+        return null;
+    }
+    message(raw_key, ...args) {
+        let msg = this._standard_msg(raw_key);
+        if (msg === ASTERISK) {
+            return;
+        }
+        this._run_message("*", msg, ...args);
+        this._run_message(msg, ...args);
+    }
+    _standard_msg(raw) {
+        return raw.split(WHITESPACE).filter((e) => e !== "").join(" ");
+    }
+    _run_message(msg, ...args) {
+        if (this._messages[msg]) {
+            this._messages[msg].forEach((f) => {
+                f(...args);
+            });
         }
     }
 }
