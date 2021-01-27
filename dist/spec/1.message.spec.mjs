@@ -5,9 +5,18 @@ describe("Da_Message#message", function () {
         let msg = new Da_Message();
         let x = [];
         msg.push("push something", function () { x.push("a"); });
-        msg.push("push something", function () { x.push("b"); });
+        msg.push("push something", function () { x.push(1); });
         msg.message("push something");
         msg.message("push something");
-        assert.equal(x.join(" "), "a b a b");
+        assert.equal(x.join(" "), "a 1 a 1");
+    });
+    it("accepts regular expressions", function () {
+        let msg = new Da_Message();
+        let x = [];
+        msg.push(/^push something$/, function () { x.push("b"); });
+        msg.push(/^push something$/, function () { x.push(2); });
+        msg.message("push something");
+        msg.message("push something");
+        assert.equal(x.join(" "), "b 2 b 2");
     });
 });
