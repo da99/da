@@ -1,0 +1,8 @@
+#!/usr/bin/env zsh
+#
+#
+set -u -e -o pipefail
+cd $(dirname "$0")/..
+sh/build
+
+find dist/spec/ -type f -name '*.spec.mjs' | sort -h | xargs -I FILE node FILE

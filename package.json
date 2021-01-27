@@ -4,13 +4,34 @@
   "version": "0.0.0",
   "description": "Utilites for software development.",
   "type": "module",
+  "main": "dist/src/",
+  "scripts": {
+    "test": "sh/test"
+  },
   "dependencies": {
     "@cloudflare/workers-types": "*",
     "@cloudflare/wrangler": "*",
     "@types/node": "*"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@types/node": "*"
+  },
   "scripts": {},
   "author": "da99",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/da99/da.git"
+  },
+  "files": [
+    "dist/src/**/*.mjs",
+    "dist/src/**/*.d.ts",
+    "LICENSE",
+    "README.md"
+  ],
+  "author": "da99",
+  "bugs": {
+    "url": "https://github.com/da99/da_message/issues"
+  },
+  "homepage": "https://github.com/da99/da_message#readme"
 }

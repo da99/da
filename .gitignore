@@ -1,6 +1,5 @@
 /.shards/
 /.crystal/
-/tmp/
 /progs/
 /tmp/
 /.shards/
@@ -8,3 +7,4 @@
 /bin/da
 /bin/my
 /node_modules/
+/tmp/

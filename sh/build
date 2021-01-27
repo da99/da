@@ -1,0 +1,15 @@
+#!/usr/bin/env zsh
+#
+#
+set -u -e -o pipefail -x
+
+cd $(dirname "$0")/..
+rm -f -r dist
+tsc
+
+
+cd dist
+da fs rename files with ext .js .mjs
+da fs fix mjs import from extensions
+cd ..
+tree dist
