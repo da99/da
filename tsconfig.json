@@ -10,8 +10,7 @@
     "lib": ["ES2016", "ES2017", "dom"],
     "types": ["node"],
     "declaration": true,
-    "outDir": "dist",
-    "allowSyntheticDefaultImports": true
+    "outDir": "dist"
   },
   "include": ["src/", "spec/"]
 }
