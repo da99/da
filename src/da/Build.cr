@@ -87,6 +87,34 @@ module DA
       } # Dir.cd
     end # def
 
+    def find_node_modules(origin)
+      current = origin
+      max = 10
+      counter = 0
+      while (current != "/" && counter < max)
+        break if File.exists?(File.join current, "node_modules")
+        current = File.dirname(current)
+        counter += 1
+      end # while
+
+      fin = File.join(current, "node_modules")
+      return nil unless File.directory?(fin)
+      fin
+    end # def
+
+    def find_js_module_file(file)
+      node_modules = find_node_modules(Dir.current)
+      {".js", ".mjs"}.each { |ext|
+        new_file = "#{file}#{ext}"
+        return new_file if File.exists?(new_file)
+        if node_modules
+          mod_file = File.join node_modules, new_file
+          return new_file if File.exists?(File.join node_modules, new_file)
+        end
+      }
+      nil
+    end # def
+
     # Workaround because TypeScript, NodeJS + Browsers handle
     # paths differently:
     # Set all import statements to use .mjs or .js
@@ -95,14 +123,10 @@ module DA
         DIR.new(".").files.select(/\.mjs$/).each { |f|
           content = File.read(f)
           new_content = content.gsub(/import .+['"](?<file>.+)['"]/) { |full_match, m|
-            js = "#{m["file"]}.js"
-            mjs = "#{m["file"]}.mjs"
             Dir.cd(File.dirname(f)) {
-              case
-              when File.exists?(mjs)
-                full_match.sub(m["file"], mjs)
-              when File.exists?(js)
-                full_match.sub(m["file"], js)
+              new_file = find_js_module_file(m["file"])
+              if new_file
+                full_match.sub(m["file"], new_file)
               else
                 full_match
               end

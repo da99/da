@@ -56,6 +56,34 @@ DA::CLI.parse do |o|
       }
   } # run_if
 
+  o.desc %{
+    fs fix mjs import from extensions
+      (Add ".js" or ".mjs" if the file exists in an "import ... from" statement.)
+  }
+  o.run_if(full_cmd == "fs fix mjs import from extensions") {
+    DA::Build.fix_mjs_import_extensions(Dir.current)
+  } # run_if
+
+  o.desc %{ fs find node_modules }
+  o.run_if(full_cmd == "fs find node_modules") {
+    x = DA::Build.find_node_modules(Dir.current)
+    if x
+      puts x
+    else
+      exit 1
+    end
+  }
+
+  o.desc %{ fs find js module file STRING }
+  o.run_if(full_cmd["fs find js module file "]?) {
+    x = DA::Build.find_js_module_file(ARGV.last)
+    if x
+      puts x
+    else
+      exit 1
+    end
+  }
+
   o.desc "run max [seconds] cmd -with args"
   o.run_if(full_cmd[/^run max \d+ .+/]?) {
     max = (ARGV[2].to_i32 * 10)
