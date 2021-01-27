@@ -1,11 +1,15 @@
 {
   "private": true,
+
   "name": "da",
   "version": "0.0.0",
-  "description": "Utilites for software development.",
+  "description": "My personal utilites for software development.",
   "type": "module",
   "main": "dist/src/",
-  "scripts": {},
+  "scripts": {
+    "test": "sh/test",
+    "build": "sh/build"
+  },
   "dependencies": {
     "@cloudflare/workers-types": "*",
     "@cloudflare/wrangler": "*"

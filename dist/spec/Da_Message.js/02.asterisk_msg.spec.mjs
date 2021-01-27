@@ -1,5 +1,5 @@
-import { describe, it, assert } from "da_spec/dist/src/index";
-import { Da_Message } from "../../src/Da_Message";
+import { describe, it, assert } from "../../src/DA_SPEC.mjs";
+import { Da_Message } from "../../src/Da_Message.mjs";
 describe("ASTERISK handlers", function () {
     it("runs on every message", function () {
         let msg = new Da_Message();
