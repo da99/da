@@ -1,0 +1,48 @@
+#!/usr/bin/env zsh
+#
+# === {{CMD}}
+#
+set -u -e -o pipefail
+
+local +x ORIGINAL_ARGS="$@"
+PATH="$PATH:$THIS_DIR/../process/bin"
+PATH="$PATH:$THIS_DIR/../sh_color/bin"
+
+if [[ -z "$@" ]]; then
+  local +x ACTION=watch
+else
+  local +x ACTION="$1"; shift
+fi
+
+export IS_DEV_BUILD=yes
+case "$ACTION" in
+
+  watch)
+    da_html.cr specs run || :
+    process watch "-r examples -r sh -r src -r specs -r tmp/in" "da_html.cr specs run"
+    ;;
+
+  run)
+    reset
+    cd "$THIS_DIR"
+    mkdir -p tmp/in tmp/out
+    case "${CHANGED_FILE:-}" in
+      */tmp/out/*) return 0 ;;
+      *)
+        sh_color ORANGE "=== {{Compiling}} specs..."
+        my_crystal __ build --error-trace -o tmp/out/specs.cr specs/specs.cr
+        ;;
+    esac
+
+    sh_color ORANGE "=== {{Running}} specs..."
+    tmp/out/specs.cr "$(cat tmp/in/args || :)" $@
+    sh_color GREEN "=== {{DONE}} ==="
+    ;;
+
+  *)
+    echo "!!! Unknown arguments: $ORIGINAL_ARGS" >&2
+    exit 1
+    ;;
+
+esac
+

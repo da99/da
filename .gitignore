@@ -1,4 +1,6 @@
+
 /.shards/
+/shard.lock
 /.crystal/
 /progs/
 /tmp/
@@ -7,6 +9,6 @@
 /bin/da
 /bin/my
 /node_modules/
-/tmp/
-/lib/
+
+/package-lock.json
 

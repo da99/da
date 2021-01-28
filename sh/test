@@ -6,6 +6,7 @@ set -u -e -o pipefail
 cd "$(dirname "$0")"/..
 sh/build
 
-find dist/spec/ -type f -name '*.spec.mjs' | sort -h | xargs -I FILE node FILE
-
-
+for file in $(find dist/spec/ -type f -name '*.spec.mjs' | sort -h) ; do
+  echo "=== $file"
+  node $file
+done

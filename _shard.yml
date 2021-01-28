@@ -1,0 +1,16 @@
+---
+name: da_html
+version: 3.2.1
+dependencies:
+  da:
+    github: da99/da
+  da_html_escape:
+    github: da99/da_html_escape.cr
+  da_uri:
+    github: da99/da_uri.cr
+    branch: master
+  terminal_table:
+    github: benoist/terminal_table.cr
+development_dependencies:
+  da_spec:
+    github: da99/da_spec.cr

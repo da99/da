@@ -1,6 +1,5 @@
 {
   "private": true,
-
   "name": "da",
   "version": "0.0.0",
   "description": "My personal utilites for software development.",
@@ -15,7 +14,8 @@
     "@cloudflare/wrangler": "*"
   },
   "devDependencies": {
-    "@types/node": "*"
+    "@types/node": "*",
+    "jsdom": "*"
   },
   "author": "da99",
   "license": "MIT",
@@ -32,5 +32,8 @@
   "bugs": {
     "url": "https://github.com/da99/da_message/issues"
   },
-  "homepage": "https://github.com/da99/da_message#readme"
+  "homepage": "https://github.com/da99/da_message#readme",
+  "jshintConfig": {
+    "esversion": 6
+  }
 }
