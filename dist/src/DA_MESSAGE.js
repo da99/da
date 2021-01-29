@@ -1,6 +1,6 @@
 const ASTERISK = "*";
 const WHITESPACE = /(\s+)/;
-class Da_Message {
+class DA_Message {
     constructor() {
         this._messages = {};
     }
@@ -40,5 +40,4 @@ class Da_Message {
         }
     }
 }
-const DA_MESSAGE = new Da_Message();
-export { Da_Message, DA_MESSAGE };
+export { DA_MESSAGE };

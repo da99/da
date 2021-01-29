@@ -1,6 +1,6 @@
 
 require "./spec_helper.cr"
-require "../src/da/Git"
+require "../../../src/da/Git"
 
 describe "da git status" do
 

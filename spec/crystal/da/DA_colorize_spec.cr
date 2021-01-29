@@ -1,6 +1,6 @@
 
 require "./spec_helper.cr"
-require "../src/da/String"
+require "../../../src/da/String"
 
 describe ".colorize :bold" do
   it "bolds the text: === {{#{"BOLD".colorize.bold}}} ===" do

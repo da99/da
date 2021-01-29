@@ -4,6 +4,7 @@ if in_spec?
   result = run("Describe_Header")
   describe("Describe_Header") {
     it "prints the header once" do
+      puts Process.executable_path.not_nil!
       assert result.output.scan("Describe_Header").size == 1
     end # === it "prints the header once"
   }

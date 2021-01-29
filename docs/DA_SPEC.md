@@ -4,7 +4,7 @@ Reference: da\_spec
 
 ```crystal
 
-  require "da_spec"
+  require "da/DA_SPEC"
 
   DA_Spec.pattern "name of test"
   DA_Spec.pattern /name of test/

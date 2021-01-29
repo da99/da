@@ -1,8 +1,7 @@
 
 
-require "da_spec"
-require "../src/da"
-require "../src/da/String"
+require "../../../src/DA_SPEC"
+require "../../../src/da"
 
 extend DA_SPEC
 

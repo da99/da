@@ -2,7 +2,7 @@
 ORIGIN_ARGS = ARGV.dup.map(&.strip)
 ARGV.clear
 
-require "../src/da_spec"
+require "../../../src/DA_SPEC"
 
 extend DA_SPEC
 
@@ -10,9 +10,10 @@ class Result
 
   getter exit_code : Int32
   getter output : String
+  getter err : String
   getter status : Process::Status
 
-  def initialize(@status, @exit_code, @output)
+  def initialize(@status, @exit_code, @output, @err)
   end # === def initialize
 
 end # === class Result
@@ -20,14 +21,15 @@ end # === class Result
 def run(raw)
   args   = raw.split
   output = IO::Memory.new
+  err = IO::Memory.new
 
   stat = Process.run(
     Process.executable_path.not_nil!,
     args,
     output: output,
-    error: output
+    error: err
   )
-  return(Result.new(stat, stat.exit_code, output.rewind.to_s))
+  return(Result.new(stat, stat.exit_code, output.rewind.to_s, err.rewind.to_s))
 end # === def shell_out
 
 def in_spec?

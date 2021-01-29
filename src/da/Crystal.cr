@@ -192,11 +192,6 @@ module DA
       dependencies:
         da:
           github: da99/da
-      development_dependencies:
-        da_spec:
-          github: da99/da_spec.cr
-        da_process:
-          github: da99/da_process.cr
       EOF
       if File.exists?("shard.yml")
         DA::Crystal.shards!

@@ -1,7 +1,7 @@
 
 require "./spec_helper.cr"
-require "../src/da/Git"
-require "../src/da/Process"
+require "../../../src/da/Git"
+require "../../../src/da/Process"
 
 GITIGNORE = ".gitignore"
 

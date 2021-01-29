@@ -1,4 +1,4 @@
-import { describe, it, assert } from "../../src/DA_SPEC.mjs";
+import { describe, it, assert } from "../../src/DA_SPEC";
 describe("Describe", function () {
     it("works", function () { assert.equal(5, 5); });
     it("throws an AssertionError", function () {

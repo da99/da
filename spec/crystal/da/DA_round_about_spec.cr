@@ -1,6 +1,6 @@
 
 require "./spec_helper.cr"
-require "../src/da/Enumerable"
+require "../../../src/da/Enumerable"
 
 describe "DA.round_about"  do
 
