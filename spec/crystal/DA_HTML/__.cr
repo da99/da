@@ -17,9 +17,9 @@ macro strip(str)
   end
 end
 
-DA_SPEC.pattern(ARGV.join(" ")) unless ARGV.empty?
+DA_Spec.pattern(ARGV.join(" ")) unless ARGV.empty?
 
-module DA_SPEC
+module DA_Spec
   def examine(*args)
     puts "================================"
 
@@ -52,9 +52,9 @@ module DA_SPEC
       puts "================================"
     }
   end
-end # === module DA_SPEC
+end # === module DA_Spec
 
-extend DA_SPEC
+extend DA_Spec
 
 require "./main/*"
 

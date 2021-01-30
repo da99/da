@@ -1,13 +1,13 @@
 
 
-require "../../../src/DA_SPEC"
+require "../../../src/DA_Spec"
 require "../../../src/da"
 
-extend DA_SPEC
+extend DA_Spec
 
 if !ARGV.empty?
-  DA_SPEC.pattern /#{ARGV.join ' '}/
-  DA.orange! "=== {{Pattern}}: #{DA_SPEC.pattern.inspect}"
+  DA_Spec.pattern /#{ARGV.join ' '}/
+  DA.orange! "=== {{Pattern}}: #{DA_Spec.pattern.inspect}"
 end
 
 class SPEC

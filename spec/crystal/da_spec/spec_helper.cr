@@ -2,9 +2,9 @@
 ORIGIN_ARGS = ARGV.dup.map(&.strip)
 ARGV.clear
 
-require "../../../src/DA_SPEC"
+require "../../../src/DA_Spec"
 
-extend DA_SPEC
+extend DA_Spec
 
 class Result
 
@@ -37,7 +37,7 @@ def in_spec?
 end
 
 if !in_spec?
-  DA_SPEC.pattern ORIGIN_ARGS.join(' ')
+  DA_Spec.pattern ORIGIN_ARGS.join(' ')
 end
 
 

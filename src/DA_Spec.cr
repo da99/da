@@ -1,7 +1,7 @@
 
 require "colorize"
 
-module DA_SPEC
+module DA_Spec
 
   @@pattern : String | Symbol | Regex | Nil = nil
 
@@ -63,7 +63,7 @@ module DA_SPEC
   end # def
 
   def describe(*args, &blok)
-    return if DA_SPEC.skip_all?
+    return if DA_Spec.skip_all?
     name = args.map { |x| x.to_s.strip }.join(' ')
     print name.colorize.bold, ":", "\n"
     Describe.names.push name
@@ -74,13 +74,13 @@ module DA_SPEC
   def it(name : String)
     full_name = [Describe.names.last, name.strip].join(' ')
     Describe.names.push name
-    if DA_SPEC.matches?(full_name)
+    if DA_Spec.matches?(full_name)
       beginning_assert_count = Describe.asserts.size
       print "- ", name, ": "
       begin
         yield
       rescue ex
-        DA_SPEC.print_fail
+        DA_Spec.print_fail
         puts "  #{ex.class.to_s}: #{ex.message.colorize.bold}"
         line_count = 0
         ex.backtrace.each { |line|
@@ -94,7 +94,7 @@ module DA_SPEC
       ending_assert_count = Describe.asserts.size
 
       if beginning_assert_count == ending_assert_count
-        DA_SPEC.print_fail
+        DA_Spec.print_fail
         STDERR.puts "  No assertions were specified.".colorize.yellow.bold
         exit 1
       end
@@ -117,9 +117,9 @@ module DA_SPEC
     Describe.asserts.push %origin
 
     if %result
-      DA_SPEC.print_pass
+      DA_Spec.print_pass
     else
-      DA_SPEC.print_fail
+      DA_Spec.print_fail
       puts "  #{__LINE__.colorize.bold}: #{__FILE__}"
       puts "  #{%origin.colorize.bold} -> #{%result.inspect.colorize.red.bold}"
       examine({ {{func_call.receiver.stringify}}, %a}, { {{func_call.args.first.stringify}}, %b})
@@ -131,19 +131,19 @@ module DA_SPEC
     Describe.asserts.push(error_class.to_s)
     begin
       yield
-      DA_SPEC.print_fail
+      DA_Spec.print_fail
       examine({"Expected", error_class.name}, {"Actual", "[none]"})
       exit 1
     rescue e
       case
       when e.class == error_class && !msg
-        DA_SPEC.print_pass
+        DA_Spec.print_pass
       when e.class == error_class && msg.is_a?(String) && e.message == msg
-        DA_SPEC.print_pass
+        DA_Spec.print_pass
       when e.class == error_class && msg.is_a?(Regex) && e.message =~ msg
-        DA_SPEC.print_pass
+        DA_Spec.print_pass
       else
-        DA_SPEC.print_fail
+        DA_Spec.print_fail
         if msg
           examine({"Expected: ", error_class.name + ": " + msg.inspect}, {"Actual: ", e.class.name + ": " + e.message.inspect})
         else
@@ -155,10 +155,10 @@ module DA_SPEC
     end
   end # === def assert_raises
 
-end # === module DA_SPEC
+end # === module DA_Spec
 
 at_exit {
-  if DA_SPEC::Describe.asserts.empty?
+  if DA_Spec::Describe.asserts.empty?
     STDERR.puts "!!! No assertions were run.".colorize.yellow.bold
     exit 1
   end

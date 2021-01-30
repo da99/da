@@ -1,5 +1,5 @@
 
-import { describe, it, assert } from "../../src/DA_SPEC";
+import { describe, it, assert } from "../../src/DA_Spec";
 
 describe("Describe", function () {
 

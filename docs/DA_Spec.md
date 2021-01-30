@@ -4,12 +4,12 @@ Reference: da\_spec
 
 ```crystal
 
-  require "da/DA_SPEC"
+  require "da/DA_Spec"
 
   DA_Spec.pattern "name of test"
   DA_Spec.pattern /name of test/
 
-  extend DA_SPEC
+  extend DA_Spec
 
   describe "My_Class" do
 
@@ -26,7 +26,7 @@ Reference: da\_spec
 
   end # === describe
 
-  module DA_SPEC
+  module DA_Spec
     def examine(*pairs)
       # override this method to display the actual/expected
       # results when an assertion fails.

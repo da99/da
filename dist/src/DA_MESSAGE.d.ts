@@ -1,1 +1,0 @@
-export { DA_MESSAGE };

@@ -2,7 +2,7 @@
 const RESET = "\x1b[0m";
 
 // Colors from: https://stackoverflow.com/questions/9781218/how-to-change-node-jss-console-font-color
-const DA_SPEC = {
+const DA_Spec = {
   "BOLD" : "\x1b[1m",
   "RED": "\x1b[31m",
   "GREEN": "\x1b[32m",
@@ -16,7 +16,7 @@ function standard_keys(raw : string) {
 }
 
 function color(color, ...args) {
-  const new_color = standard_keys(color).map((x) => DA_SPEC[x]).join(" ");
+  const new_color = standard_keys(color).map((x) => DA_Spec[x]).join(" ");
   return `${new_color}${args.join(" ")}${RESET}`;
 }
 

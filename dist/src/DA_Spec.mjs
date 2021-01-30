@@ -1,5 +1,5 @@
 const RESET = "\x1b[0m";
-const DA_SPEC = {
+const DA_Spec = {
     "BOLD": "\x1b[1m",
     "RED": "\x1b[31m",
     "GREEN": "\x1b[32m",
@@ -10,7 +10,7 @@ function standard_keys(raw) {
     return raw.split(WHITESPACE).filter((e) => e !== "");
 }
 function color(color, ...args) {
-    const new_color = standard_keys(color).map((x) => DA_SPEC[x]).join(" ");
+    const new_color = standard_keys(color).map((x) => DA_Spec[x]).join(" ");
     return `${new_color}${args.join(" ")}${RESET}`;
 }
 function bold(txt) {

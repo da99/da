@@ -1,6 +1,6 @@
 
 
-import { describe, it, assert } from "../../src/DA_SPEC";
+import { describe, it, assert } from "../../src/DA_Spec";
 import { Da_Message } from "../../src/Da_Message";
 
 describe("Da_Message#message", function () {

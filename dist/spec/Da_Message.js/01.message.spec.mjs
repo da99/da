@@ -1,5 +1,5 @@
-import { describe, it, assert } from "../../src/DA_SPEC";
-import { Da_Message } from "../../src/Da_Message";
+import { describe, it, assert } from "../../src/DA_Spec.mjs";
+import { Da_Message } from "../../src/Da_Message.mjs";
 describe("Da_Message#message", function () {
     it("runs all handlers", function () {
         let msg = new Da_Message();
