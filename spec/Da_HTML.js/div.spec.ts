@@ -1,5 +1,5 @@
 
-import { describe, it, assert, DA_HTML, JSDOM } from "./helper.mjs";
+import { describe, it, assert, DA_HTML, JSDOM } from "./helper";
 
 describe("DA_HTML#div", function() {
 

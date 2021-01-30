@@ -1,6 +1,6 @@
 
-import { describe, it, assert, DA_HTML, JSDOM } from "./helper.mjs";
-import { default as partial01 } from "./_partial.01.mjs";
+import { describe, it, assert, DA_HTML, JSDOM } from "./helper";
+import { default as partial01 } from "./_partial.01";
 
 describe("DA_HTML#partial", function () {
   it("renders content from given file", function () {

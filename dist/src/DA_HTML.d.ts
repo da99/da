@@ -15,7 +15,8 @@ declare class DA_HTML {
     link(attrs: any): HTMLElement;
     meta(attrs: any): any;
     serialize(): string;
-    fragment(func: any): DocumentFragment | this;
+    partial(func: Function): this;
+    fragment(): DocumentFragment;
     body(...args: any[]): this;
     script(...args: any[]): this;
     text_node(raw_txt: any): Text;

@@ -1,8 +1,8 @@
 import { describe, it, assert } from "../../src/DA_Spec.mjs";
-import { Da_Message } from "../../src/Da_Message.mjs";
-describe("Da_Message#message", function () {
+import { DA_Message } from "../../src/DA_Message.mjs";
+describe("DA_Message#message", function () {
     it("runs all handlers", function () {
-        let msg = new Da_Message();
+        let msg = new DA_Message();
         let x = [];
         msg.push("push something", function () { x.push("a"); });
         msg.push("push something", function () { x.push(1); });
@@ -11,7 +11,7 @@ describe("Da_Message#message", function () {
         assert.equal(x.join(" "), "a 1 a 1");
     });
     it("does not run handlers when they do not match", function () {
-        let msg = new Da_Message();
+        let msg = new DA_Message();
         let x = [];
         msg.push("a", function () { x.push("b"); });
         msg.push("b", function () { x.push(2); });

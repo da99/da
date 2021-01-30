@@ -210,15 +210,15 @@ class DA_HTML {
     return e.innerHTML;
   } // method
 
-  fragment(func) {
-    if (func) {
-      this.current.push(this._fragment);
-      func(this);
-      this.current.pop();
-      return this;
-    } else {
-      return this._fragment;
-    }
+  partial(func: Function) {
+    this.current.push(this._fragment);
+    func(this);
+    this.current.pop();
+    return this;
+  } // method
+
+  fragment() {
+    return this._fragment;
   } // method
 
   body(...args) {

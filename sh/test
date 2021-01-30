@@ -6,7 +6,8 @@ set -u -e -o pipefail
 cd "$(dirname "$0")"/..
 sh/build
 
-for file in $(find dist/spec/ -type f -name '*.spec.mjs' | sort -h) ; do
+# NOTE: sort in reverse to run DA_Spec specs first.
+for file in $(find dist/spec/ -type f -name '*.spec.mjs' | sort -r -h) ; do
   echo "=== $file"
   node $file
 done

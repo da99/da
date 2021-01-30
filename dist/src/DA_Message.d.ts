@@ -1,4 +1,4 @@
-declare class Da_Message {
+declare class DA_Message {
     private _messages;
     constructor();
     push(raw_key: string, func: Function): void;
@@ -7,4 +7,4 @@ declare class Da_Message {
     private _standard_msg;
     private _run_message;
 }
-export { Da_Message };
+export { DA_Message };

@@ -1,11 +1,11 @@
 
 import { describe, it, assert } from "../../src/DA_Spec";
-import { Da_Message } from "../../src/Da_Message";
+import { DA_Message } from "../../src/DA_Message";
 
 describe("ASTERISK handlers", function () {
 
   it("runs on every message", function () {
-    let msg = new Da_Message();
+    let msg = new DA_Message();
     let x : (string | number)[]  = [];
     msg.push("*", function () { x.push("b"); });
     msg.push("*", function () { x.push(2); });
@@ -15,7 +15,7 @@ describe("ASTERISK handlers", function () {
   });
 
   it("gets passed original message", function () {
-    let msg = new Da_Message();
+    let msg = new DA_Message();
     let x : string[]  = [];
     msg.push("*", function (orig) { x.push(orig); });
     msg.push("*", function (orig) { x.push(orig); });

@@ -171,16 +171,14 @@ class DA_HTML {
         e.appendChild(this._fragment);
         return e.innerHTML;
     }
-    fragment(func) {
-        if (func) {
-            this.current.push(this._fragment);
-            func(this);
-            this.current.pop();
-            return this;
-        }
-        else {
-            return this._fragment;
-        }
+    partial(func) {
+        this.current.push(this._fragment);
+        func(this);
+        this.current.pop();
+        return this;
+    }
+    fragment() {
+        return this._fragment;
     }
     body(...args) {
         let doc = this.document.querySelector("body");

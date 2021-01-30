@@ -1,9 +1,6 @@
-
-
 import { JSDOM } from "jsdom";
-import { DA_HTML } from "../src/index.mjs";
-import { describe, it, assert } from "da_spec";
-
+import { DA_HTML } from "../../src/DA_HTML.mjs";
+import { describe, it, assert } from "../../src/DA_Spec.mjs";
 const HTML5 = `<!doctype html>
 <html lang="en">
   <head>
@@ -12,7 +9,4 @@ const HTML5 = `<!doctype html>
   </head>
   <body></body>
 </html>`;
-
-
 export { HTML5, JSDOM, DA_HTML, describe, it, assert };
-
