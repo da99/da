@@ -120,6 +120,7 @@ DA::CLI.parse do |o|
       npm install -g
       typescript
       jshint
+      @cloudflare/wrangler
       stylelint
       stylelint-config-standard
     ])
