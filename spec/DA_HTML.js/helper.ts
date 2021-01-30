@@ -1,7 +1,7 @@
 
 
 import { JSDOM } from "jsdom";
-import { DA_HTML } from "../../src/DA_HTML";
+import { DA } from "../../src/DA";
 import { describe, it, assert } from "../../src/DA_Spec";
 
 const HTML5 = `<!doctype html>
@@ -14,5 +14,5 @@ const HTML5 = `<!doctype html>
 </html>`;
 
 
-export { HTML5, JSDOM, DA_HTML, describe, it, assert };
+export { HTML5, JSDOM, DA, describe, it, assert };
 

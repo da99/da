@@ -1,10 +1,10 @@
 
-import { describe, it, assert, DA_HTML, JSDOM } from "./helper";
+import { describe, it, assert, DA, JSDOM } from "./helper";
 
 
 describe("DA_HTML#a", function () {
   it("allows string based id attributes", function () {
-    let h = new DA_HTML((new JSDOM()).window);
+    let h = new DA.HTML((new JSDOM()).window);
     h.partial(function () {
       h.a("#alert.red", {href: "/"}, "click here");
     });
@@ -14,7 +14,7 @@ describe("DA_HTML#a", function () {
   }); // it
 
   it("allows string based class attributes", function () {
-    let h = new DA_HTML((new JSDOM()).window);
+    let h = new DA.HTML((new JSDOM()).window);
     h.partial(function () {
       h.a("#alert.red.scare", {href: "/"}, "click here");
     });
@@ -24,7 +24,7 @@ describe("DA_HTML#a", function () {
   }); // it
 
   it("accepts text nodes as strings", function () {
-    let h = new DA_HTML((new JSDOM()).window);
+    let h = new DA.HTML((new JSDOM()).window);
     h.partial(function () {
       h.a("#alert.red.scare", {href: "/"}, "click here");
     });
