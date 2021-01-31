@@ -46,6 +46,19 @@ DA::CLI.parse do |o|
       }
   } # run_if
 
+  o.desc "fs remove files named [STRING] ..."
+  o.run_if(full_cmd[/^fs remove files named .+$/]?) {
+    files = ARGV[4..-1]
+    DA::File_System::FILES
+      .new(Dir.current)
+      .each_file { |f|
+        if files.includes?(f.basename)
+          f.remove
+          puts f.raw
+        end
+      }
+  } # run_if
+
   o.desc "fs rename files with ext [.ext1] [.ext2]"
   o.run_if(full_cmd[/^fs rename files with ext (\.[\.a-zA-Z0-9\-]+)\ +(\.[\.a-zA-Z0-9\-]+)$/]?) {
     DA::File_System::FILES.new(Dir.current)
