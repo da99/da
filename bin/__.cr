@@ -334,6 +334,17 @@ DA::CLI.parse do |o|
     DA::Build.cloudflare_worker(Dir.current)
   }
 
+  o.desc "build .html from .html.mjs"
+  o.run_if(full_cmd == "build .html from .html.mjs") {
+    DA::File_System::FILES.new(Dir.current)
+      .select_ext(".html.mjs")
+      .each_file { |file|
+        new_file = file.remove_ext(".mjs")
+        new_file.write(DA::Process.new(["node", file.raw]).success!.output)
+        puts new_file.raw
+      } # each_file
+  }
+
   # =============================================================================
   # Linux:
   # =============================================================================

@@ -228,6 +228,14 @@ module DA
         self.class.new "#{base}#{new}"
       end # def
 
+      def remove_ext(old : String)
+        base = raw.rchop(old)
+        if base == raw
+          raise Exception.new("File with extension #{old.inspect} not found: #{raw.inspect}")
+        end
+        self.class.new base
+      end # def
+
       def rename_ext(old, new : Enumerable(String))
         new.map { |new_e| rename_ext(old, new_e) }
       end # def
@@ -261,6 +269,10 @@ module DA
 
       def basename
         File.basename raw
+      end # def
+
+      def write(*args)
+        File.write(raw, *args)
       end # def
 
       def to_s(io)
