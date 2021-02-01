@@ -1,12 +1,12 @@
 
-import { DA_Message } from "./DA_Message";
+import { DA_Event } from "./DA_Event";
 import { DA_HTML } from "./DA_HTML";
 
 const WHITESPACE_PATTERN = /\s+/
 
 const DA = {
   HTML : DA_HTML,
-  Message : DA_Message,
+  Event : DA_Event,
 
   split_whitespace : function (x : string) {
     // The .split method call will not create any null values in the

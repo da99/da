@@ -1,43 +1,43 @@
 const ASTERISK = "*";
 const WHITESPACE = /(\s+)/;
-class DA_Message {
+class DA_Event {
     constructor() {
-        this._messages = {};
+        this._events = {};
     }
-    push(raw_key, func) {
+    on(raw_key, func) {
         let new_key = this._standard_msg(raw_key);
-        if (!this._messages[new_key]) {
-            this._messages[new_key] = [];
+        if (!this._events[new_key]) {
+            this._events[new_key] = [];
         }
-        this._messages[new_key].push(func);
+        this._events[new_key].push(func);
     }
     has(raw_key) {
         const key = this._standard_msg(raw_key);
-        if (this._messages[ASTERISK]) {
+        if (this._events[ASTERISK]) {
             return ASTERISK;
         }
-        if (this._messages[key]) {
+        if (this._events[key]) {
             return key;
         }
         return null;
     }
-    message(raw_key, ...args) {
+    emit(raw_key, ...args) {
         let msg = this._standard_msg(raw_key);
         if (msg === ASTERISK) {
             return;
         }
-        this._run_message("*", msg, ...args);
-        this._run_message(msg, ...args);
+        this._emit("*", msg, ...args);
+        this._emit(msg, ...args);
     }
     _standard_msg(raw) {
         return raw.split(WHITESPACE).filter((e) => e !== "").join(" ");
     }
-    _run_message(msg, ...args) {
-        if (this._messages[msg]) {
-            this._messages[msg].forEach((f) => {
+    _emit(msg, ...args) {
+        if (this._events[msg]) {
+            this._events[msg].forEach((f) => {
                 f(...args);
             });
         }
     }
 }
-export { DA_Message };
+export { DA_Event };

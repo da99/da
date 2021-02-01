@@ -2,54 +2,54 @@
 const ASTERISK = "*";
 const WHITESPACE = /(\s+)/;
 
-class DA_Message {
+class DA_Event {
 
-  private _messages : object;
+  private _events : object;
 
   constructor() {
-    this._messages = {};
+    this._events = {};
   } // method
 
-  push (raw_key : string, func : Function) {
+  on (raw_key : string, func : Function) {
     let new_key = this._standard_msg(raw_key);
 
-    if (!this._messages[new_key]) {
-      this._messages[new_key] = [];
+    if (!this._events[new_key]) {
+      this._events[new_key] = [];
     }
 
-    this._messages[new_key].push(func);
+    this._events[new_key].push(func);
   } // method
 
   has (raw_key : string) {
     const key = this._standard_msg(raw_key);
 
-    if (this._messages[ASTERISK]) {
+    if (this._events[ASTERISK]) {
       return ASTERISK;
     }
 
-    if (this._messages[key]) {
+    if (this._events[key]) {
       return key;
     }
 
     return null;
   } // method
 
-  message (raw_key : string, ...args) {
+  emit (raw_key : string, ...args) {
     let msg = this._standard_msg(raw_key);
     if (msg === ASTERISK) {
       return;
     }
-    this._run_message("*", msg, ...args);
-    this._run_message(msg, ...args);
+    this._emit("*", msg, ...args);
+    this._emit(msg, ...args);
   } // method
 
   private _standard_msg(raw : string) {
     return raw.split(WHITESPACE).filter((e) => e !== "" ).join(" ");
   }
 
-  private _run_message (msg : string, ...args) {
-    if (this._messages[msg]) {
-      this._messages[msg].forEach((f) => {
+  private _emit (msg : string, ...args) {
+    if (this._events[msg]) {
+      this._events[msg].forEach((f) => {
         f(...args);
       });
     }
@@ -57,5 +57,5 @@ class DA_Message {
 
 } // class
 
-export { DA_Message };
+export { DA_Event };
 

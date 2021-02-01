@@ -9,7 +9,7 @@ module DA
     DESC = [] of String
 
     IS_HELP = begin
-                if ARGV.first? == "-h" || ARGV.first? == "help"
+                if {"-h", "--help", "help"}.includes?(ARGV.first?)
                   ARGV.shift
                   ARGV.join(' ')
                 end # if
