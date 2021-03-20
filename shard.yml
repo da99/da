@@ -7,6 +7,3 @@ targets:
     main: bin/__.cr
   my:
     main: bin/my.cr
-  faunadb:
-    main: bin/faunadb.cr
-
