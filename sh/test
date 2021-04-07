@@ -3,18 +3,28 @@
 #
 set -u -e -o pipefail
 
+set -x
+if test "$@" = "" ; then
+  local TARGET="js crystal"
+  local FILE_TARGET="*"
+else
+  local TARGET="$1";
+  local FILE_TARGET="${2:-"*"}"
+fi
+
 cd "$(dirname "$0")"/..
 sh/build
 
-# NOTE: sort in reverse to run DA_Spec specs first.
-if test "$(echo $@)" != "" ; then
-  for file in $(find dist/spec/ -type f -iname "${@}.spec.mjs" | sort -r -h) ; do
-    echo "=== $file"
-    node $file
-  done
-else
-  for file in $(find dist/spec/ -type f -name '*.spec.mjs' | sort -r -h) ; do
-    echo "=== $file"
-    node $file
-  done
-fi
+case "$@" in
+  *js*)
+    # NOTE: sort in reverse to run DA_Spec specs first.
+    for file in $(find dist/spec/ -type f -iname "${FILE_TARGET}.spec.mjs" | sort -r -h) ; do
+      echo "=== $file"
+      node $file
+    done
+    ;;
+  *)
+    echo "$@"
+    exit 1
+esac
+
