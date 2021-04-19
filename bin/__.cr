@@ -35,15 +35,17 @@ DA::CLI.parse do |o|
     }
   } # run_if
 
-  o.desc "fs remove files with ext [.ext]"
-  o.run_if(full_cmd[/^fs remove files with ext (\.[\.a-zA-Z0-9\-]+)$/]?) {
-    DA::File_System::FILES
-      .new(Dir.current)
-      .select_ext(ARGV.last)
-      .each_file { |f|
-        f.remove
-        puts f.raw
-      }
+  o.desc "fs remove files with ext [.ext .ext2 ...]"
+  o.run_if(full_cmd[/^fs remove files with ext (.+)$/]?) {
+    ARGV[4..-1].each { |ext|
+      DA::File_System::FILES
+        .new(Dir.current)
+        .select_ext(ext)
+        .each_file { |f|
+          f.remove
+          puts f.raw
+        }
+    } # each
   } # run_if
 
   o.desc "fs remove files named [STRING] ..."
