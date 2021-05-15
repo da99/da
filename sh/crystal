@@ -15,6 +15,16 @@ case "$@" in
     ;;
 
   "install")
+    case "$(lsb_release -a)" in
+      *Ubuntu*)
+        sudo apt install libssl-dev libxml2-dev libyaml-dev libgmp-dev
+        ;;
+      *)
+        echo "Unknown system: $(lsb_release -a)" >&2
+        exit 1
+        ;;
+    esac
+
     mkdir -p /progs/crystal
     cd /progs/crystal
 
@@ -27,6 +37,7 @@ case "$@" in
       tar xvzf "$(basename $latest)"
       rm -f "current"
       ln -s "$dirname" "current"
+      rm "$(basename $latest)"
     fi
 
     current/bin/crystal --version
