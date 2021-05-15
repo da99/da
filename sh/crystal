@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+#
+#
+set -u -e -o pipefail
+cd "$( dirname "$(realpath "$0")" )/.."
+THIS_DIR="$PWD"
+
+
+case "$@" in
+  "latest")
+    url="https://github.com/crystal-lang/crystal/releases"
+    href="$(curl --silent -L $url | grep -Po '/.+releases/download/.+linux-x86_64.+.gz' | head -n 1)"
+    test -n "$href" || { echo "!!! Latest release not found." >&2; exit 1; }
+    echo "https://github.com$href"
+    ;;
+
+  "install")
+    mkdir -p /progs/crystal
+    cd /progs/crystal
+
+    latest="$($THIS_DIR/sh/crystal latest)"
+    dirname="$(basename $latest -linux-x86_64.tar.gz)"
+
+    if ! test -d "$dirname" ; then
+      # rm -f "$basename"
+      wget --continue "$latest"
+      tar xvzf "$(basename $latest)"
+      rm -f "current"
+      ln -s "$dirname" "current"
+    fi
+
+    current/bin/crystal --version
+    ;;
+
+  *)
+    echo "!!! Unknown arguments: $@"
+    exit 1
+    ;;
+esac
+
