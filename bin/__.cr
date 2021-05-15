@@ -12,6 +12,7 @@ require "../src/da/Dev"
 require "../src/da/OS"
 require "../src/da/Linux"
 require "../src/da/Build"
+require "../src/da/Crystal"
 
 full_cmd = ARGV.map(&.strip).join(" ")
 
@@ -288,6 +289,14 @@ DA::CLI.parse do |o|
   } # run_if
 
   # =============================================================================
+  # Crystal:
+  # =============================================================================
+  o.desc "install crystal"
+  o.run_if(full_cmd == "install crystal") {
+    DA::Crystal.new.install
+  }
+
+  # =============================================================================
   # Dev:
   # =============================================================================
   o.desc "watch"
@@ -434,10 +443,6 @@ DA::CLI.exit!
 #   # Search for a Crystal source file or a doc HTML file
 #   #   using find . -type f -ipath '*#{YOUR_STRING}*'
 #   DA::Crystal.src_file(ARGV[2])
-
-# when full_cmd == "crystal install"
-#   # === {{CMD}} crystal install
-#   DA::Crystal.install
 
 # when ARGV[0]? == "crystal" && ARGV[1]?
 #   # === {{CMD}} crystal --args ...

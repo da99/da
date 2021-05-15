@@ -1,5 +1,6 @@
 
 require "http/client"
+require "./Process"
 
 module DA
   def fzf(stuff : Array(String))
@@ -12,16 +13,48 @@ module DA
     results.to_s.strip
   end
 
-  module Crystal
+  class Crystal
     BIN = "crystal"
-    extend self
+
+    struct Release
+      getter path     : String
+      getter version  : String
+      getter basename : String
+      getter dirname  : String
+
+      def initialize
+        host = "https://github.com"
+        url  = "#{host}/crystal-lang/crystal/releases"
+        doc  = HTTP::Client.get(url).body
+        raw  = doc.split.find { |x|
+          x[/releases\/download\/.+linux-x86_64\.tar\.gz/]?
+        } || raise("!!! Latest version not found.")
+
+        @path = raw.split('"')[1]? || raise("!!! Latest version not found.")
+        @basename = File.basename(@path)
+        @version = File.basename(@basename, ".tar.gz").sub("-linux-x86_64","").sub("crystal-", "")
+        @dirname =  File.basename(@basename, "-linux-x86_64.tar.gz")
+      end # def
+    end # === struct
+
+    def self.latest_version
+    end # def
+
+    getter base_dir : String = "/progs/crystal"
+    getter target_version : String = "1.0.0-1"
+
+    def initialize
+    end # def
+
+    def initialize(@base_dir, @target_version)
+    end # def
 
     def docs_dir
-      "/progs/crystal/current/share/doc/crystal"
+      File.join base_dir, "current/share/doc/crystal"
     end
 
     def src_dir
-      "/progs/crystal/current/share/crystal/src"
+      File.join base_dir, "current/share/crystal/src"
     end
 
     def src_file(partial : String)
@@ -29,119 +62,120 @@ module DA
         DA.exit! 1, "Empty search string: #{partial.inspect}"
       end
 
-      Dir.cd "/progs/crystal/current/share"
-      files = `find . -type f -ipath '*#{partial}*'`.strip.split('\n').reject { |x| x.strip.empty? }
-      if files.empty?
-        DA.exit! "No files found for:  #{partial.inspect}"
-      end
-      file = if files.size > 1
-               DA.fzf(files)
-             else
-               files.first
-             end
-      if file[".html"]?
-        DA.success! "xdg-open", [file]
-      else
-        Process.exec "nvim", ["-R", file]
-      end
+      Dir.cd(File.join(base_dir, "current/share")) {
+        files = `find . -type f -ipath '*#{partial}*'`.strip.split('\n').reject { |x| x.strip.empty? }
+        if files.empty?
+            DA.exit! "No files found for:  #{partial.inspect}"
+        end
+
+        if files.size > 1
+          DA.fzf(files)
+        else
+          files.first
+        end
+      }
+      # if file[".html"]?
+      #   file
+      #   DA.success! "xdg-open", [file]
+      # else
+      #   Process.exec "nvim", ["-R", file]
+      # end
     end # === def src_file
 
     def src(args : Array(String))
-      Dir.cd src_dir
-      if args.includes?("-l") || args.includes?("--files-with-matches")
-        files = DA.output("rg", args).strip
-        if files.empty?
-          DA.orange! "=== No files found."
-          return
-        else
-          file = DA.fzf(files.split('\n'))
-          if File.file?(file)
-            Process.exec("nvim", ["-R", file])
-          else
+      Dir.cd(src_dir) {
+        if args.includes?("-l") || args.includes?("--files-with-matches")
+          files = DA.output("rg", args).strip
+          if files.empty?
+            DA.orange! "=== No files found."
             return
+          else
+            file = DA.fzf(files.split('\n'))
+            if File.file?(file)
+              Process.exec("nvim", ["-R", file])
+            else
+              return
+            end
           end
+        else
+          Process.exec("rg", args)
         end
-      else
-        Process.exec("rg", args)
-      end
+      }
     end # def
 
 
     def docs(path)
-      Dir.cd docs_dir
-      files = `find . -type f -ipath '*#{path}*'`.strip.split('\n').reject { |x| x.strip.empty? }
-      file = if files.size > 1
-               DA.success! "which fzf"
-               r, w = IO.pipe
-               files.each { |f|
-                 w.puts f
-               }
-               results = IO::Memory.new
-               Process.run("fzf", "--reverse --no-hscroll --ansi --tabstop=2 -i".split, output: results, input: r, error: STDERR)
-               results.to_s.strip
-             else
-               files.first
-             end
+      Dir.cd(docs_dir) {
+        files = `find . -type f -ipath '*#{path}*'`.strip.split('\n').reject { |x| x.strip.empty? }
+        file = if files.size > 1
+                 DA.success! "which fzf"
+                 r, w = IO.pipe
+                 files.each { |f|
+                   w.puts f
+                 }
+                 results = IO::Memory.new
+                 Process.run("fzf", "--reverse --no-hscroll --ansi --tabstop=2 -i".split, output: results, input: r, error: STDERR)
+                 results.to_s.strip
+               else
+                 files.first
+               end
 
-      if File.file?(file)
-        Process.exec "xdg-open", [file]
-      end
+        if File.file?(file)
+          Process.exec "xdg-open", [file]
+        end
 
-      puts Dir.current.inspect
-      puts file.inspect
-      puts File.expand_path(file).inspect
-      DA.exit! 1, "File not found: #{path} -> #{file}"
-      exit 1
+        puts Dir.current.inspect
+        puts file.inspect
+        puts File.expand_path(file).inspect
+        DA.exit! 1, "File not found: #{path} -> #{file}"
+        exit 1
+      }
     end # def docs
 
-    def crystal(args : Array(String))
-      DA.system! "crystal", args
-    end
+    # def crystal(args : Array(String))
+    #   DA.system! "crystal", args
+    # end
 
     def shards(args : Array(String))
       DA.system! "shards", args
     end
 
     def install
-      Dir.cd "/progs"
-      host = "https://github.com"
-      url  = "#{host}/crystal-lang/crystal/releases"
-      doc  = HTTP::Client.get(url).body
-      raw  = doc.split.find { |x|
-        x[/releases\/download\/.+linux-x86_64\.tar\.gz/]?
-      } || ""
-      href = raw.split('"')[1]
-      if !href
-        DA.exit!("!!! Latest release not found: #{url}")
-      end
+      Dir.mkdir_p base_dir
+      Dir.cd(base_dir) {
 
-      init
+        release = Release.new
 
-      Dir.cd("/tmp") {
-        file = File.basename(href)
-        dir = File.basename(href, "-linux-x86_64.tar.gz")
-        target = File.join("/progs/crystal", dir)
-        current = "/progs/crystal/current"
-        Dir.mkdir_p(File.dirname(target))
-        if !Dir.exists?(target)
-          if !Dir.exists?(dir)
-            DA.system!("wget", ["--continue",File.join(host, href)])
-            DA.system!("tar", ["-xzf", file])
-          end
-          DA.system! "mv #{dir} #{target}"
+        puts release.version
+        puts release.basename
+        puts release.dirname
+
+        if Dir.exists?(release.dirname)
+          puts "Directory exists: #{release.dirname}"
         end
-        DA.system! "ln -sf #{target} #{current}"
-        Dir.cd(current) {
-          Dir.glob("share/crystal/src/openssl/lib_*.cr").each { |f|
-            contents = File.read(f)
-              .sub(/OPENSSL_102 = .+/, %[OPENSSL_102 = {{ `command -v pkg-config > /dev/null && pkg-config --atleast-version=1.0.2 libssl && pkg-config --exists libtls || printf succ`.stringify == "succ" }}])
-              .sub(/OPENSSL_110 = .*/, %[OPENSSL_110 = {{ `command -v pkg-config > /dev/null && pkg-config --atleast-version=1.1.0 libssl && pkg-config --exists libtls || printf succ`.stringify == "succ" }}])
-            File.write(f, contents)
-            DA.orange! "=== {{Updated}}: BOLD{{#{f}}}"
-          }
-          DA.system! "bin/crystal --version"
-        }
-      }
+      } # dir.cd
+
+
+      exit 0
+
+      # Dir.cd("/tmp") {
+      #   file = File.basename(path)
+      #   dir = File.basename(path, "-linux-x86_64.tar.gz")
+      #   target = File.join("/progs/crystal", dir)
+      #   current = "/progs/crystal/current"
+      #   Dir.mkdir_p(File.dirname(target))
+      #   if !Dir.exists?(target)
+      #     if !Dir.exists?(dir)
+      #       DA::Process.new("wget --continue #{File.join host, path}").success!
+      #       DA::Process.new("tar -xzf #{file}").success!
+      #     end
+      #     DA::Process.new("mv #{dir} #{target}").success!
+      #   end
+      #   DA::Process.new("ln -sf #{target} #{current}").success!
+      #   Dir.cd(current) {
+      #     DA::Process.new("bin/crystal --version").success!
+      #   }
+      # }
     end # === def install
 
     def init
