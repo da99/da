@@ -1,6 +1,7 @@
 ---
 name: da
 version: 0.0.0
+crystal: ">= 1.0.0"
 
 targets:
   da:
@@ -8,4 +9,3 @@ targets:
   my:
     main: bin/my.cr
 
-crystal: ">= 1.0.0"
