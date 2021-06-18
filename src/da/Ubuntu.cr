@@ -7,12 +7,19 @@ module DA
     extend self
 
     def upgrade
-      # DA::Process::Inherit.new("sudo journalctl --vacuum-size=500M").success!
-      DA::Process::Inherit.new("sudo apt update").success!
-      DA::Process::Inherit.new("sudo apt upgrade").success!
-      DA::Process::Inherit.new("sudo apt autoremove").success!
-      DA::Process::Inherit.new("sudo apt autoclean").success!
-      DA::Process::Inherit.new("sudo apt clean").success!
+      [
+        "journalctl --vacuum-time=1d",
+        "journalctl --vacuum-size=100M",
+        "apt update",
+        "apt autoremove",
+        "apt autoclean",
+        "apt clean",
+        "apt upgrade",
+        "apt autoremove",
+        "apt autoclean",
+      ].each { |x|
+        DA::Process::Inherit.new("sudo #{x}").success!
+      }
 
       x = (File_System.free_space("/tmp") / 1024).to_i
       if x < 500
