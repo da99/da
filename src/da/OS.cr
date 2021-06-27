@@ -77,6 +77,8 @@ module DA
       case
       when @@lsb_release["Ubuntu"]?
         "Ubuntu"
+      when @@lsb_release["Linux Mint"]?
+        "Ubuntu"
       when @@lsb_release["Void"]?
         "Void Linux"
       else
