@@ -1,0 +1,92 @@
+#!/usr/bin/env zsh
+#
+
+# === {{CMD}}
+
+PATH="$PATH:$THIS_DIR/../sh_color/bin"
+PATH="$PATH:$THIS_DIR/../process/bin"
+PATH="$PATH:$THIS_DIR/../my_network/bin"
+PATH="$PATH:$THIS_DIR/bin"
+PATH="$PATH:$THIS_DIR/tmp/latest-crystal/bin"
+
+cd "$THIS_DIR"
+mkdir -p "tmp/in" "tmp/out"
+
+if [[ -z "$@" ]]; then
+  local +x ACTION=watch
+else
+  local +x ACTION="$1"; shift
+fi
+
+case "$ACTION" in
+  edit)
+    mkdir -p tmp/in
+    exec $EDITOR tmp/in/scratch.cr
+    ;;
+
+  watch)
+    export CONTROLLER_PID="$$"
+    local +x CMD="da crystal run tmp/in/scratch.cr"
+    local +x content=""
+    while true ; do
+      if [[ "$content" != "$(cat tmp/in/scratch.cr)" ]]; then
+        content="$(cat tmp/in/scratch.cr)"
+        $CMD || :
+        echo "=== Exit status: $? ==="
+      fi
+      sleep 1
+    done
+    ;;
+
+  run)
+    reset
+    mkdir -p tmp/bin tmp/in tmp/out
+
+    local +x IN_FILE="tmp/in/scratch.cr"
+    local +x OUT_FILE="tmp/out/scratch"
+
+
+    if [[ ! -f "$IN_FILE" ]]; then
+      sh_color RED "=== File does not exist: {{$IN_FILE}}"
+    fi
+
+    local +x IS_BENCHMARK="$(grep "Benchmark\." "$IN_FILE")"
+    if [[ ! -z "$IS_BENCHMARK" ]] ; then
+      sh_color ORANGE "=== {{Compiling}} BOLD{{release}} ... $(date "+%H:%M:%S") ..."
+      my_crystal __ build --release --no-debug "$IN_FILE" -o "$OUT_FILE"
+    else
+      sh_color ORANGE "=== {{Compiling}} BOLD{{dev}} ... $(date "+%H:%M:%S") ..."
+      my_crystal __ build --error-trace "$IN_FILE" -o "$OUT_FILE"
+    fi
+
+    if grep "server.listen" "$IN_FILE" ; then
+      pkill -f "$OUT_FILE" || :
+      sh_color ORANGE "=== {{Running}}..."
+      ( ./out/scratch || : ) &
+      sleep 1
+      reset
+      my_network inspect http://localhost:3000/ && echo
+      my_network inspect http://localhost:3000/hello/world && echo
+      my_network inspect http://localhost:3000/hello/the/entire/world && echo
+      my_network inspect http://localhost:3000/missing && echo
+    else
+      if [[ ! -z "$IS_BENCHMARK" ]] ; then
+        sh_color ORANGE "=== {{Running}} benchmark..."
+        "$OUT_FILE"
+        "$OUT_FILE"
+        "$OUT_FILE" && sh_color GREEN "=== {{DONE}} ===" || sh_color RED "=== {{DONE}} ==="
+      else
+        sh_color ORANGE "=== {{Running}}..."
+        "$OUT_FILE" && sh_color GREEN "=== {{DONE}} ===" || sh_color RED "=== {{DONE}}: $? ==="
+      fi
+    fi
+    ;;
+
+  *)
+    sh_color RED "=== {{Invalid arguments}}: BOLD{{$ACTION $@}}"
+    exit 2
+    ;;
+esac
+
+
+

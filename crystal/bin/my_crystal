@@ -1,0 +1,81 @@
+#!/usr/bin/env zsh
+#
+#
+#
+set -u -e -o pipefail
+local +x THE_ARGS="$@"
+local +x THIS_DIR="$(dirname "$(dirname "$0")")"
+
+PATH="$PATH:$THIS_DIR/bin"
+
+local +x ACTION="[none]"
+if [[ ! -z "$@" ]]; then
+  ACTION="$1"; shift
+fi
+
+# local +x CRYSTAL_VERSION_FILE="$THIS_DIR/configs/crystal-version"
+# export SHARDS_INSTALL_PATH="$PWD/.shards/.install"
+# export CRYSTAL_VERSION="${CRYSTAL_VERSION:=""}"
+
+# if [[ -z "$CRYSTAL_VERSION" ]]; then
+#   CRYSTAL_VERSION="$(cat "$CRYSTAL_VERSION_FILE")"
+# fi
+
+# PATH="/progs/crystal/bin:$PATH"
+# export CRYSTAL_PATH="$(realpath "/progs/crystal/share/crystal/src"):$PWD/.shards/.install"
+# export CRYSTAL_PATH="/usr/lib/crystal:$PWD/.shards/.install"
+
+if [[ "$(uname -m)" != "x86_64" ]]; then
+  echo "!!! Only 64-bit architecures supported." >&2
+  echo "!!! (Only 512 fibers allowed in 32-bit architectures.)" >&2
+  exit 2
+fi
+
+case $ACTION in
+
+  help|--help|-h)
+    PATH="$PATH:$THIS_DIR/../my_zsh/bin"
+    my_zsh print-help $0 "$@"
+    sh_color BOLD  " {{OTHER}}:"
+    sh_color GREEN "   {{my_crystal}} bump major|minor|patch"
+    sh_color GREEN "   {{my_crystal}} version"
+    echo
+    ;;
+
+  version)
+    cat shard.yml | grep -Po "version: \K([0-9.]+)"
+    ;;
+
+  target)
+    cat "$THIS_DIR"/configs/crystal-version
+    ;;
+
+  "shards")
+    da shards "$@"
+    ;;
+
+  "__")
+    da crystal "$@"
+    ;;
+
+  *)
+    local +x SH_FILE="$THIS_DIR/sh/${ACTION}/_"
+    if [[ -s  "$SH_FILE"  ]]; then
+      source "$SH_FILE"
+      exit 0
+    fi
+
+    # === Check tmp/bin:
+    local +x BIN_FILE="$THIS_DIR/tmp/bin/${ACTION}.sh"
+    if [[ -x "$BIN_FILE" ]]; then
+      export PATH="$THIS_DIR/tmp/bin:$PATH"
+      "$BIN_FILE" "$@"
+      exit 0
+    fi
+
+    # === Send it to the binary
+    crystal $ACTION $@
+    exit 0
+    ;;
+
+esac

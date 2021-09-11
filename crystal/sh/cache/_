@@ -1,0 +1,28 @@
+#!/usr/bin/env zsh
+#
+# === {{CMD}}
+#
+set -u -e -o pipefail
+
+local +x ORIGINAL_ARGS="$@"
+local +x ACTION=$1; shift
+
+case "$ACTION" in
+
+  clear)
+    local +x DIR="$HOME/.cache/crystal"
+    if [[ -e "$DIR" ]]; then
+      echo "=== Removing: $DIR" >&2
+      rm -rf "$DIR"
+    else
+      echo "=== Not found: $DIR" >&2
+    fi
+    ;;
+
+  *)
+    echo "!!! Unknown arguments: $ORIGINAL_ARGS" >&2
+    exit 1
+    ;;
+
+esac
+

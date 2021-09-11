@@ -13,3 +13,5 @@
 /package-lock.json
 
 /bin/faunadb
+/crystal/tmp
+/crystal/progs

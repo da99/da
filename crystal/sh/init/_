@@ -1,0 +1,59 @@
+#!/usr/bin/env zsh
+#
+#
+# === {{CMD}} lib|app
+# === Run this command AFTER creating the repo.
+
+local +x NAME="$(basename "$PWD" .cr)"
+local +x REPO_TYPE
+
+if [[ -n "$@" ]]; then
+  local +x REPO_TYPE="$1"; shift
+else
+  echo "=== lib or app? (app): " >&2
+  read -r ANS
+  case "$ANS" in
+    lib) REPO_TYPE=lib ;;
+    *) REPO_TYPE=app ;;
+  esac
+fi
+
+{
+  if [[ $REPO_TYPE == "lib" ]]; then
+    echo "/shard.lock"
+  fi
+
+  echo "/.shards/"
+  echo "/.crystal/"
+  echo "/tmp/"
+  echo "/lib/"
+} >> .gitignore
+
+local +x NEW_GITIGNORE="$(cat .gitignore | awk '!seen[$0]++' )"
+echo "$NEW_GITIGNORE" > .gitignore
+
+mkdir -p src/"$NAME" specs tmp/out
+
+
+case "$REPO_TYPE" in
+  app)
+    mkdir -p bin
+    touch bin/__.cr
+    ;;
+esac
+
+if [[ -e "shard.yml" ]]; then
+  da shards update
+else
+  {
+    echo "name: $NAME"
+    echo "version: 0.0.0"
+    echo "dependencies:"
+    echo "  da:"
+    echo "    github: da99/da"
+    echo "development_dependencies:"
+    echo "  da_spec:"
+    echo "    github: da99/da_spec"
+  } >> shard.yml
+fi
+

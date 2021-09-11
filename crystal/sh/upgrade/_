@@ -1,0 +1,16 @@
+#!/usr/bin/env zsh
+#
+# === {{CMD}} # Upgrade to latest Crystal.
+#
+set -u -e -o pipefail
+
+local +x CURRENT="$(my_crystal current)"
+local +x LATEST="$(my_crystal latest)"
+
+if [[ "$CURRENT" == "$LATEST" ]]; then
+  echo "=== Already installed latest: $LATEST" >&2
+  exit 0
+fi
+
+my_crystal install
+

@@ -1,0 +1,60 @@
+#!/usr/bin/env zsh
+#
+# === {{CMD}} (defaults to "watch")
+# === {{CMD}} watch|run|release
+#
+set -u -e -o pipefail
+
+local +x ORIGINAL_ARGS="$@"
+if [[ -z "$@" ]]; then
+  local +x ACTION=watch
+else
+  local +x ACTION=$1; shift
+fi
+
+case "$ACTION" in
+  bin)
+    local +x name="$(basename $PWD)"
+    local +x tmp=tmp/out/$name
+    mkdir -p tmp/out
+    if [[ -f bin/$name && "$(file --mime bin/$name)" == *text/plain* ]]; then
+      echo "!!! File already exists: $(file --mime bin/$name)" >&2
+      exit 1
+    fi
+    sh_color ORANGE "=== {{Compiling}}: $tmp ==="
+    my_crystal __ build $@ sh/$name -o $tmp
+    mv $tmp bin/$name
+    sh_color GREEN "=== {{DONE}}: bin/$name ==="
+    ;;
+
+  cli)
+    local +x name="$(basename $PWD)"
+    local +x tmp=tmp/out/cli
+    local +x out="bin/$name.cli"
+    sh_color ORANGE "=== {{Compiling}}: $tmp ==="
+    my_crystal __ build $@ sh/$name -o $tmp
+    mv $tmp "$out"
+    sh_color GREEN "=== {{DONE}}: $out ==="
+    ;;
+
+  run)
+    sh_color ORANGE "=== {{Compiling}}..."
+    my_crystal __ build src/my_crystal.cr -o tmp/out/my_crystal
+    sh_color ORANGE "=== {{Running}}: $(echo $@)"
+    tmp/out/my_crystal $@
+    ;;
+
+  watch)
+    mkdir -p tmp/out tmp/in
+    local +x CMD="my_crystal dev run $@"
+    $CMD || :
+    process watch "-r sh -r src -r bin" "$CMD"
+    ;;
+
+  *)
+    echo "!!! Unknown arguments: $ORIGINAL_ARGS" >&2
+    exit 1
+    ;;
+
+esac
+

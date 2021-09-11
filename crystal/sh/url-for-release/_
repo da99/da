@@ -1,0 +1,31 @@
+#!/usr/bin/env zsh
+#
+# === {{CMD}} [PATTERN]
+# === Prints the url of a Crystal release. Defaults to latest release.
+#
+set -u -e -o pipefail
+
+local +x PATTERN=""
+
+if [[ -z "$@" ]]; then
+  case "$(uname -a)" in
+    *" x86_64 GNU/Linux") PATTERN+="linux-x86_64" ;;
+    *) echo "!!! Unknown architecture: $(uname -a)" >&2; exit 5 ;;
+  esac
+else
+  PATTERN="${PATTERN}${1}"; shift
+fi
+
+local +x URL="$(
+lynx --dump "https://github.com/crystal-lang/crystal/releases/latest" \
+  | grep -P "releases/download.+$PATTERN.+" \
+  | tr -s ' ' | cut -d' ' -f3 | sort --version-sort \
+  | tail -n1
+)"
+
+if [[ -z "$URL" ]]; then
+  echo "!!! Could not find latest url for: $PATTERN" >&2
+  exit 5
+fi
+
+echo $URL

@@ -1,0 +1,106 @@
+#!/usr/bin/env zsh
+#
+
+# === {{CMD}}  --runtime
+# === {{CMD}}  # Installs latest Crystal version.
+
+get-output () {
+  "$@" 2>/dev/null || :
+}
+
+update_version () {
+  new_version=$1
+  rm -f /progs/crystal
+  set -x
+  ln -s /progs/${new_version} /progs/crystal
+  set +x
+}
+
+if [[ "$(uname -m)" != 'x86_64' ]]; then
+  echo "!!! Only 64-bit architecures supported." >&2
+  echo "   (Only 512 fibers allowed in 32-bit architectures.)" >&2
+  exit 2
+fi
+
+local +x MAIN_DIR="$THIS_DIR/tmp/crystal-versions"
+
+if [[ "$(echo $@)" == "--runtime" ]]; then
+  local +x sys_info="$(lsb_release -a -s)"
+
+  case "$sys_info" in
+    *"Void Linux"*)
+      PATH="$PATH:$THIS_DIR/../my_os/bin"
+      my_os package --install $(xbps-query -R -x crystal | sort | grep -Po "^[[:alnum:]\-\.\_\+]+" | tr '\n' ' ') \
+        lzo-devel libmcrypt-devel libgcrypt-devel \
+        libressl-devel pcre-devel pcre2-devel || :
+      ;;
+
+    *"Ubuntu"*)
+      echo "Follow instructions on https://crystal-lang.org/install/on_ubuntu/"
+      exit 2
+      ;;
+
+    *"Arch rolling"*)
+      PATH="$PATH:$THIS_DIR/../my_os/bin"
+      sudo pacman -S --needed crystal
+      ;;
+
+    *)
+      ;;
+  esac
+
+  return 0
+else
+  MAIN_DIR="/progs"
+
+  if [[ ! -d "$MAIN_DIR" ]]; then
+    echo "!!! Not a dir: $MAIN_DIR" >&2
+    exit 1
+  fi
+fi
+
+my_crystal install --runtime
+
+local +x LATEST="$(my_crystal latest)"
+local +x DIR="$MAIN_DIR/$LATEST"
+local +x CRYSTAL="$DIR/bin/crystal"
+
+if [[ -z "$LATEST" ]]; then
+  echo "!!! Could not determine latest Crystal download on the Internet." >&2
+  exit 1
+fi
+
+my_crystal cache clear
+
+if [[ -x "$CRYSTAL" ]]; then
+  echo "=== Already installed: $LATEST" >&2
+  update_version "$LATEST"
+  "$CRYSTAL" --version
+  which crystal
+  return 0
+fi
+
+mkdir -p "$(dirname "$DIR")"
+
+local +x TMP_FILE="$(my_crystal download $LATEST)"
+if [[ -z "$TMP_FILE" ]]; then
+  exit 5
+fi
+
+local +x TMP_DIR="$(mktemp -d)"
+mkdir -p "$TMP_DIR"
+cd "$TMP_DIR"
+tar -zxf "$TMP_FILE"
+
+mv crystal-* "$DIR"
+cd "$THIS_DIR"
+rm -rf "$TMP_DIR"
+
+echo "=== Installed Crystal:" >&2
+"$CRYSTAL" --version
+echo "" >&2
+
+update_version "$LATEST"
+
+
+

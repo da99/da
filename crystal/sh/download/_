@@ -1,0 +1,21 @@
+#!/usr/bin/env zsh
+#
+# === {{CMD}} [PATTERN]
+#
+set -u -e -o pipefail
+
+case "$(echo $@)" in
+  "") local +x URL="$(my_crystal url-for-release latest)" ;;
+  *) local +x URL="$(my_crystal url-for-release $@)" ;;
+esac
+
+local +x FILE_NAME="$(basename "$URL")"
+local +x CACHE_FILE="$THIS_DIR/tmp/download-cache/$(basename "$URL")"
+
+mkdir -p "$(dirname "$CACHE_FILE")"
+
+if [[ ! -f "$CACHE_FILE" ]]; then
+  wget "$URL" --output-document="$CACHE_FILE" >&2
+fi
+
+echo "$CACHE_FILE"

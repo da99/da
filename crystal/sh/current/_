@@ -1,0 +1,8 @@
+#!/usr/bin/env zsh
+#
+# === {{CMD}}  # Print the currently installed Crystal.
+#
+set -u -e -o pipefail
+
+echo $CRYSTAL_VERSION
+

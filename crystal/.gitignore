@@ -1,0 +1,6 @@
+/progs/
+/tmp/
+/.shards/
+/shard.lock
+/.crystal/
+/lib
