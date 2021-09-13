@@ -258,7 +258,6 @@ DA::CLI.parse do |o|
         exit 0
       end
     }
-    DA.green! "All repos {{clean}}."
   }
 
   o.desc "gitignore"
