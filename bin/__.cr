@@ -243,10 +243,15 @@ DA::CLI.parse do |o|
   o.desc "next dirty repo [directory]? [directory]? ..."
   o.run_if(full_cmd[/^next dirty repo/]?) {
     repo = DA::Git::Repo.new(Dir.current)
-    repos = [repo.parent_dir].concat(ARGV[3..-1]).
-      uniq.
-      map { |dir| DA::Git::Repos.new(dir).repos }.
-      flatten
+    repos = ARGV[3..-1].map { |dir|
+      raise("!!! Directory does not exist: #{dir}") unless Dir.exists?(dir)
+      if DA::Git.repo?(dir)
+        DA::Git::Repo.new(dir)
+      else
+        DA::Git::Repos.new(dir).repos
+      end
+    }.compact.flatten
+
     DA.round_about(repos, ->(r : DA::Git::Repo) { r.dir == repo.dir }) { |r|
       if r.dirty?
         puts r.dir

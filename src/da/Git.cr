@@ -69,6 +69,12 @@ module DA
       DA::Process.new("git rev-parse --is-inside-work-tree").success?
     end
 
+    def repo?(x : String)
+      Dir.cd(x) {
+        DA::Process.new("git rev-parse --is-inside-work-tree").success?
+      }
+    end
+
     def ahead_of_remote?
       p = DA::Process.new("git status --branch --porcelain")
       p.success? && p.output.to_s[/\[\w+ [0-9]+\]/]?
