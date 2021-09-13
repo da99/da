@@ -120,6 +120,7 @@ module DA
       app_dir = Dir.current
       file_path = File.expand_path(raw_path)
       Dir.cd da_dir
+      `mkdir -p "#{File.join da_dir, "tmp/out"}"`
       new_file = "tmp/out/#{app_dir.gsub('/', "__")}.sh"
 
       File.write(new_file, %<
