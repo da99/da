@@ -99,6 +99,44 @@ DA::CLI.parse do |o|
     end
   }
 
+  o.desc %{ reload running process }
+  o.run_if(full_cmd == "reload running process") {
+    DA::Process::Inherit.new(["pkill", "-USR1", "-f", "^da keep running"])
+  } # run_if
+
+  o.desc %{ keep running cmd -with args }
+  o.run_if(full_cmd[/^keep running .+/]?) {
+    DA.orange! "=== \{\{Main process}}: #{Process.pid}"
+    cmd = ARGV[2]
+    args = ARGV[3..-1]
+    pid = nil
+    keep_running = true
+    Signal::USR1.trap do
+      case
+      when pid.is_a?(Int64) && Process.exists?(pid.not_nil!)
+        DA.orange! "--- Sending INT to: \{\{#{pid}}}"
+        Process.signal(Signal::INT, pid.not_nil!)
+      else
+        puts "=== No process found."
+      end
+    end # trap
+
+    while keep_running
+      DA.orange! "=== {{Running}}: #{cmd} #{args.map(&.inspect).join ' '}"
+      p = ::Process.new(
+        cmd, args,
+        output: ::Process::Redirect::Inherit,
+        error: ::Process::Redirect::Inherit,
+        input: ::Process::Redirect::Inherit
+      )
+      pid = p.pid
+      DA.orange! "=== \{\{Current pid}}: #{pid}"
+      p.wait
+      puts "=== Process ended: #{pid}\n"
+      sleep 1.second
+    end
+  } # run_if
+
   o.desc "run max [seconds] cmd -with args"
   o.run_if(full_cmd[/^run max \d+ .+/]?) {
     max = (ARGV[2].to_i32 * 10)
