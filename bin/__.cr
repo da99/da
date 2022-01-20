@@ -106,6 +106,7 @@ DA::CLI.parse do |o|
 
   o.desc %{ keep running cmd -with args }
   o.run_if(full_cmd[/^keep running .+/]?) {
+    raise "!!! Only run this on an interactive terminal." unless STDERR.tty?
     DA.orange! "=== \{\{Main process}}: #{Process.pid}"
     cmd = ARGV[2]
     args = ARGV[3..-1]
