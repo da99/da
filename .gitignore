@@ -4,14 +4,11 @@
 /.crystal/
 /progs/
 /tmp/
-/.shards/
 /lib/
+
 /bin/da
 /bin/my
-/node_modules/
 
+/node_modules/
 /package-lock.json
 
-/bin/faunadb
-/crystal/tmp
-/crystal/progs
