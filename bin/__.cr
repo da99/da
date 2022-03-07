@@ -99,17 +99,17 @@ DA::CLI.parse do |o|
     end
   }
 
-  o.desc %{ reload running process }
-  o.run_if(full_cmd == "reload running process") {
+  o.desc %{ reload keep-alive }
+  o.run_if(full_cmd == "reload keep-alive") {
     DA::Process::Inherit.new(["pkill", "-USR1", "-f", "^da keep running"])
   } # run_if
 
-  o.desc %{ keep running cmd -with args }
-  o.run_if(full_cmd[/^keep running .+/]?) {
+  o.desc %{ keep-alive cmd -with args }
+  o.run_if(full_cmd[/^keep-alive .+/]?) {
     raise "!!! Only run this on an interactive terminal." unless STDERR.tty?
     DA.orange! "=== \{\{Main process}}: #{Process.pid}"
-    cmd = ARGV[2]
-    args = ARGV[3..-1]
+    cmd = ARGV[1]
+    args = ARGV[2..-1]
     pid = nil
     keep_running = true
     Signal::USR1.trap do

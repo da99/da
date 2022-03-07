@@ -6,8 +6,8 @@
   "type": "module",
   "main": "dist/src/",
   "scripts": {
-    "test": "sh/test",
-    "build": "sh/build"
+    "test": "dev/specs/_ run",
+    "build": "dev/build"
   },
   "dependencies": {
     "@cloudflare/workers-types": "*",
