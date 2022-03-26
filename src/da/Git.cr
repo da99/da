@@ -19,14 +19,16 @@ module DA
 
     configured = nil
     repos.each { |repo|
-      DA.orange! "=== {{#{repo}}} ==="
+      DA.orange! "=== {\{#{repo}}} ==="
 
-      if DA::Process.new("git remote show #{repo}").out_err[/configured.+git push/i]?
+      out_err = DA::Process.new("git remote show -n #{repo}").out_err
+      if out_err[/Remote branch: \(status not queried\)/i]?
         configured = true
       end
 
       if repo == "origin" && !configured
-        DA::Process::Inherit.new("git push -u #{repo} main").success!
+        branch = DA::Process.new("git branch --show-current").out_err.strip
+        DA::Process::Inherit.new("git push -u #{repo} #{branch}").success!
       else
         DA::Process::Inherit.new("git push #{repo}").success!
       end
