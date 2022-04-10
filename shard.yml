@@ -6,6 +6,3 @@ crystal: ">= 1.0.0"
 targets:
   da:
     main: bin/__.cr
-  my:
-    main: bin/my.cr
-
