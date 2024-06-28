@@ -5,14 +5,7 @@ set -u -e -o pipefail
 
 
 case "$*" in
-  '-h'|'--help'|'help') # doc - Show this message.
-    echo "$0 -h|--help|help -- Show this message."
-    echo "$0 bold|italics ..."
-    echo "$0 red|blue|green|white ..."
-    echo
-    exit 0
-    ;;
-  'help intro line') # doc
+  'help intro line')
     echo "Format strings: bold|red|... content string ..."
     exit 0
     ;;

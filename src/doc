@@ -8,15 +8,22 @@ prog = __FILE__.split('/').last
 case cmd
 when '-h', '--help', 'help'
   puts "#{prog} -h|--help|help  --  Show this message."
+  exit 0
 
 when 'help intro line'
   puts 'Extract documentation from a file.'
+  exit 0
+end
 
-when /shell .+/
+ftype = `file --mime "#{main_cmd}"`
+case ftype
+when /shellscript/
   contents = File.read(ARGV.last)
   previous = nil
+  sub_cmd = File.basename(ARGV.last.sub('/main', ''))
+  puts "da #{sub_cmd} -h|--help|help - Show this message."
   contents.each_line do |line|
-    new_line = (previous) ? "\n" : ''
+    new_line = (previous) ? "\nda #{sub_cmd} " : "da #{sub_cmd} "
     raw_txt, doc = line.split(/\)\ +#\ +doc(\ +.+|$)/)
     next unless doc
     txt = raw_txt.strip.gsub(/['"]/, '')
@@ -38,6 +45,6 @@ when /shell .+/
   print "\n"
   STDOUT.flush
 else
-  warn "!!! Unknown command: #{ENV['DA_CMD']} #{cmd}"
-  exit 1
+  warn "!!! Unknown file type: #{ENV['DA_CMD']} #{cmd}"
+  exit 2
 end # case

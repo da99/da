@@ -82,15 +82,19 @@ case "$*" in
     ;;
 
   "help "*)
-    cmd="$(da cmd-file "$*")"
-    if test -z "$cmd" ; then
-      exit 2
-    fi
-    case "$(file --mime "$cmd")" in
+    shift
+    cmd="$(get-cmd-file "$*")"
+    # if test -z "$cmd" ; then
+    #   exit 2
+    # fi
+    cd "$DA_DIR"/src
+    ftype="$(file --mime "$cmd")"
+    case "$ftype" in
       *'shellscript'*)
+        da doc "$cmd"
         ;;
       *)
-        "$cmd" --help
+        "$DA_NAME" "$cmd" --help
         ;;
     esac
     ;;
@@ -102,22 +106,36 @@ case "$*" in
     export MAIN_CMD;
     shift
 
+    target=""
     AS_FILE="$DA_DIR/src/$MAIN_CMD"
     if test -f "$AS_FILE" ; then
-      exec "$AS_FILE" "$@"
+      target="$AS_FILE"
+    else
+      AS_MAIN="$DA_DIR/src/$MAIN_CMD/main"
+      if test -f "$AS_MAIN" ; then
+        target="$AS_MAIN"
+      else
+        AS_APP="/apps/$MAIN_CMD/bin/$MAIN_CMD"
+        if test -f "$AS_APP" ; then
+          target="$AS_APP"
+        fi
+      fi
     fi
 
-    AS_MAIN="$DA_DIR/src/$MAIN_CMD/main"
-    if test -f "$AS_MAIN" ; then
-      exec "$AS_MAIN" "$@"
+    if test -z "$target" ; then
+      echo "!!! Unknown command: $*" >&2
+      exit 1
     fi
 
-    AS_APP="/apps/$MAIN_CMD/bin/$MAIN_CMD"
-    if test -f "$AS_APP" ; then
-      exec "$AS_APP" "$@"
-    fi
+    case "$@" in
+      -h|--help|help)
+        "$target" help intro line 2>/dev/null || :
+        da doc "$target"
+        ;;
+      *)
+        exec "$target" "$@"
+        ;;
+    esac
 
-    echo "!!! Unknown command: $*" >&2
-    exit 1
     ;;
 esac
