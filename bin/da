@@ -16,22 +16,35 @@ set -u -e -o pipefail
 #   da new .sh|bash ...
 #
 #   da --help|help www
+DA_BIN="$(dirname "$0")"
+DA_DIR="$(dirname "$DA_BIN")"
+DA_NAME="$(basename "$0")"
+MAIN_CMD="$1"
+DA_CMD="$DA_NAME $MAIN_CMD"
 
 case "$1" in
   "-h"|"--help"|"help")
-    echo "$0 -h|--help|help -- Show this message."
-    echo
+    echo "$DA_NAME -h|--help|help -- Show this message."
+    cd "$DA_DIR"/src
+    while read -r raw_thing ; do
+      thing="$(basename "$raw_thing")"
+      if test -f "$raw_thing"; then
+        echo "$DA_NAME $thing"
+        continue
+      fi
+      if test -d "$thing" && test -e "$thing"/main; then
+        echo "$DA_NAME $thing"
+        continue
+      fi
+    done < <(find . -maxdepth 1 -mindepth 1 | sort)
     ;;
+
   *)
-    DA_SCRIPT="$0"
-    DA_SCRIPT_NAME="$(basename "$DA_SCRIPT")"
-    DA_BIN="$(dirname "$0")"
-    DA_DIR="$(dirname "$DA_BIN")"
     MAIN_CMD="$1"
-    export DA_SCRIPT;
-    export DA_SCRIPT_NAME;
+    DA_CMD="$(basename "$0") $MAIN_CMD"
     export DA_BIN;
     export DA_DIR;
+    export DA_CMD;
     export MAIN_CMD;
     shift
 

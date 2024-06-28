@@ -7,6 +7,13 @@ THIS_DIR="$PWD"
 
 
 case "$@" in
+  -h|help|--help)
+    echo "--------------------------------------"
+    echo "-- Use mise instead of this script."
+    echo "--------------------------------------"
+    echo "$DA_CMD latest|install"
+    ;;
+
   "latest")
     url="https://github.com/crystal-lang/crystal/releases"
     href="$(curl --silent -L $url | grep -Po '/.+releases/download/.+linux-x86_64.+.gz' | head -n 1)"
@@ -28,23 +35,23 @@ case "$@" in
     mkdir -p /progs/crystal
     cd /progs/crystal
 
-    latest="$($THIS_DIR/sh/crystal latest)"
-    dirname="$(basename $latest -linux-x86_64.tar.gz)"
+    latest="$("$THIS_DIR/sh/crystal" latest)"
+    dirname="$(basename "$latest" -linux-x86_64.tar.gz)"
 
     if ! test -d "$dirname" ; then
       # rm -f "$basename"
       wget --continue "$latest"
-      tar xvzf "$(basename $latest)"
+      tar xvzf "$(basename "$latest")"
       rm -f "current"
       ln -s "$dirname" "current"
-      rm "$(basename $latest)"
+      rm "$(basename "$latest")"
     fi
 
     current/bin/crystal --version
     ;;
 
   *)
-    echo "!!! Unknown arguments: $@"
+    echo "!!! Unknown arguments: $*"
     exit 1
     ;;
 esac
