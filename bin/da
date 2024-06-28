@@ -24,6 +24,11 @@ DA_CMD="$DA_NAME $MAIN_CMD"
 
 case "$1" in
   "-h"|"--help"|"help")
+    shift
+    if ! test -z "$*" ; then
+      $DA_CMD | grep "$*"
+      exit 0
+    fi
     echo "$DA_NAME -h|--help|help -- Show this message."
     cd "$DA_DIR"/src
     while read -r raw_thing ; do
@@ -40,8 +45,6 @@ case "$1" in
     ;;
 
   *)
-    MAIN_CMD="$1"
-    DA_CMD="$(basename "$0") $MAIN_CMD"
     export DA_BIN;
     export DA_DIR;
     export DA_CMD;
@@ -53,15 +56,9 @@ case "$1" in
       exec "$AS_FILE" "$@"
     fi
 
-    AS_SH="$DA_DIR/src/${MAIN_CMD}.sh"
-    if test -f "$AS_SH" ; then
-      export DA_DIR;
-      exec "$AS_SH" "$@"
-    fi
-
-    AS_DIR="$DA_DIR/$MAIN_CMD/main"
-    if test -f "$AS_DIR" ; then
-      exec "$AS_DIR" "$@"
+    AS_MAIN="$DA_DIR/src/$MAIN_CMD/main"
+    if test -f "$AS_MAIN" ; then
+      exec "$AS_MAIN" "$@"
     fi
 
     AS_APP="/apps/$MAIN_CMD/bin/$MAIN_CMD"
