@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+#
+#
+set -u -e -o pipefail
+
+# Examples:
+#   da www --help
+#   da www serve static
+#
+#   da public_files --help
+#   da public_files manifest
+#
+#   da string color red ...
+#   da new fish function ...
+#   da new .rb|ruby ...
+#   da new .sh|bash ...
+#
+#   da --help|help www
+
+case "$1" in
+  "-h"|"--help"|"help")
+    echo "$0 -h|--help|help -- Show this message."
+    echo
+    ;;
+  *)
+    DA_SCRIPT="$0"
+    DA_SCRIPT_NAME="$(basename "$DA_SCRIPT")"
+    DA_BIN="$(dirname "$0")"
+    DA_DIR="$(dirname "$DA_BIN")"
+    MAIN_CMD="$1"
+    export DA_SCRIPT;
+    export DA_SCRIPT_NAME;
+    export DA_BIN;
+    export DA_DIR;
+    export MAIN_CMD;
+    shift
+
+    AS_FILE="$DA_DIR/src/$MAIN_CMD"
+    if test -f "$AS_FILE" ; then
+      exec "$AS_FILE" "$@"
+    fi
+
+    AS_SH="$DA_DIR/src/${MAIN_CMD}.sh"
+    if test -f "$AS_SH" ; then
+      export DA_DIR;
+      exec "$AS_SH" "$@"
+    fi
+
+    AS_DIR="$DA_DIR/$MAIN_CMD/main"
+    if test -f "$AS_DIR" ; then
+      exec "$AS_DIR" "$@"
+    fi
+
+    AS_APP="/apps/$MAIN_CMD/bin/$MAIN_CMD"
+    if test -f "$AS_APP" ; then
+      exec "$AS_APP" "$@"
+    fi
+
+    echo "!!! Unknown command: $*" >&2
+    exit 1
+    ;;
+esac
