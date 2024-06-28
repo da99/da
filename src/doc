@@ -1,0 +1,43 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+cmd = ARGV.join(' ')
+main_cmd = ARGV.first
+prog = __FILE__.split('/').last
+
+case cmd
+when '-h', '--help', 'help'
+  puts "#{prog} -h|--help|help  --  Show this message."
+
+when 'help intro line'
+  puts 'Extract documentation from a file.'
+
+when /shell .+/
+  contents = File.read(ARGV.last)
+  previous = nil
+  contents.each_line do |line|
+    new_line = (previous) ? "\n" : ''
+    raw_txt, doc = line.split(/\)\ +#\ +doc(\ +.+|$)/)
+    next unless doc
+    txt = raw_txt.strip.gsub(/['"]/, '')
+    case doc.strip
+    when 'or'
+      print "|#{txt}"
+    when /or(\ +.+)/
+      print "|#{txt} #{$1.strip}"
+    when ''
+      print "#{new_line}#{txt}"
+      STDOUT.flush
+    else
+      print "#{new_line}#{txt} #{doc}"
+      STDOUT.flush
+    end
+
+    previous = txt
+  end
+  print "\n"
+  STDOUT.flush
+else
+  warn "!!! Unknown command: #{ENV['DA_CMD']} #{cmd}"
+  exit 1
+end # case

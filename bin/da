@@ -22,7 +22,27 @@ DA_NAME="$(basename "$0")"
 MAIN_CMD="$1"
 DA_CMD="$DA_NAME $MAIN_CMD"
 
-case "$1" in
+get-cmd-file () {
+  cd "$DA_DIR"/src
+  thing="$*"
+  if test -f "$thing" ; then
+    echo "$thing"
+    return 0
+  fi
+  if test -d "$thing" && test -e "$thing"/main; then
+    echo "$thing"/main
+    return 0
+  fi
+  if test -d "/apps/$thing" && test -e /apps/"$thing"/bin/"$thing" ; then
+    echo "/apps/$thing/bin/$thing"
+    return 0
+  fi
+  echo "!!! File not found for: $thing" >&2
+  return 1
+}
+
+
+case "$*" in
   "-h"|"--help"|"help")
     shift
     if ! test -z "$*" ; then
@@ -32,16 +52,47 @@ case "$1" in
     echo "$DA_NAME -h|--help|help -- Show this message."
     cd "$DA_DIR"/src
     while read -r raw_thing ; do
-      thing="$(basename "$raw_thing")"
-      if test -f "$raw_thing" || { test -d "$thing" && test -e "$thing"/main; }  then
-        intro_line="$("$DA_NAME" "$thing" help intro line 2>/dev/null || : )"
-        if test -n "$intro_line" ; then
-          echo "$DA_NAME" "$(da string bold "$thing")" "$intro_line"
-        else
-          echo "$DA_NAME $thing"
-        fi
+      cmd_file="$(get-cmd-file "$(basename "$raw_thing")" 2>/dev/null || :)"
+      if test -z "$cmd_file" ; then
+        continue
+      fi
+
+      case "$cmd_file" in
+        */main)
+          thing="$(dirname "$cmd_file")"
+          ;;
+        *)
+          thing="$cmd_file"
+          ;;
+      esac
+
+      intro_line="$("$DA_NAME" "$thing" help intro line 2>/dev/null || : )"
+      if test -n "$intro_line" ; then
+        echo "$DA_NAME" "$(da string bold "$thing")" - "$intro_line"
+      else
+        echo "$DA_NAME" "$(da string bold "$thing")"
       fi
     done < <(find . -maxdepth 1 -mindepth 1 | sort)
+    ;;
+
+  "cmd-file "*)
+    cd "$DA_DIR"/src
+    shift
+    get-cmd-file "$@"
+    ;;
+
+  "help "*)
+    cmd="$(da cmd-file "$*")"
+    if test -z "$cmd" ; then
+      exit 2
+    fi
+    case "$(file --mime "$cmd")" in
+      *'shellscript'*)
+        ;;
+      *)
+        "$cmd" --help
+        ;;
+    esac
     ;;
 
   *)

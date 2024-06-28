@@ -5,50 +5,57 @@ set -u -e -o pipefail
 
 
 case "$*" in
-  "-h"|"--help"|"help")
+  '-h'|'--help'|'help') # doc - Show this message.
     echo "$0 -h|--help|help -- Show this message."
-    echo "$0 bold|italics|faint -- Show this message."
-    echo "$0 red|blue|green -- Show this message."
+    echo "$0 bold|italics ..."
+    echo "$0 red|blue|green|white ..."
     echo
     exit 0
     ;;
-  "help intro line")
+  'help intro line') # doc
     echo "Format strings: bold|red|... content string ..."
     exit 0
     ;;
 esac
 
-case "$*" in
-  'bold '*)
+case "$1" in
+  bold) # doc
     shift
     bold=$(tput bold)
     normal=$(tput sgr0)
     echo -e "$bold$*$normal"
     ;;
-  "italics "*)
+
+  italics) # doc or [content ...]
     shift
     echo -e "\e[3m$*\e[0m"
     ;;
-  "red "*)
+
+  red) # doc
     shift
     echo -e "\e[31m$*\e[0m"
     ;;
-  "green "*)
+
+  green) # doc or
     shift
     echo -e "\e[32m$*\e[0m"
     ;;
-  "yellow "*)
+
+  yellow) # doc or
     shift
     echo -e "\e[33m$*\e[0m"
     ;;
-  "blue "*)
+
+  blue) # doc or
     shift
     echo -e "\e[34m$*\e[0m"
     ;;
-  "white "*)
+
+  white) # doc or [content ...]
     shift
     echo -e "\e[37m$*\e[0m"
     ;;
+
   *)
     echo "!!! Unknown command: $*" >&2
     exit 1
