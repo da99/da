@@ -7,7 +7,8 @@ prog = __FILE__.split('/').last
 
 case cmd
 when '-h', '--help', 'help'
-  puts "#{prog} -h|--help|help  --  Show this message."
+  puts "da #{prog} -h|--help|help  --  Show this message."
+  puts "da #{prog} path/to/file    --  Extract documentation from file."
   exit 0
 
 when 'help intro line'
@@ -45,6 +46,5 @@ when /shellscript/
   print "\n"
   STDOUT.flush
 else
-  warn "!!! Unknown file type: #{ENV['DA_CMD']} #{cmd}"
-  exit 2
+  system(*ARGV, '--help')
 end # case
