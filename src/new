@@ -9,6 +9,10 @@ case "$@" in
     echo "$DA_SCRIPT_NAME $MAIN_CMD .zsh|.rb|.bash|tmp/run FILE_NAME"
     ;;
 
+  'help intro line')
+    echo "Create new files."
+    ;;
+
   ".zsh "*|".rb "*|".bash "*|"tmp/run "*)
     file_type="$1"
     new_file="$2"
