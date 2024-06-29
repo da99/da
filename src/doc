@@ -25,10 +25,11 @@ when /shellscript/
   puts "da #{sub_cmd} -h|--help|help - Show this message."
   contents.each_line do |line|
     new_line = (previous) ? "\nda #{sub_cmd} " : "da #{sub_cmd} "
-    raw_txt, doc = line.split(/(\))?\ +#\ +doc(\ +.+|$)/)
-    next unless doc
+    raw_txt, raw_doc = line.split(/(\))?\ +#\ +doc(\ +.+|$)/)
+    next unless raw_doc
+    doc = raw_doc.strip
     txt = raw_txt.strip.gsub(/['"]/, '')
-    case doc.strip
+    case doc
     when 'or'
       print "|#{txt}"
     when /or(\ +.+)/
@@ -37,7 +38,7 @@ when /shellscript/
       print "#{new_line}#{txt}"
       STDOUT.flush
     else
-      print "#{new_line}#{txt} #{doc}"
+      print "#{new_line}#{[txt,doc].join(' ').strip}"
       STDOUT.flush
     end
 
