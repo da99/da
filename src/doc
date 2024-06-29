@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require "#{ENV['DA_SRC']}/ruby_lib/shell"
+
 cmd = ARGV.join(' ')
 main_cmd = ARGV.first
 prog = __FILE__.split('/').last
@@ -21,12 +23,13 @@ case ftype
 when /shellscript/
   contents = File.read(ARGV.last)
   previous = nil
-  sub_cmd = File.basename(ARGV.last.sub('/main', ''))
+  sub_cmd = Shell::String.bold(File.basename(ARGV.last.sub('/main', '')))
   puts "da #{sub_cmd} -h|--help|help - Show this message."
   contents.each_line do |line|
     new_line = (previous) ? "\nda #{sub_cmd} " : "da #{sub_cmd} "
-    raw_txt, raw_doc = line.split(/(\))?\ +#\ +doc(\ +.+|$)/)
-    next unless raw_doc
+    results = line.split(/(\))?\ +#\ +doc(\ +.+)?$/)
+    next if results.size == 1
+    raw_txt, paren, raw_doc, __newline = results
     doc = raw_doc.strip
     txt = raw_txt.strip.gsub(/['"]/, '')
     case doc

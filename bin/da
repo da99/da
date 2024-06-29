@@ -18,6 +18,7 @@ set -u -e -o pipefail
 #   da --help|help www
 DA_BIN="$(dirname "$0")"
 DA_DIR="$(dirname "$DA_BIN")"
+DA_SRC="$DA_DIR/src"
 DA_NAME="$(basename "$0")"
 MAIN_CMD="$1"
 DA_CMD="$DA_NAME $MAIN_CMD"
@@ -102,6 +103,7 @@ case "$*" in
   *)
     export DA_BIN;
     export DA_DIR;
+    export DA_SRC;
     export DA_CMD;
     export MAIN_CMD;
     shift
