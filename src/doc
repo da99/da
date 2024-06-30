@@ -22,33 +22,41 @@ ftype = `file --mime "#{main_cmd}"`
 case ftype
 when /shellscript/
   contents = File.read(ARGV.last)
-  previous = nil
   sub_cmd = Shell::String.bold(File.basename(ARGV.last.sub('/main', '')))
-  puts "da #{sub_cmd} -h|--help|help - Show this message."
+  puts "da #{sub_cmd} -h|--help|help #{Shell::String.yellow('- Show this message.')}"
+
+  prefix = "da #{sub_cmd}"
+  previous_or = false
   contents.each_line do |line|
-    new_line = (previous) ? "\nda #{sub_cmd} " : "da #{sub_cmd} "
-    results = line.split(/(\))?\ +#\ +doc(\ +.+)?$/)
+    results = line.split(/[\)]?\ +#\ +(doc:|doc\||doc)(\ +.+)?$/)
     next if results.size == 1
-    raw_txt, paren, raw_doc, __newline = results
-    doc = raw_doc.strip
+    raw_txt, doc, raw_content = results
     txt = raw_txt.strip.gsub(/['"]/, '')
+    content = if !(raw_content || '').strip.empty?
+                Shell::String.yellow(raw_content.strip)
+              end
     case doc
-    when 'or'
-      print "|#{txt}"
-    when /or(\ +.+)/
-      print "|#{txt} #{$1.strip}"
-    when ''
-      print "#{new_line}#{txt}"
-      STDOUT.flush
+    when 'doc|'
+      if previous_or
+        print "#{txt}|"
+      else
+        print "#{prefix} #{txt}|"
+        previous_or = true
+      end
+    when 'doc:'
+      if previous_or
+        puts "#{txt} #{content}".strip
+        STDOUT.flush
+        previous_or = false
+      else
+        puts "#{prefix} #{txt} #{content}".strip
+      end
     else
-      print "#{new_line}#{[txt,doc].join(' ').strip}"
-      STDOUT.flush
+      puts "#{prefix} #{txt} #{content}".strip
+      previous_or = false
     end
 
-    previous = txt
   end
-  print "\n"
-  STDOUT.flush
 else
   system(*ARGV, '--help')
 end # case

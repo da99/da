@@ -12,39 +12,39 @@ case "$*" in
 esac
 
 case "$1" in
-  bold) # doc
+  bold) # doc|
     shift
     bold=$(tput bold)
     normal=$(tput sgr0)
     echo -e "$bold$*$normal"
     ;;
 
-  italics) # doc or [content ...]
+  italics) # doc: [content ...]
     shift
     echo -e "\e[3m$*\e[0m"
     ;;
 
-  red) # doc
+  red) # doc|
     shift
     echo -e "\e[31m$*\e[0m"
     ;;
 
-  green) # doc or
+  green) # doc|
     shift
     echo -e "\e[32m$*\e[0m"
     ;;
 
-  yellow) # doc or
+  yellow) # doc|
     shift
     echo -e "\e[33m$*\e[0m"
     ;;
 
-  blue) # doc or
+  blue) # doc|
     shift
     echo -e "\e[34m$*\e[0m"
     ;;
 
-  white) # doc or [content ...]
+  white) # doc: [content ...]
     shift
     echo -e "\e[37m$*\e[0m"
     ;;
