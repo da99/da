@@ -134,6 +134,9 @@ case "$*" in
         "$target" help intro line 2>/dev/null || :
         da doc "$target"
         ;;
+      README)
+        bat "$(dirname "$target")"/README.md
+        ;;
       *)
         exec "$target" "$@"
         ;;

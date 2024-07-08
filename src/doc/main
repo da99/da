@@ -26,34 +26,21 @@ when /shellscript/
   puts "da #{sub_cmd} -h|--help|help #{Shell::String.yellow('- Show this message.')}"
 
   prefix = "da #{sub_cmd}"
-  previous_or = false
   contents.each_line do |line|
-    results = line.split(/[\)]?\ +#\ +(doc:|doc\||doc)(\ +.+)?$/)
+    results = line.split(/[\)]?\ +#\ +(doc\+|doc:||doc)(\ +.+)?$/)
     next if results.size == 1
     raw_txt, doc, raw_content = results
     txt = raw_txt.strip.gsub(/['"]/, '')
-    content = if !(raw_content || '').strip.empty?
-                Shell::String.yellow(raw_content.strip)
-              end
+    content = Shell::String.format_command_comment(raw_content || '')
+
     case doc
-    when 'doc|'
-      if previous_or
-        print "#{txt}|"
-      else
-        print "#{prefix} #{txt}|"
-        previous_or = true
-      end
-    when 'doc:'
-      if previous_or
-        puts "#{txt} #{content}".strip
-        STDOUT.flush
-        previous_or = false
-      else
-        puts "#{prefix} #{txt} #{content}".strip
-      end
+    when 'doc'
+      puts "#{prefix} #{txt}".strip
+    when 'doc+'
+      puts "#{prefix} #{Shell::String.remove_trailing_asterisk(txt)} #{content}".strip
+      previous_or = false
     else
       puts "#{prefix} #{txt} #{content}".strip
-      previous_or = false
     end
 
   end

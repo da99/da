@@ -32,5 +32,22 @@ module Shell
       return "\e[37m#{content}\e[0m"
     end
 
+    def remove_trailing_asterisk(raw)
+      raw.strip.sub(/\ +\*\ */, '')
+    end
+
+    def format_command_comment(raw)
+      content = raw.strip
+
+      return content if content.empty?
+      return Shell::String.yellow(raw.strip) if content[/^-\ +/]
+
+      pieces = content.split('-')
+      prefix = pieces.shift.strip
+      return prefix if pieces.empty?
+
+      "#{prefix} #{Shell::String.yellow('-' + pieces.join('-'))}"
+    end
+
   end # module
 end # module
