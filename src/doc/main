@@ -5,12 +5,12 @@ require "#{ENV['DA_SRC']}/ruby_lib/shell"
 
 cmd = ARGV.join(' ')
 main_cmd = ARGV.first
-prog = __FILE__.split('/').last
+prog = __FILE__.split('/')[-2]
 
 case cmd
 when '-h', '--help', 'help'
-  puts "da #{prog} -h|--help|help  --  Show this message."
-  puts "da #{prog} path/to/file    --  Extract documentation from file."
+  puts "da #{Shell::String.bold prog} -h|--help|help  --  Show this message."
+  puts "da #{Shell::String.bold prog} path/to/file    --  Extract documentation from file."
   exit 0
 
 when 'help intro line'
@@ -22,10 +22,10 @@ ftype = `file --mime "#{main_cmd}"`
 case ftype
 when /shellscript/
   contents = File.read(ARGV.last)
-  sub_cmd = Shell::String.bold(File.basename(ARGV.last.sub('/main', '')))
-  puts "da #{sub_cmd} -h|--help|help #{Shell::String.yellow('- Show this message.')}"
+  sub_cmd = Shell::String.bold(File.basename(ARGV.last.sub(/\/main$/, '')))
+  puts "#{sub_cmd} -h|--help|help #{Shell::String.yellow('- Show this message.')}"
 
-  prefix = "da #{sub_cmd}"
+  prefix = "#{sub_cmd}"
   contents.each_line do |line|
     results = line.split(/[\)]?\ +#\ +(doc\+|doc:||doc)(\ +.+)?$/)
     next if results.size == 1
