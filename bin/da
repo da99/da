@@ -18,6 +18,7 @@ set -u -e -o pipefail
 #   da --help|help www
 DA_BIN="$(dirname "$0")"
 DA_DIR="$(dirname "$DA_BIN")"
+DA_APPS="$(dirname "$DA_DIR")"
 DA_SRC="$DA_DIR/src"
 DA_NAME="$(basename "$0")"
 MAIN_CMD="$1"
@@ -40,8 +41,58 @@ get-cmd-file () {
   fi
   echo "!!! File not found for: $thing" >&2
   return 1
-}
+} # function
 
+route_cmd () {
+  first_cmd="$1"
+  second_cmd="${2:-}"
+  third_cmd="${3:-}"
+
+  if test -n "$third_cmd" ; then
+    cmd_bin="$DA_APPS/$first_cmd/src/$second_cmd/$third_cmd/main"
+    if test -e "$cmd_bin" ; then
+      shift; shift; shift
+      exec "$cmd_bin" "$@"
+    fi
+
+    cmd_bin="$DA_APPS/$first_cmd/src/$second_cmd/$third_cmd"
+    if test -e "$cmd_bin" ; then
+      shift; shift; shift
+      exec "$cmd_bin" "$@"
+    fi
+  fi
+
+  if test -n "$second_cmd"; then
+    cmd_bin="$DA_APPS/$first_cmd/src/$second_cmd/main"
+    if test -e "$cmd_bin" ; then
+      shift; shift; shift
+      exec "$cmd_bin" "$@"
+    fi
+    cmd_bin="$DA_APPS/$first_cmd/src/$second_cmd"
+    if test -e "$cmd_bin" ; then
+      shift; shift
+      exec "$cmd_bin" "$@"
+    fi
+  fi
+
+  shift
+  cmd_bin="$DA_APPS/$first_cmd/bin/$first_cmd"
+  if test -e "$cmd_bin" ; then
+    exec "$cmd_bin" "$@"
+  fi
+
+  cmd_bin="$DA_APPS/$first_cmd/src/$first_cmd/main"
+  if test -e "$cmd_bin" ; then
+    exec "$cmd_bin" "$@"
+  fi
+
+  cmd_bin="$DA_APPS/$first_cmd/src/$first_cmd"
+  if test -e "$cmd_bin" ; then
+    exec "$cmd_bin" "$@"
+  fi
+
+  "$first_cmd" "$@"
+} # function
 
 case "$*" in
   "-h"|"--help"|"help")
@@ -74,6 +125,11 @@ case "$*" in
         echo "$DA_NAME" "$(da string bold "$thing")"
       fi
     done < <(find . -maxdepth 1 -mindepth 1 | sort)
+    ;;
+
+  "route "*)
+    shift
+    route_cmd "$@"
     ;;
 
   "cmd-file "*)
