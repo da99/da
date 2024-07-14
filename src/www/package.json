@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "latest",
+    "chai": "latest",
+    "lodash": "latest",
+    "mocha": "latest",
+    "hono": "latest"
+  }
+}

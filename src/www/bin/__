@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+#
+#
+set -u -e -o pipefail
+
+
+case "$*" in
+  "-h"|"--help"|"help")
+    echo "$0 -h|--help|help -- Show this message."
+    echo "$0 build"
+    echo "$0 build test"
+    echo "$0 serve test"
+    echo
+    ;;
+
+  "build")
+    cd "$(dirname "$(realpath "$0")")"/..
+    echo "=== $PWD"
+    set -x
+    rm -rf build
+    mkdir build
+    bun build --target browser src/html.mts --outfile build/html.mjs
+    set +x
+    tree build
+    ;;
+
+  "build test")
+    set -x
+    rm -rf build
+    mkdir build
+    bun build --target browser spec/test.js --outdir build
+    ;;
+  "serve test")
+    set -x
+    bun run --hot spec/serve.js
+    ;;
+  *)
+    echo "!!! Unknown command: $*" >&2
+    exit 1
+    ;;
+esac

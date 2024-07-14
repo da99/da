@@ -1,0 +1,153 @@
+
+external Error, arguments;
+import DA_STANDARD.SPECS;
+import DA_STANDARD.OBJECT;
+import DA_STANDARD.COMMON;
+import System;
+
+// === TEMPLATEs in DA_STANDARD are inspired by Mustache.
+// === * No partials are included. (This should be taken care of
+// ===   by the scripting lang. used to generate the templates.
+// === * By default, the values are included AS IS, no escaping.
+// ===   Escaping should be done by the server passing the info.
+// ===   to the browser/client.
+module DA_STANDARD.TEMPLATE {
+
+  class ALLOWED {
+    public static string[] chars = [
+      escape_char('&'), escape_char('<'), escape_char('>')
+    ];
+  }
+
+  class PATTERN {
+    public static RegExp replace = new RegExp( '(?:' + ALLOWED.chars.join('|') + ')', 'g');
+  }
+
+  void unescape_specs() {
+    string s = "&#x3c;p id=\"main\" class=\"red hot\"&#x3e;&#x26;#x22;&#x26;#x27;hello&#x26;#x27;&#x26;#x22;&#x3c;/p&#x3e;";
+    should_eq('<p id="main" class="red hot">&#x22;&#x27;hello&#x27;&#x22;</p>', TEMPLATE.unescape(s));
+  }
+
+  string escape_char(string x) {
+    switch (x) {
+      case '&' : return "&#x26;";
+      case '<' : return "&#x3c;";
+      case '>' : return "&#x3e;";
+      case '"' : return "&#x22;";
+      case "'" : return "&#x27;";
+      case '`' : return "&#x60;";
+      case '{' : return "&#x7b;";
+      case '}' : return "&#x7d;";
+      default: throw new Error("Unknown string to escape for Template");
+    }
+  }
+
+  string unescape_string(string s) {
+    switch (s) {
+      case "&#x26;" : return '&';
+      case "&#x3c;" : return '<';
+      case "&#x3e;" : return '>';
+      /* case "&#x22;" : return '"'; */
+      /* case "&#x27;" : return "'"; */
+      /* case "&#x60;" : return '`'; */
+      /* case "&#x7b;" : return '{'; */
+      /* case "&#x7d;" : return '}'; */
+      default: throw new Error("Unknown string to unescape for Template");
+    }
+  }
+
+  string unescape(string source) {
+    return source.replace(TEMPLATE.PATTERN.replace, unescape_string);
+  }
+
+  void template_render_specs() {
+    string str = "a {{abc}} {{unknown}} b {{# arr }} {{a}}->{{abc}} {{/arr}} {{#o}} {{inner}} {{/o}}";
+    var o      = {a: "default", abc: " A-B-C ", arr: [{a: "a"},{a: "b"},{a: "c"}], o: {inner: "inside"}, name: " BWC "};
+    should_eq(
+        "a  A-B-C  {{unknown}} b  a-> A-B-C   b-> A-B-C   c-> A-B-C    inside ",
+        TEMPLATE.render(str, o)
+    );
+
+    should_eq( " No name here. ", TEMPLATE.render("{{^name}} No name here. {{/name}}", {name: false}));
+    should_eq( " No names. ", TEMPLATE.render("{{^names}} No names. {{/names}}", {names: []}));
+    should_eq( " COMMENT: one line", TEMPLATE.render(" COMMENT: one line{{! This is nice. }}", {names: []}));
+
+  } // === template_render_specs
+
+  string render(string raw, obj) {
+    return render_var(
+        render_iter(
+          remove_comment(raw),
+          obj),
+        obj
+        );
+  }
+
+  string remove_comment(string raw) {
+    return raw.replace(/\{\{\!([^\{]+)\}\}/g, "");
+  }
+
+  string render_var(string raw, obj) {
+    return raw.replace(/\{\{([\!])?\ *([a-zA-Z0-9\_]+)\ *\}\}/g, string (string matched) {
+      string modifier = arguments[1];
+      string key      = arguments[2];
+      if (modifier == "!")
+        return "";
+      if (obj.hasOwnProperty(key)) { return("" + obj[key]); }
+        return matched;
+      });
+  }
+
+  string render_array(string partial, obj, arr) {
+    string rendered = "";
+    for (int i = 0; i < arr.length; i++) {
+      rendered += render(partial, OBJECT.assign(obj, (arr[i].constructor == {}.constructor ? arr[i] : {})));
+    }
+    return rendered;
+  }
+
+  string render_obj(string partial, o1, o2) {
+    return render(partial, OBJECT.assign(o1, o2));
+  }
+
+  string render_iter(string str, obj) {
+    return str.replace(
+        /\{\{([\#\^])\ *([^\}]+)\ *\}\}(.+)\{\{\/\ *\2\ *\}\}/g,
+        string (string matched) {
+          string s_type  = arguments[1];
+          string key     = arguments[2];
+          string partial = arguments[3];
+
+          switch (s_type) {
+            case "#":
+              if (obj.hasOwnProperty(key)) {
+                var inner_o = obj[key];
+                if (is_array(inner_o)) {
+                  return render_array(partial, obj, inner_o);
+                }
+                return render_obj(partial, obj, inner_o);
+              }
+              break;
+
+            case "!":
+              return "";
+              break;
+
+            case "^":
+              var x = obj.hasOwnProperty(key) && obj[key];
+              bool do_it = !x || (is_array(x) && x.length == 0);
+              if (do_it) {
+                return render(partial, obj);
+              }
+              break;
+
+            default:
+              throw new Error("Unknown section type: " + s_type);
+          } // === switch type
+
+          return matched;
+        }
+    );
+  } // === string render_iter
+
+} // === module TEMPLATE

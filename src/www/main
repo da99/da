@@ -1,0 +1,167 @@
+#!/usr/bin/env bash
+
+set -u -e -o pipefail
+
+THIS_DIR="$(dirname "$0")/.."
+#
+# Color_Off='\e[0m'
+# Bold="$(tput bold)"
+# Reset='\e[0m'
+# BRed='\e[1;31m'
+# Red='\e[0;31m'
+# Green='\e[0;32m'
+# BGreen='\e[1;32m'
+# Orange='\e[0;33m'
+# BOrange='\e[1;33m'
+
+ensure_build_dir() {
+  test -n "$BUILD_TARGET"
+  case "$PWD/" in
+    */build/*) : ;;
+    *)
+      echo "!!! Not in a build directory: $PWD" >&2
+      exit 1
+      ;;
+  esac
+}
+
+case "$*" in
+  --help|help|-h)
+    da doc "$0"
+  ;;
+
+  README) # doc
+    bat "$THIS_DIR/README.md"
+  ;;
+
+  "public upload") # doc
+    shift
+    test -n "$BUILD_TARGET"
+    "$THIS_DIR"/src/PublicFile.rb "$@"
+  ;;
+
+  "public upload list") # doc
+    test -n "$BUILD_TARGET"
+    shift
+    "$THIS_DIR"/src/PublicFile.rb "$@"
+  ;;
+
+  "public prune") # doc
+    test -n "$BUILD_TARGET"
+  ;;
+
+  "public prune list") # doc
+    test -n "$BUILD_TARGET"
+  ;;
+
+  "update file manifest") # doc: - Writes public_files.json
+    test -n "$BUILD_TARGET"
+    "$THIS_DIR"/src/PublicFile.rb "$@"
+  ;;
+
+  "update raw file manifest") # doc: - Writes tmp/raw_files.json
+    test -n "$BUILD_TARGET"
+    "$THIS_DIR"/src/PublicFile.rb "$@"
+  ;;
+
+  "set src to "*)
+    "$THIS_DIR"/src/PublicFile.rb "$@"
+    ;;
+
+  'build css') # doc
+    ensure_build_dir
+    while read -r LINE ; do
+      case "$LINE" in
+        *section/base/*)
+          echo "--- Skipping: $LINE"
+          ;;
+        *)
+          echo "--- Processing .css: $LINE"
+          set -x
+          bun x lightningcss --minify --bundle "$LINE" -o "$LINE".tmp
+          set +x
+          mv "$LINE".tmp "$LINE"
+          ;;
+      esac
+    done < <( find section -maxdepth 2 -mindepth 2 -type f -iname '*.css')
+    ;;
+
+  'build html') # doc
+    ensure_build_dir;
+    while read -r LINE ; do
+      new_file=${LINE/.html.mts/.html}
+      echo "--- Processing .html: $LINE"
+      bun run "$LINE" > "$new_file"
+      rm "$LINE"
+    done < <( find section -maxdepth 2 -mindepth 2 -type f -iname '*.html.mts')
+
+    while read -r LINE ; do
+      new_file=${LINE/.html.rb/.html}
+      echo "--- Processing .html: $LINE"
+      ruby "$LINE" > "$new_file"
+      rm "$LINE"
+    done < <( find section -maxdepth 2 -mindepth 2 -type f -iname '*.html.rb')
+    ;;
+
+  'build mjs') # doc
+    ensure_build_dir;
+    # "$THIS_DIR"/src/PublicFile.rb build mjs
+    set -x
+    mts_files=$( find section -maxdepth 2 -mindepth 2 -type f -iname '*.mts' -and -not -iname '*.html.mts')
+    # index_mts=$( echo public/section/**/*.html.mts )
+    bun build \
+      --target browser \
+      --outdir "$PWD"/section \
+      --splitting \
+      --chunk-naming "[dir]/lib.[name].[hash].mjs" \
+      --entry-naming "[dir]/[name].mjs" \
+      $mts_files
+    rm $mts_files
+  ;;
+
+  'list new files') # doc
+    bun run "$THIS_DIR"/src/Public_File.mts "$@"
+  ;;
+
+  'list old files') # doc
+    bun run "$THIS_DIR"/src/Public_File.mts "$@"
+  ;;
+
+  'public_file '*)
+    shift
+    bun run "$THIS_DIR"/src/Public_File.mts "$@"
+  ;;
+
+  'prune files')
+    bun run "$THIS_DIR"/src/Public_File.mts "$@"
+  ;;
+
+  'serve '*) # doc+ [PORT] [DIR] [CMD] - Run CMD and serve static file.
+    set -x
+    bun run "$THIS_DIR"/src/Bun.Serve.ts "$@"
+  ;;
+
+  'mime '*) # doc+ [FILE]
+    results="$(bun --eval "console.log(Bun.file('$2').type)")"
+    case "$results" in
+      "application/octet-stream")
+        file --mime "$2" | cut -d':' -f2- | cut -d' ' -f2-
+        ;;
+      *)
+        echo "$results"
+        ;;
+    esac
+  ;;
+
+  'modified manifest for '*) # doc+ [DIRs...] - Prints a list of files and their modified times.
+    shift; shift; shift
+    while read -r FPATH ; do
+      echo "$FPATH $(stat -c '%y' "$FPATH")"
+    done < <(find "$@" -type f | sort)
+    ;;
+  *)
+    echo "!!! Unknown command: $*" >&2
+    exit 1
+  ;;
+esac
+
