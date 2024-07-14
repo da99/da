@@ -24,7 +24,7 @@ end
 
 PREFIX_DOC = %r{^\s*(#|//)\s+doc:\s+}
 ARGV.each do |file_path|
-  intro = `"#{file_path}" help intro line`.strip
+  intro = `"#{file_path}" help intro line 2>/dev/null`.strip
   puts('-' * 70)
   puts intro unless intro.empty?
   contents = File.read(file_path)

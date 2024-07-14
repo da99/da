@@ -62,7 +62,7 @@ class PublicFile
           'Key' => new_file.public_path,
           'ETag' => new_file.etag,
           'LastModified' => new_file.created_at,
-          'mime' => `www mime '#{new_file.raw}'`.strip
+          'mime' => `da www mime '#{new_file.raw}'`.strip
         }
 
         memo[new_file.path.sub(dir, '')] = data

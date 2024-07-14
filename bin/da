@@ -51,14 +51,14 @@ route_cmd () {
     cmd_bin="$DA_SRC/$sub_cmd/$third_cmd/main"
     if test -x "$cmd_bin" ; then
       shift; shift
-      exec "$cmd_bin" "$@"
+      CMD="$DA_NAME $sub_cmd $third_cmd" exec "$cmd_bin" "$@"
     fi
   fi
 
   cmd_bin="$DA_SRC/$sub_cmd/main"
   if test -x "$cmd_bin" ; then
     shift
-    exec "$cmd_bin" "$@"
+    CMD="$DA_NAME $sub_cmd" exec "$cmd_bin" "$@"
   fi
 
   echo "!!! Command not found: $*" >&2
@@ -105,13 +105,13 @@ case "$*" in
 
     case "${2:-}" in
       -h|help|--help)
-        exec "$0" string doc "$DA_SRC/$1/main"
+        CMD="$DA_NAME $1" exec "$0" string doc "$DA_SRC/$1/main"
         ;;
       README)
         if test -e "$DA_SRC/$1/README.md" ; then
           bat "$DA_SRC/$1/README.md"
         else
-          exec "$DA_SRC/$1/main" help intro line
+          CMD="$DA_NAME $1" exec "$DA_SRC/$1/main" help intro line
         fi
         ;;
     esac
