@@ -6,17 +6,11 @@ cd "$( dirname "$(realpath "$0")" )/.."
 THIS_DIR="$PWD"
 
 case "$@" in
-  -h|help|--help)
-    echo "--------------------------------------"
-    echo "-- Use mise instead of this script."
-    echo "--------------------------------------"
-    echo "$DA_CMD latest|install"
-    ;;
-
   "help intro line")
     echo "Use mise instead of this script."
     ;;
 
+  # doc: CMD latest
   "latest")
     url="https://github.com/crystal-lang/crystal/releases"
     href="$(curl --silent -L $url | grep -Po '/.+releases/download/.+linux-x86_64.+.gz' | head -n 1)"
@@ -24,6 +18,7 @@ case "$@" in
     echo "https://github.com$href"
     ;;
 
+  # doc: CMD install
   "install")
     case "$(lsb_release -a)" in
       *Ubuntu*)

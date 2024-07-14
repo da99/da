@@ -12,34 +12,37 @@ case "$*" in
 esac
 
 case "$1" in
-  bold) # doc|
+  # doc: CMD bold|italics [string]
+  bold)
     shift
     bold=$(tput bold)
     normal=$(tput sgr0)
     echo -e "$bold$*$normal"
     ;;
 
-  italics) # doc: [content ...]
+  italics)
     shift
     echo -e "\e[3m$*\e[0m"
     ;;
+  # ==============================================
 
-  red) # doc|
+  # doc: CMD red|green|yellow|blue|white [string]
+  red)
     shift
     echo -e "\e[31m$*\e[0m"
     ;;
 
-  green) # doc|
+  green)
     shift
     echo -e "\e[32m$*\e[0m"
     ;;
 
-  yellow) # doc|
+  yellow)
     shift
     echo -e "\e[33m$*\e[0m"
     ;;
 
-  blue) # doc|
+  blue)
     shift
     echo -e "\e[34m$*\e[0m"
     ;;
@@ -47,6 +50,13 @@ case "$1" in
   white) # doc: [content ...]
     shift
     echo -e "\e[37m$*\e[0m"
+    ;;
+  # ==============================================
+
+  # doc: CMD doc [...file paths]
+  doc)
+    shift
+    "$DA_SRC"/string/doc_format.rb "$@"
     ;;
 
   *)

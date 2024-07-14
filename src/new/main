@@ -9,7 +9,7 @@ case "$@" in
     echo "Create new files."
     ;;
 
-  # doc .zsh|.rb|.bash|tmp/run [FILE]
+  # doc: CMD .zsh|.rb|.bash|tmp/run [FILE]
   ".zsh "*|".rb "*|".bash "*|"tmp/run "*)
     file_type="$1"
     new_file="$2"

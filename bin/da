@@ -44,24 +44,21 @@ get-cmd-file () {
 } # function
 
 route_cmd () {
-  first_cmd="$1"
-  second_cmd="${2:-}"
-  third_cmd="${3:-}"
+  sub_cmd="${1:-}"
+  third_cmd="${2:-}"
 
   if test -n "$third_cmd" ; then
-    cmd_bin="$DA_APPS/$first_cmd/src/$second_cmd/$third_cmd/main"
+    cmd_bin="$DA_SRC/$sub_cmd/$third_cmd/main"
     if test -x "$cmd_bin" ; then
-      shift; shift; shift
+      shift; shift
       exec "$cmd_bin" "$@"
     fi
   fi
 
-  if test -n "$second_cmd"; then
-    cmd_bin="$DA_APPS/$first_cmd/src/$second_cmd/main"
-    if test -x "$cmd_bin" ; then
-      shift; shift; shift
-      exec "$cmd_bin" "$@"
-    fi
+  cmd_bin="$DA_SRC/$sub_cmd/main"
+  if test -x "$cmd_bin" ; then
+    shift
+    exec "$cmd_bin" "$@"
   fi
 
   echo "!!! Command not found: $*" >&2
@@ -69,7 +66,12 @@ route_cmd () {
 } # function
 
 case "$*" in
-  help)
+  "help intro line")
+    :
+    ;;
+
+  -h|--help|help)
+  # doc: CMD -h|--help|help - Show this message.
     cd "$DA_DIR"
 
     export DA_BIN;
@@ -79,78 +81,19 @@ case "$*" in
     export MAIN_CMD;
     source "src/string/colors.sh"
 
+    CMD="$DA_NAME" "$DA_SRC"/string/main doc "$0"
+
     while read -r main_dir ; do
-      main_file="$main_dir/main"
-      main_no_src="${main_dir//src\/}"
-      main_cmd="${main_no_src//\// }"
-      intro_line="$("$main_file" help intro line 2>/dev/null || : )"
-      echo -n "$DA_NAME" "$cBOLD$main_cmd$sRESET"
-      if test -n "$intro_line" ; then
-        echo -n " - $intro_line"
-      fi
-      echo
-    done < <(find src -maxdepth 4 -mindepth 2 -type f -name 'main' -executable | sed s:/main:: | sort)
+      CMD="$DA_NAME $(basename "$main_dir")"
+      export CMD
+      "$DA_SRC"/string/main doc "$main_dir"/main
+    done < <(find -L src -maxdepth 4 -mindepth 2 -type f -name 'main' -executable | sed s:/main:: | sort)
     ;;
 
-  "-h"|"--help")
+  "-h "*|"help "*|"--help "*)
+    # doc: CMD -h|help|--help [search string] - Find sub-string in help messages.
     shift
-    if ! test -z "$*" ; then
-      $DA_CMD | grep "$*"
-      exit 0
-    fi
-    echo "$DA_NAME -h|--help|help -- Show this message."
-    cd "$DA_DIR"/src
-    while read -r raw_thing ; do
-      cmd_file="$(get-cmd-file "$(basename "$raw_thing")" 2>/dev/null || :)"
-      if test -z "$cmd_file" ; then
-        continue
-      fi
-
-      case "$cmd_file" in
-        */main)
-          thing="$(dirname "$cmd_file")"
-          ;;
-        *)
-          thing="$cmd_file"
-          ;;
-      esac
-
-      intro_line="$("$DA_NAME" "$thing" help intro line 2>/dev/null || : )"
-      if test -n "$intro_line" ; then
-        echo "$DA_NAME" "$(da string bold "$thing")" - "$intro_line"
-      else
-        echo "$DA_NAME" "$(da string bold "$thing")"
-      fi
-    done < <(find . -maxdepth 1 -mindepth 1 | sort)
-    ;;
-
-  "route "*) # doc
-    shift
-    route_cmd "$@"
-    ;;
-
-  "cmd-file "*)
-    cd "$DA_DIR"/src
-    shift
-    get-cmd-file "$@"
-    ;;
-
-  "help "*)
-    shift
-    cmd="$(get-cmd-file "$*")"
-    # if test -z "$cmd" ; then
-    #   exit 2
-    # fi
-    cd "$DA_DIR"/src
-    ftype="$(file --mime "$cmd")"
-    case "$ftype" in
-      *'shellscript'*)
-        da doc "$cmd"
-        ;;
-      *)
-        "$DA_NAME" "$cmd" --help
-        ;;
-    esac
+    "$0" help | grep --ignore-case "$*"
     ;;
 
   *)
@@ -159,41 +102,21 @@ case "$*" in
     export DA_SRC;
     export DA_CMD;
     export MAIN_CMD;
-    shift
 
-    target=""
-    AS_FILE="$DA_DIR/src/$MAIN_CMD"
-    if test -f "$AS_FILE" ; then
-      target="$AS_FILE"
-    else
-      AS_MAIN="$DA_DIR/src/$MAIN_CMD/main"
-      if test -f "$AS_MAIN" ; then
-        target="$AS_MAIN"
-      else
-        AS_APP="/apps/$MAIN_CMD/bin/$MAIN_CMD"
-        if test -f "$AS_APP" ; then
-          target="$AS_APP"
-        fi
-      fi
-    fi
-
-    if test -z "$target" ; then
-      echo "!!! Unknown command: $*" >&2
-      exit 1
-    fi
-
-    case "$@" in
-      -h|--help|help)
-        "$target" help intro line 2>/dev/null || :
-        da doc "$target"
+    case "${2:-}" in
+      -h|help|--help)
+        exec "$0" string doc "$DA_SRC/$1/main"
         ;;
       README)
-        bat "$(dirname "$target")"/README.md
-        ;;
-      *)
-        exec "$target" "$@"
+        if test -e "$DA_SRC/$1/README.md" ; then
+          bat "$DA_SRC/$1/README.md"
+        else
+          exec "$DA_SRC/$1/main" help intro line
+        fi
         ;;
     esac
+
+    route_cmd "$@"
 
     ;;
 esac
