@@ -10,7 +10,7 @@ case "$*" in
     echo
     ;;
   "help intro line")
-    :
+    echo "Various WWW-related helpers."
     ;;
   *)
     echo "!!! Unknown command: $*" >&2

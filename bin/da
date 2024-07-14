@@ -50,13 +50,7 @@ route_cmd () {
 
   if test -n "$third_cmd" ; then
     cmd_bin="$DA_APPS/$first_cmd/src/$second_cmd/$third_cmd/main"
-    if test -e "$cmd_bin" ; then
-      shift; shift; shift
-      exec "$cmd_bin" "$@"
-    fi
-
-    cmd_bin="$DA_APPS/$first_cmd/src/$second_cmd/$third_cmd"
-    if test -e "$cmd_bin" ; then
+    if test -x "$cmd_bin" ; then
       shift; shift; shift
       exec "$cmd_bin" "$@"
     fi
@@ -64,38 +58,41 @@ route_cmd () {
 
   if test -n "$second_cmd"; then
     cmd_bin="$DA_APPS/$first_cmd/src/$second_cmd/main"
-    if test -e "$cmd_bin" ; then
+    if test -x "$cmd_bin" ; then
       shift; shift; shift
       exec "$cmd_bin" "$@"
     fi
-    cmd_bin="$DA_APPS/$first_cmd/src/$second_cmd"
-    if test -e "$cmd_bin" ; then
-      shift; shift
-      exec "$cmd_bin" "$@"
-    fi
   fi
 
-  shift
-  cmd_bin="$DA_APPS/$first_cmd/bin/$first_cmd"
-  if test -e "$cmd_bin" ; then
-    exec "$cmd_bin" "$@"
-  fi
-
-  cmd_bin="$DA_APPS/$first_cmd/src/$first_cmd/main"
-  if test -e "$cmd_bin" ; then
-    exec "$cmd_bin" "$@"
-  fi
-
-  cmd_bin="$DA_APPS/$first_cmd/src/$first_cmd"
-  if test -e "$cmd_bin" ; then
-    exec "$cmd_bin" "$@"
-  fi
-
-  "$first_cmd" "$@"
+  echo "!!! Command not found: $*" >&2
+  exit 2
 } # function
 
 case "$*" in
-  "-h"|"--help"|"help")
+  help)
+    cd "$DA_DIR"
+
+    export DA_BIN;
+    export DA_DIR;
+    export DA_SRC;
+    export DA_CMD;
+    export MAIN_CMD;
+    source "src/string/colors.sh"
+
+    while read -r main_dir ; do
+      main_file="$main_dir/main"
+      main_no_src="${main_dir//src\/}"
+      main_cmd="${main_no_src//\// }"
+      intro_line="$("$main_file" help intro line 2>/dev/null || : )"
+      echo -n "$DA_NAME" "$cBOLD$main_cmd$sRESET"
+      if test -n "$intro_line" ; then
+        echo -n " - $intro_line"
+      fi
+      echo
+    done < <(find src -maxdepth 4 -mindepth 2 -type f -name 'main' -executable | sed s:/main:: | sort)
+    ;;
+
+  "-h"|"--help")
     shift
     if ! test -z "$*" ; then
       $DA_CMD | grep "$*"
@@ -127,7 +124,7 @@ case "$*" in
     done < <(find . -maxdepth 1 -mindepth 1 | sort)
     ;;
 
-  "route "*)
+  "route "*) # doc
     shift
     route_cmd "$@"
     ;;
