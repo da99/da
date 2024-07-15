@@ -51,14 +51,16 @@ route_cmd () {
     cmd_bin="$DA_SRC/$sub_cmd/$third_cmd/main"
     if test -x "$cmd_bin" ; then
       shift; shift
-      CMD="$DA_NAME $sub_cmd $third_cmd" exec "$cmd_bin" "$@"
+      test -n "${CMD:-}" || CMD="$DA_NAME $sub_cmd $third_cmd" :
+      CMD="${CMD}" exec "$cmd_bin" "$@"
     fi
   fi
 
   cmd_bin="$DA_SRC/$sub_cmd/main"
   if test -x "$cmd_bin" ; then
     shift
-    CMD="$DA_NAME $sub_cmd" exec "$cmd_bin" "$@"
+    test -n "${CMD:-}" || CMD="$DA_NAME $sub_cmd"
+    CMD="$CMD" exec "$cmd_bin" "$@"
   fi
 
   echo "!!! Command not found: $*" >&2
