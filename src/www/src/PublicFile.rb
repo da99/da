@@ -12,6 +12,7 @@ end
 class PublicFile
   class << self
     def add_etag_to_file_name(etag, path)
+      return path if path[%r|/lib.index.[^\.]{10,16}.mjs|]
       pieces = path.split('/')
       last = pieces.pop
       pieces.push("#{etag[0..ETAG_SIZE]}.#{last}")
