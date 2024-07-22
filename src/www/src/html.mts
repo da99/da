@@ -37,7 +37,7 @@ export interface Response_Detail {
 }
 
 const THE_BODY = document.body;
-export const IS_DEV = window.location.href.indexOf('://localhost:') > 0;
+export const IS_DEV = window.location.href.indexOf('://localhost:') > 0 || window.location.href.indexOf('://the-stage.') > 0;
 
 import { is_plain_object, SPLIT_TAG_NAME_PATTERN } from './base.mts';
 
@@ -228,7 +228,13 @@ export const template = {
       const key = e.dataset['key'];
       if (!key)
         return false;
-      e.textContent = data[key].toLocaleString();
+      const value = data[key];
+      if (!value) {
+        log(`--- Data value for, ${key}, in template, ${e.id}, not found: ${key} in ..`)
+        log(data);
+        return e;
+      }
+      e.textContent = value.toLocaleString();
       return e;
     },
 
