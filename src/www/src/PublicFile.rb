@@ -156,6 +156,17 @@ if $PROGRAM_NAME == __FILE__
   when 'upload list'
     PublicFile.upload_list.each { |lf| puts "#{lf['Origin']} => #{ENV['BUILD_TARGET']}#{lf['Key']}" }
 
+  when /upload dir (.+)/
+    build_target = ENV['BUILD_TARGET'] or raise("BUILD_TARGET not specified")
+    settings = JSON.parse(File.read('settings.json'))
+    bucket_name = settings['BUCKET_NAME']
+    dir = Regexp.last_match(1)
+    `find '#{dir}' -type f`.strip.split("\n").each do |file|
+      cmd = %Q(bun x wrangler r2 object put "#{bucket_name}/#{build_target}#{file.sub(/^build\//, '/')}" --file "#{file}" --content-type "#{`da www mime '#{file}'`.strip}")
+      puts "--- #{cmd}"
+      exit($?.exitstatus) unless system(cmd)
+    end
+
   when "upload"
     build_target = ENV['BUILD_TARGET'] or raise("BUILD_TARGET not specified")
     settings = JSON.parse(File.read('settings.json'))
