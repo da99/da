@@ -5,8 +5,9 @@
 CMD = ENV['CMD'] || ENV['DA_CMD']
 BOLD = `tput bold`
 NORMAL = `tput sgr0`
+
 def replace_cmd(str)
-  str.sub('CMD', '').strip
+  str.sub('CMD', FORMATED_CMD).strip
 end
 
 def replace_options(str)
@@ -17,12 +18,14 @@ end
 
 def format_cmd(x)
   main, *cmd = x.split(/\s+/)
-  return main if cmd.empty?
+  return "#{BOLD}#{main}#{NORMAL}" if cmd.empty?
 
-  "#{main} #{BOLD}#{cmd.join ' '}#{NORMAL}"
+  "#{BOLD}#{main}#{NORMAL}#{cmd.join ' '}"
 end
 
 PREFIX_DOC = %r{^\s*(#|//)\s+doc:\s+}
+FORMATED_CMD = format_cmd(CMD)
+
 ARGV.each do |file_path|
   intro = `"#{file_path}" help intro line 2>/dev/null`.strip
   puts('-' * 70)
@@ -31,6 +34,6 @@ ARGV.each do |file_path|
   contents.each_line do |raw_line|
     next unless raw_line.strip[PREFIX_DOC]
     line = raw_line.sub(PREFIX_DOC, '')
-    puts "#{format_cmd(CMD)} #{replace_options(replace_cmd line)}"
+    puts replace_cmd(replace_options(line))
   end
 end
