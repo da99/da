@@ -20,7 +20,7 @@ def format_cmd(x)
   main, *cmd = x.split(/\s+/)
   return "#{BOLD}#{main}#{NORMAL}" if cmd.empty?
 
-  "#{BOLD}#{main}#{NORMAL}#{cmd.join ' '}"
+  "#{BOLD}#{main}#{NORMAL} #{cmd.join ' '}"
 end
 
 PREFIX_DOC = %r{^\s*(#|//)\s+doc:\s+}
