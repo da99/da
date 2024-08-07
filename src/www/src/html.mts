@@ -399,8 +399,6 @@ export const form = {
       return false;
 
     const button = ele as HTMLButtonElement;
-    if (!button.classList.contains('submit'))
-      return false;
 
     const e_form = button.closest('form');
     if (!e_form) {
@@ -411,15 +409,14 @@ export const form = {
     ev.preventDefault();
     ev.stopPropagation();
 
-    return form.submit(e_form);
-  }, // === function
+    dom.id.upsert(e_form);
+    if (button.classList.contains('submit'))
+      return dispatch.form_submit(e_form);
+    if (button.classList.contains('cancel'))
+      return dispatch.form_cancel(e_form);
 
-  submit(e: HTMLFormElement) {
-    const form_id = dom.id.upsert(e);
-
-    http.fetch(form_id, e.getAttribute('action'), 'POST', form.data(e))
-
-    return true;
+    warn(`Unknown action for form: ${e_form.id}`);
+    return false;
   }, // === function
 
   event_allow_only_numbers(event: Event) {
@@ -470,6 +467,28 @@ export const page = {
 
 
 export const dispatch = {
+
+  form_submit(e: HTMLFormElement) {
+    const action_url = e.getAttribute('action') || '';
+    const form_id = dom.id.upsert(e);
+
+    if (action_url.indexOf('local') === 0) {
+      const data = form.data(e);
+      THE_BODY.dispatchEvent(new CustomEvent('* submit', {detail: data}));
+      THE_BODY.dispatchEvent(new CustomEvent(`${e.id} submit`, {detail: data}));
+      return true;
+    }
+
+    http.fetch(form_id, e.getAttribute('action'), 'POST', form.data(e))
+    return true;
+  },
+
+  form_cancel(e: HTMLFormElement) {
+    const data = form.data(e);
+    THE_BODY.dispatchEvent(new CustomEvent('* cancel', {detail: data}));
+    THE_BODY.dispatchEvent(new CustomEvent(`${e.id} cancel`, {detail: data}));
+    return true;
+  },
 
   request(req: Request_Origin) {
     THE_BODY.dispatchEvent(new CustomEvent('* request', {detail: req}));
@@ -591,6 +610,14 @@ export const http = {
 }; // export const
 
 export const on = {
+
+  submit(selector: string, f: (data: any) => void)  {
+    THE_BODY.addEventListener(`${selector} submit`, function (ev: Event) {
+      const cev = ev as Custom_Event_Detail<Request_Origin>;
+      f(cev.detail);
+    });
+  },
+
   request(selector: string, f: (req: Request_Origin) => void) {
     THE_BODY.addEventListener(`${selector} request`, function (ev: Event) {
       const cev = ev as Custom_Event_Detail<Request_Origin>;
