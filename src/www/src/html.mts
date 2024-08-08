@@ -359,7 +359,7 @@ export const css = {
 
 export const use = {
   default_forms() {
-    return THE_BODY.addEventListener('click', form.on_click_submit);
+    return THE_BODY.addEventListener('click', form.on_click_button);
   } // export function
 };
 
@@ -389,7 +389,7 @@ export const form = {
     return data;
   }, // export function
 
-  on_click_submit(ev: MouseEvent) {
+  on_click_button(ev: MouseEvent) {
     const ele =  ev.target && (ev.target as Element).tagName && (ev.target as Element);
 
     if (!ele)
@@ -400,8 +400,8 @@ export const form = {
 
     const button = ele as HTMLButtonElement;
 
-    const e_form = button.closest('form');
-    if (!e_form) {
+    const form = button.closest('form');
+    if (!form) {
       warn('Form not found for: ' + button.tagName);
       return false;
     }
@@ -409,13 +409,18 @@ export const form = {
     ev.preventDefault();
     ev.stopPropagation();
 
-    dom.id.upsert(e_form);
-    if (button.classList.contains('submit'))
-      return dispatch.form_submit(e_form);
-    if (button.classList.contains('cancel'))
-      return dispatch.form_cancel(e_form);
+    dom.id.upsert(form);
 
-    warn(`Unknown action for form: ${e_form.id}`);
+    if (button.classList.contains('submit'))
+      return dispatch.form.submit(form);
+
+    if (button.classList.contains('reset'))
+      return dispatch.form.reset(form);
+
+    if (button.classList.contains('cancel'))
+      return dispatch.form.cancel(form);
+
+    warn(`Unknown action for form: ${form.id}`);
     return false;
   }, // === function
 
@@ -468,26 +473,34 @@ export const page = {
 
 export const dispatch = {
 
-  form_submit(e: HTMLFormElement) {
-    const action_url = e.getAttribute('action') || '';
-    const form_id = dom.id.upsert(e);
+  form: {
+    submit(e: HTMLFormElement) {
+      const action_url = e.getAttribute('action') || '';
+      const form_id = dom.id.upsert(e);
 
-    if (action_url.indexOf('local') === 0) {
       const data = form.data(e);
       THE_BODY.dispatchEvent(new CustomEvent('* submit', {detail: data}));
       THE_BODY.dispatchEvent(new CustomEvent(`${e.id} submit`, {detail: data}));
+
+      if (action_url.indexOf('/') < 0) // then, no fetch needed.
+        return true;
+
+      return http.fetch(form_id, e.getAttribute('action'), 'POST', form.data(e));
+    },
+
+    cancel(e: HTMLFormElement) {
+      const data = form.data(e);
+      THE_BODY.dispatchEvent(new CustomEvent('* cancel', {detail: data}));
+      THE_BODY.dispatchEvent(new CustomEvent(`${e.id} cancel`, {detail: data}));
+      return true;
+    },
+
+    reset(e: HTMLFormElement) {
+      const data = form.data(e);
+      THE_BODY.dispatchEvent(new CustomEvent('* reset', {detail: data}));
+      THE_BODY.dispatchEvent(new CustomEvent(`${e.id} reset`, {detail: data}));
       return true;
     }
-
-    http.fetch(form_id, e.getAttribute('action'), 'POST', form.data(e))
-    return true;
-  },
-
-  form_cancel(e: HTMLFormElement) {
-    const data = form.data(e);
-    THE_BODY.dispatchEvent(new CustomEvent('* cancel', {detail: data}));
-    THE_BODY.dispatchEvent(new CustomEvent(`${e.id} cancel`, {detail: data}));
-    return true;
   },
 
   request(req: Request_Origin) {
