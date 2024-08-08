@@ -38,7 +38,10 @@ Bun.serve({
       },
     });
 
-    console.log(`${u.pathname} -> ${r.headers.get('Content-type')}`);
+    if (f.type.toUpperCase().indexOf('JAVASCRIPT') > 0)
+      r.headers.set('Access-Control-Allow-Origin', '*');
+
+    console.log(`${u.pathname} -> ${r.headers.get('Content-Type')}`);
     return r;
   },
 });
