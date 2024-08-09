@@ -72,8 +72,7 @@ case "$*" in
     :
     ;;
 
-  -h|--help|help)
-  # doc: CMD -h|--help|help - Show this message.
+  -h|--help|help) # doc: CMD -h|--help|help - Show this message.
     cd "$DA_DIR"
 
     export DA_BIN;

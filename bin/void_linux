@@ -1,0 +1,254 @@
+#!/usr/bin/env zsh
+#
+#
+set -u -e -o pipefail
+
+case "$@" in
+  -h|--help|help)
+    cmd="$(basename "$0")"
+    echo "  $cmd hud available packages"
+    echo "  $cmd [list|install] packages [devel]"
+    echo "  $cmd setup"
+    echo "  $cmd upgrade"
+    echo "  $cmd upgrade packages"
+    echo "  $cmd upgrade void-packages"
+    echo "     Updates /progs/void-packages"
+    echo "  $cmd cleanup"
+    echo "  $cmd sv enable|disable [name]"
+    echo "  $cmd install time"
+    echo "       Installs and activates the chrony service"
+    ;;
+
+  setup)
+    errs=""
+    if rg "options btusb enable_autosuspend=0" /etc/modprobe.d >/dev/null ; then
+      echo "--- Bluetooth auto-suspend has been disabled." >&2
+    else
+      echo "!!! Disable Bluetooth auto-suspend." >&2
+      echo "echo \"options btusb enable_autosuspend=0\" | sudo tee /etc/modprobe.d/disable_btusb-autosuspend.conf" >&2
+      errs="true"
+    fi
+
+    if grep "FastConnectable = true" /etc/bluetooth/main.conf >/dev/null; then
+      echo "--- Bluetooth FactConnectable has been enabled." >&2
+    else
+      echo "!!! Enable Bluetooth FastConnectable:" >&2
+      echo "sudoedit /etc/bluetooth/main.conf" >&2
+      errs="true"
+    fi
+
+    for x in /progs /apps ; do
+      if test -e /progs ; then
+        echo "--- Found: $x" >&2
+      else
+        echo "!!! /progs not found." >&2
+        errs="true"
+      fi
+    done
+    test -z "$errs"
+
+    void_linux sv disable agetty-tty5
+    void_linux sv disable agetty-tty6
+    void_linux sv disable dhcpcd
+    void_linux sv enable  dbus
+    void_linux sv enable  elogind
+    void_linux sv enable  NetworkManager
+    void_linux sv enable  polkitd
+    "$0" install time
+    ;;
+
+  "setup bluetooth")
+    void_linux sv enable bluetoothd
+    sudo usermod -a -G bluetooth "$USER"
+  ;;
+
+  "install time")
+    if test -e /var/service/openntpd ; then
+      echo "!!! REMOVE openntpd first." >&2
+      exit 1
+    fi
+    which chronyd || sudo xbps-install -S chrony
+    if test -e /var/service/chronyd ; then
+      echo "--- Chronyd already installed" >&2
+      exit 0;
+    fi
+    sudo ln -s /etc/sv/chronyd /var/service/
+    stat /var/service/chronyd
+    ;;
+
+  "list packages")
+    if command -v xbps-install >/dev/null; then
+      cd "$(dirname "$0")"/..
+      cat config/void.packages.txt | tr '\n' ' '
+    else
+      lsb_release -a
+      exit 1
+    fi
+    ;;
+
+  "list packages devel")
+    if command -v xbps-install >/dev/null; then
+      cd "$(dirname "$0")"/..
+      cat config/void.packages.devel.txt | tr '\n' ' '
+    else
+      lsb_release -a
+      exit 1
+    fi
+    ;;
+
+  "install packages")
+    cd "$(dirname "$0")"/..
+    set -x
+    sudo xbps-install -S $("$0" list packages | tr '\n' ' ')
+    ;;
+
+  "install packages devel")
+    cd "$(dirname "$0")"/..
+    set -x
+    sudo xbps-install -S $("$0" list packages devel | tr '\n' ' ')
+    mise use --global go@latest
+    mise use --global julia@latest
+    mise use --global perl@latest
+    mise use --global java@latest
+    mise use --global crystal@latest
+    mise use --global node@latest
+    if ! which node; then
+      mise use --global nodejs@latest
+    fi
+    if ! which ruby ; then
+      echo
+      echo
+      echo "=== This is going to take about 8 minutes..."
+      mise use --global ruby@latest
+    fi
+    ;;
+
+  "edit packages")
+    cd "$(dirname "$0")"/..
+    e config/void.packages.txt || e config/void.packages.txt
+    ;;
+
+  "list packages")
+    cd "$(dirname "$0")"/..
+    cat config/void.packages.txt | tr '\n' ' '
+    ;;
+
+  "list packages devel")
+    cd "$(dirname "$0")"/..
+    cat config/void.packages.devel.txt | tr '\n' ' '
+    ;;
+
+  "upgrade")
+    "$0" upgrade packages
+    if test -e /progs/void-packages ; then
+      "$0" upgrade void-packages
+    fi
+    if command -v mise ; then
+      mise upgrade
+    fi
+    ;;
+
+  "upgrade void-packages")
+    if ! test -e /progs/void-packages ; then
+      return 0
+    fi
+
+    cd /progs/void-packages
+    git pull
+
+    # https://github.com/void-linux/void-packages
+    # xcheckmypkgs
+    if which flatpak >/dev/null ; then
+      flatpak update
+    fi
+    set -x
+    ./xbps-src show-sys-updates
+    ./xbps-src show-local-updates
+    ./xbps-src update-check nmap
+    # ./xbps-src update-check google-chrome
+    ;;
+
+  "upgrade packages")
+    if test -e "$HOME/bin/secrets" ; then
+      chmod go-rwX "$HOME/bin/secrets"
+    fi
+
+    set -x
+    sudo xbps-install -Su || {
+      sudo xbps-install -u xbps;
+      sudo xbps-install -Su;
+    }
+    ;;
+
+  "cleanup")
+    set -x
+    sudo xbps-remove -Oo
+    xbps-remove -yO
+    sudo xbps-remove -yo
+    "$0" cleanup /boot/efi
+    ;;
+
+  "cleanup /boot/efi")
+    df_usage="$(df | grep --color=never "% /boot/efi" || : )"
+    if test -z "$df_usage" ; then
+      echo "--- Skipping cleaning /boot/efi. Not found." >&2
+      exit 0
+    fi
+    efi_usage="$(echo "$df_usage" | tr -s ' ' | cut -d' ' -f5 | tr -d '%')"
+    cd /var/log
+    if test -f Xorg.0.log.old ; then
+      sudo rm Xorg.0.log.old
+    fi
+    if test "$efi_usage" -gt 45 ; then
+      sudo vkpurge rm all
+    else
+      set +x
+      echo "--- Skipping vkpurge because /boot/efi is at ${efi_usage}% used."
+    fi
+    set +x
+    ;;
+
+  "hud available packages")
+    count="$(xbps-install -Mun | wc -l)"
+    if test "$count" = "0" ; then
+      echo
+    else
+      echo "New packages: $count"
+    fi
+    ;;
+
+  "sv enable "*)
+    cd /etc/sv
+    sv_name="$3"
+    if test -e "/var/service/$sv_name" ; then
+      echo "=== Already installed: $sv_name" >&2
+    else
+      set -x
+      if ! test -e "/etc/sv/$sv_name" ; then
+        echo "!!! Service does not exist: $sv_name" >&2
+        exit 1
+      fi
+      sudo ln -s "/etc/sv/$sv_name" /var/service/
+    fi
+    ;;
+
+  "sv disable "*)
+    sv_name="$3"
+    if test -e "/var/service/$sv_name" ; then
+      set -x
+      sudo rm "/var/service/$sv_name"
+      set +x
+    else
+      echo "==== Service already disabled: $sv_name" >&2
+      if ! test -e "/etc/sv/$sv_name" ; then
+        echo "NOTE: Service does not exist: /etc/sv/$sv_name" >&2
+      fi
+    fi
+    ;;
+
+  *)
+    echo "!!! Unknown options: $@" >&2
+    exit 1
+    ;;
+esac
+

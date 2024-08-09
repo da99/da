@@ -1,0 +1,30 @@
+#!/usr/bin/env zsh
+#
+#
+set -u -e -o pipefail
+
+case "$*" in
+  "setup") # doc: CMD setup - install common programs
+    if type xbps-install &>/dev/null ; then
+      sudo xbps-install -S neovim git htop git neovim zsh feh ruby sxhkd ripgrep \
+      NetworkManager elogind flatpak caja mise chrony
+    fi
+    if ! which deno; then
+      echo "✗ Deno missing." >&2
+    fi
+    if ! test -d "/apps" ; then
+      echo "✗ Missing /apps" >&2
+    fi
+    if ! test -d "/progs"; then
+      echo "✗ Missing /progs" >&2
+    else
+      mkdir -p /progs/tmp/nvim
+    fi
+    ;;
+
+  *)
+    echo "!!! Unknown command: $*" >&2
+    exit 1
+    ;;
+esac
+
