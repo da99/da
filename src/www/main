@@ -67,8 +67,10 @@ case "$*" in
     "$THIS_DIR"/src/PublicFile.rb "$@"
   ;;
 
-  'build file '*)
+  'build file '*) # BUILD_TARGET=... CMD build file [FILE]
     file_name="$3"
+    test -e build || { echo "!!! build dir does not exist."; exit 2; }
+
     case "$file_name" in
       *.html.rb)
         echo .html.rb
@@ -105,21 +107,28 @@ case "$*" in
     done < <( find section -maxdepth 2 -mindepth 2 -type f -iname '*.css')
     ;;
 
-  # doc: CMD build html
-  'build html') # doc
-    ensure_build_dir;
-    while read -r LINE ; do
-      new_file=${LINE/.html.mts/.html}
-      echo "--- Processing .html: $LINE"
-      bun run "$LINE" > "$new_file"
-      rm "$LINE"
-    done < <( find section -maxdepth 2 -mindepth 2 -type f -iname '*.html.mts')
-
-    while read -r LINE ; do
+  'build html'|'build html '*) # doc: CMD build html (FILE)
+    build_html_file() {
+      LINE="$1"
       new_file=${LINE/.html.rb/.html}
       echo "--- Processing .html: $LINE"
       ruby "$LINE" > "$new_file"
       rm "$LINE"
+    }
+
+    case "$@" in
+      'build html '*)
+        if ! test -e build; then
+          echo "!!! build dir does not exist." >&2
+          exit 1
+        fi
+        exit 0
+        ;;
+    esac
+
+    ensure_build_dir;
+    while read -r LINE ; do
+      build_html_file "$LINE"
     done < <( find section -maxdepth 2 -mindepth 2 -type f -iname '*.html.rb')
     ;;
 
