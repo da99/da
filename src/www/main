@@ -67,6 +67,25 @@ case "$*" in
     "$THIS_DIR"/src/PublicFile.rb "$@"
   ;;
 
+  'build file '*)
+    file_name="$3"
+    case "$file_name" in
+      *.html.rb)
+        echo .html.rb
+        ;;
+      *.css)
+        echo .css
+        ;;
+      */index.mts)
+        echo .index.mts
+        ;;
+      *)
+        echo "!!! Unknown file type: $file_name" >&2
+        exit 1
+        ;;
+    esac
+  ;;
+
   # doc: CMD build css
   'build css') # doc
     ensure_build_dir
