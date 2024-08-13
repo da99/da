@@ -16,13 +16,16 @@ THIS_DIR="$(dirname "$0")"
 
 ensure_build_dir() {
   test -n "$BUILD_TARGET"
-  case "$PWD/" in
-    */build/*) : ;;
-    *)
-      echo "!!! Not in a build directory: $PWD" >&2
-      exit 1
-      ;;
-  esac
+  if ! test -e public ; then
+    echo "!!! public directory not found." >&2
+    exit 1
+  fi
+
+  if test -e build ; then
+    return 0
+  fi
+
+  rsync -a --exclude='*.mts' --exclude='*.rb' public/* build/
 }
 
 case "$*" in
@@ -67,7 +70,12 @@ case "$*" in
     "$THIS_DIR"/src/PublicFile.rb "$@"
   ;;
 
-  'build file '*) # BUILD_TARGET=... CMD build file [FILE]
+  'build dir reset') # doc: BUILD_TARGET=... CMD build dir reset
+    rm -rf build
+    ensure_build_dir
+    ;;
+
+  'build file '*) # doc: BUILD_TARGET=... CMD build file [FILE]
     file_name="$3"
     test -e build || { echo "!!! build dir does not exist."; exit 2; }
 
@@ -108,28 +116,26 @@ case "$*" in
     ;;
 
   'build html'|'build html '*) # doc: CMD build html (FILE)
+    ensure_build_dir;
+
     build_html_file() {
-      LINE="$1"
-      new_file=${LINE/.html.rb/.html}
-      echo "--- Processing .html: $LINE"
-      ruby "$LINE" > "$new_file"
-      rm "$LINE"
+      public_file="$1"
+      new_file_ext=${public_file/.html.rb/.html}
+      build_file="${new_file_ext/public/build}"
+      echo "--- Processing .html: $build_file"
+      ruby "$public_file" > "$build_file"
     }
 
     case "$@" in
       'build html '*)
-        if ! test -e build; then
-          echo "!!! build dir does not exist." >&2
-          exit 1
-        fi
+        build_html_file "$3"
         exit 0
         ;;
     esac
 
-    ensure_build_dir;
     while read -r LINE ; do
       build_html_file "$LINE"
-    done < <( find section -maxdepth 2 -mindepth 2 -type f -iname '*.html.rb')
+    done < <( find public/section -maxdepth 2 -mindepth 2 -type f -iname '*.html.rb')
     ;;
 
   # doc: CMD build mjs - BUILD_TARGET required.
@@ -137,16 +143,17 @@ case "$*" in
     ensure_build_dir;
     # "$THIS_DIR"/src/PublicFile.rb build mjs
     set -x
-    mts_files=$( find section -maxdepth 2 -mindepth 2 -type f -iname '*.mts' -and -not -iname '*.html.mts')
+    mts_files=$( find public/section -maxdepth 2 -mindepth 2 -type f -iname '*.mts' -and -not -iname '*.html.mts')
+    test -n "$mts_files" || exit 2
     # index_mts=$( echo public/section/**/*.html.mts )
     bun build \
       --target browser \
-      --outdir "$PWD"/section \
+      --outdir "$PWD"/build/section \
       --splitting \
       --chunk-naming "[dir]/lib.[name].[hash].mjs" \
       --entry-naming "[dir]/[name].mjs" \
       $mts_files
-    rm $mts_files
+    # rm ${mts_files//public/build}
   ;;
 
   # doc: CMD list new|old files
