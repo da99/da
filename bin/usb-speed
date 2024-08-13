@@ -1,0 +1,33 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+cmd = ARGV.join(' ')
+prog = __FILE__.split('/').last
+
+case cmd
+when '-h', '--help', 'help'
+  puts "#{prog} -h|--help|help  --  Show this message."
+when ''
+  storage_adapters = `lsusb`.strip.split("\n").filter { |x| x[/PNY|Flash Drive|NVME adapter|Dockcase|JMicron.+External|SanDisk.+Ultra|JMicron .+ Storage/i] }
+
+  exit 0 if storage_adapters.empty?
+
+  id_vendors = `find /sys/devices/ -name idVendor -print -exec cat {} \\; `.strip.split
+  storage_adapters.each do |line|
+    pieces = line.split
+    id = pieces[5]
+    title = pieces[6..].join ' '
+    id1, __id2 = id.split(':')
+
+    id_vendors.each_slice(2) do |file, raw_id1|
+      next unless raw_id1 == id1
+
+      speed = File.read(file.sub('idVendor', 'speed')).strip
+      puts "#{speed} -> #{title}"
+      break
+    end
+  end
+else
+  warn "!!! Unknown command: #{cmd}"
+  exit 1
+end # case
