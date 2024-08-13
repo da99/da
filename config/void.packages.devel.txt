@@ -1,0 +1,17 @@
+git neovim zsh
+fd cmake
+fish-shell ripgrep xtools tree htop bat trash-cli
+inetutils bind-utils bmon lsof openssh
+base-devel gcc libgcc libgcc-devel make
+python3-pip rust cargo
+upower
+zip unzip exa fzf
+mise openssl-devel zlib-devel libyaml libyaml-devel gmp gmp-devel ncurses-devel libffi-devel gdbm-devel libuuid-devel
+wget curl
+xmirror lazygit
+tree-sitter tree-sitter-devel
+fuse-sshfs
+lua54 luarocks-lua54
+python3-neovim
+ruby ruby-devel
+inotify-tools

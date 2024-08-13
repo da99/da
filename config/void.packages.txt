@@ -1,0 +1,30 @@
+exa fish-shell neovim alacritty
+fzf
+jq rsync
+wget xcolor rofi bind-utils
+tree git gitk curl ripgrep tree zsh htop
+streamlink smplayer playerctl ffmpeg
+make gcc bat openssh xsel
+xdotool
+wmctrl xtitle xarchiver konsole
+pipewire pamixer libspa-bluetooth wireplumber
+network-manager-applet
+qlipper network-manager-applet pa-applet
+exfatprogs
+xorg-fonts noto-fonts-cjk noto-fonts-emoji noto-fonts-ttf noto-fonts-ttf-extra
+xdg-desktop-portal
+libX11-devel libXcursor-devel
+bluez blueman bluedevil
+gdk-pixbuf-devel gdk-pixbuf-xlib-devel pango-devel cairo-devel libgcc-devel
+atk-devel atkmm-devel gtk+3-devel
+fzf ranger trash-cli
+breeze-icons breeze-gtk breeze-cursors breeze-amber-cursor-theme
+faenza-icon-theme faience-icon-theme
+gnome-colors-icon-theme gnome-icon-theme
+gnome-icon-theme-extras gnome-icon-theme-symbolic
+gnome-icon-theme-xfce hicolor-icon-theme
+mate-icon-theme mate-icon-theme-faenza
+liberation-fonts-ttf
+gthumb xtools
+arc-theme xfce4-screenshooter
+
