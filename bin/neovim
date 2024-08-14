@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+#
+#
+set -u -e -o pipefail
+
+
+case "$*" in
+  "-h"|"--help"|"help")
+    echo "$0 -h|--help|help -- Show this message."
+    echo "$0 setup|upgrade"
+    echo "$0 edit init|bootstrap"
+    echo
+    ;;
+
+  "setup"|"upgrade")
+    void_linux install packages devel
+
+    if which gem && ! { gem list | grep neovim ; } ; then
+      gem install --user-install neovim
+    fi
+
+    if which npm && ! { npm list --global | grep neovim ; } ; then
+      if ! { npm list --global | grep neovim ; } ; then
+        npm install -g neovim
+      fi
+      if ! which vscode-html-language-server ; then
+        npm install -g vscode-langservers-extracted
+      fi
+    else
+      echo "!!! Install npm and re-run this script" >&2
+    fi
+
+
+    if ! command -v mise ; then
+      echo "!!! mise command not found."
+      exit 1
+    fi
+
+    mkdir -p /progs/tmp/nvim
+
+    if ! test -e "$HOME/.config/nvim" ; then
+      ln -s /apps/da.sh/config/nvim "$HOME/.config/"
+    fi
+    echo "--- Installing nvim packages:" >&2
+    echo "--- Paq:"
+    nvim --headless -u NONE -c 'lua require("bootstrap").headless_paq()'
+    echo
+    echo "--- Mason:"
+    nvim --headless -u NONE -c 'lua require("bootstrap").headless_mason()'
+    echo
+    echo "--- Treesitter:"
+    # nvim --headless +TSUpdateSync -c "echo 'done'" +q
+    nvim --headless -u NORC -c 'lua require("bootstrap").headless_treesitter()' +qa
+    echo ""
+    echo "--- Done setting up nvim. ----" >&2
+
+    ;;
+
+  "edit init")
+    nvim ~/.config/nvim/init.lua
+    ;;
+
+  "edit bootstrap")
+    file="$HOME/.config/nvim/lua/bootstrap.lua"
+    old_content="$(cat "$file")"
+    nvim "$file"
+    new_content="$(cat "$file")"
+    if test "$old_content" != "$new_content" ; then
+      "$0" setup
+    fi
+    ;;
+
+  *)
+    echo "!!! Unknown command: $*" >&2
+    exit 1
+    ;;
+esac

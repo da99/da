@@ -1,0 +1,70 @@
+
+snippet desc
+  describe("${0}");
+snippet ita
+  it("${1:does}", async function () {
+    ${0}
+  }); // it async
+snippet itf
+  it("${1:does}", function () {
+    ${0}
+  }); // it function
+snippet exportc
+  export class ${1:Name} {
+    ${0}
+  } // export class
+snippet exportf
+  export function ${1:Name}(${2:args}) {
+    ${0}
+  } // export function
+snippet async
+  async function ${1:Name}(${2:args}) {
+    ${0}
+  } // async function
+snippet exporta
+  export async function ${1:Name}(${2:args}) {
+    ${0}
+  } // export async function
+snippet inter
+  interface ${1:Name} {
+    ${0};
+  } // interface
+snippet type
+  type ${1:Name} = {
+    ${0};
+  }; // type
+snippet func
+  function ${1:name}(${2}) {
+    ${0}
+  } // function
+snippet func*
+  function* ${1:name}(${2}) {
+    ${0}
+  } // function*
+
+snippet switch
+  switch (${1:var}) {
+    case ${2:var}: {
+      ${0}
+      break;
+    }
+    default: {
+    }
+  } // switch
+snippet case
+  case ${1}: {
+    ${0}
+    break;
+  }
+snippet while
+  while (${1}) {
+    ${0}
+  } // while
+snippet for
+  for (const ${1} of ${2}) {
+    ${0}
+  } // for
+snippet if
+  if (${1}) {
+    ${0}
+  } // if
