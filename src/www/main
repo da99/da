@@ -29,18 +29,16 @@ ensure_build_dir() {
 }
 
 case "$*" in
-  # doc: CMD public prune (list)
-  "public prune")
+  "public prune") # doc: CMD public prune (list)
     test -n "$BUILD_TARGET"
     bun run "$THIS_DIR"/src/Public_File.mts "$@"
   ;;
 
-  "public prune list") # doc
+  "public prune list")
     test -n "$BUILD_TARGET"
   ;;
 
-  # doc: CMD public upload (list)
-  "public upload")
+  "public upload") # doc: CMD public upload (list)
     shift
     test -n "$BUILD_TARGET"
     "$THIS_DIR"/src/PublicFile.rb "$@"
@@ -59,13 +57,13 @@ case "$*" in
     "$THIS_DIR"/src/PublicFile.rb "$@"
   ;;
 
-  # doc: CMD update (raw) file manifest
-  "update file manifest") # doc: - Writes public_files.json
+  # doc: CMD update (raw) file manifest - Writes public_files.json
+  "update file manifest")
     test -n "$BUILD_TARGET"
     "$THIS_DIR"/src/PublicFile.rb "$@"
   ;;
 
-  "update raw file manifest") # doc: - Writes tmp/raw_files.json
+  "update raw file manifest") # doc: CMD update raw file manifet - Writes tmp/raw_files.json
     test -n "$BUILD_TARGET"
     "$THIS_DIR"/src/PublicFile.rb "$@"
   ;;
@@ -96,23 +94,30 @@ case "$*" in
     esac
   ;;
 
-  # doc: CMD build css
-  'build css') # doc
+  'build css'|'build css '*) # doc: BUILD_TARGET=... CMD build css (FILE)
     ensure_build_dir
-    while read -r LINE ; do
-      case "$LINE" in
+    build_css() {
+      case "$1" in
         *section/base/*)
-          echo "--- Skipping: $LINE"
-          ;;
-        *)
-          echo "--- Processing .css: $LINE"
-          set -x
-          bun x lightningcss --minify --bundle "$LINE" -o "$LINE".tmp
-          set +x
-          mv "$LINE".tmp "$LINE"
+          echo "--- Skipping .css: $1"
+          return 0
           ;;
       esac
-    done < <( find section -maxdepth 2 -mindepth 2 -type f -iname '*.css')
+      build_file=${1/public/build}
+      echo "--- Processing .css: $build_file"
+      bun x lightningcss --minify --bundle "$1" -o "$build_file"
+    }
+
+    case "$@" in
+      'build css '*)
+        build_css "$3"
+        exit 0
+        ;;
+    esac
+
+    while read -r LINE ; do
+      build_css "$LINE"
+    done < <( find public/section -maxdepth 2 -mindepth 2 -type f -iname '*.css')
     ;;
 
   'build html'|'build html '*) # doc: CMD build html (FILE)
@@ -138,8 +143,7 @@ case "$*" in
     done < <( find public/section -maxdepth 2 -mindepth 2 -type f -iname '*.html.rb')
     ;;
 
-  # doc: CMD build mjs - BUILD_TARGET required.
-  'build mjs') # doc
+  'build mjs') # doc: CMD build mjs - BUILD_TARGET required.
     ensure_build_dir;
     # "$THIS_DIR"/src/PublicFile.rb build mjs
     set -x

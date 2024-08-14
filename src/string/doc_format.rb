@@ -23,7 +23,7 @@ def format_cmd(x)
   "#{BOLD}#{main}#{NORMAL} #{cmd.join ' '}"
 end
 
-PREFIX_DOC = %r{^\s*(#|//)\s+doc:\s+}
+PREFIX_DOC = %r{\s*(#|//)\s+doc:\s+}
 FORMATED_CMD = format_cmd(CMD)
 
 ARGV.each do |file_path|
@@ -33,7 +33,7 @@ ARGV.each do |file_path|
   contents = File.read(file_path)
   contents.each_line do |raw_line|
     next unless raw_line.strip[PREFIX_DOC]
-    line = raw_line.sub(PREFIX_DOC, '')
+    line = raw_line.split(PREFIX_DOC).last
     puts replace_cmd(replace_options(line))
   end
 end
