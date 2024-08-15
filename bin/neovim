@@ -2,7 +2,7 @@
 #
 #
 set -u -e -o pipefail
-
+THIS_DIR="$(dirname "$(dirname "$0")")"
 
 case "$*" in
   "-h"|"--help"|"help")
@@ -39,7 +39,7 @@ case "$*" in
     mkdir -p /progs/tmp/nvim
 
     if ! test -e "$HOME/.config/nvim" ; then
-      ln -s /apps/da.sh/config/nvim "$HOME/.config/"
+      ln -s "$THIS_DIR"/config/nvim "$HOME/.config/"
     fi
     echo "--- Installing nvim packages:" >&2
     echo "--- Paq:"

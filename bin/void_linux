@@ -107,9 +107,9 @@ case "$@" in
     set -x
     sudo xbps-install -S $("$0" list packages devel | tr '\n' ' ')
     mise use --global go@latest
-    mise use --global julia@latest
-    mise use --global perl@latest
-    mise use --global java@latest
+    # mise use --global julia@latest
+    # mise use --global perl@latest
+    # mise use --global java@latest
     mise use --global crystal@latest
     mise use --global node@latest
     if ! which node; then
