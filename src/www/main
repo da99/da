@@ -16,12 +16,14 @@ THIS_DIR="$(dirname "$0")"
 
 ensure_build_dir() {
   test -n "$BUILD_TARGET"
-  if ! test -e public ; then
-    echo "!!! public directory not found." >&2
+  public_dir="$(jq --raw-output .STATIC_DIR < settings.json)"
+  build_dir="$(jq --raw-output .BUILD_DIR < settings.json)"
+  if ! test -e "$public_dir" ; then
+    echo "!!! $public_dir directory not found." >&2
     exit 1
   fi
 
-  if test -e build ; then
+  if test -e "$build_dir" ; then
     return 0
   fi
 
@@ -169,8 +171,7 @@ case "$*" in
     bun run "$THIS_DIR"/src/Public_File.mts "$@"
   ;;
 
-  # doc: CMD server [PORT] [DIR] [CMD] - Run CMD and serve static file.
-  'serve '*)
+  'serve') # doc: CMD serve - Run CMD and serve static file using settings.json
     set -x
     bun run "$THIS_DIR"/src/Bun.Serve.ts "$@"
   ;;

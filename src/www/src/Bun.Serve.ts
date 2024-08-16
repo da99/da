@@ -27,10 +27,10 @@ Bun.serve({
 
     // if this a .html request,
     //   re-build static files:
-    if (is_html(u.pathname)) {
-      console.log(`-- Running: ${BUILD_CMD}`)
-      console.log(await $`sh -c ${BUILD_CMD}`.text());
-    }
+    // if (is_html(u.pathname)) {
+    //   console.log(`-- Running: ${BUILD_CMD}`)
+    //   console.log(await $`sh -c ${BUILD_CMD}`.text());
+    // }
 
     const r = new Response(await f.arrayBuffer(), {
       headers: {
