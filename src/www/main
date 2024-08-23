@@ -81,13 +81,13 @@ case "$*" in
 
     case "$file_name" in
       *.html.rb)
-        da build html "$file_name"
+        da www build html "$file_name"
         ;;
       *.css)
-        da build css "$file_name"
+        da www build css "$file_name"
         ;;
       */index.mts)
-        da build mjs "$file_name"
+        da www build mjs "$file_name"
         ;;
       *)
         echo "!!! Unknown file type: $file_name" >&2

@@ -141,6 +141,11 @@ set_keymap('n', '<C-z>', 'u', {silent = true}) -- " http://vim.wikia.com/wiki/Sa
 set_keymap('n', 'ga', '<Plug>(EasyAlign)', {noremap = true})
 
 -- =============================================================================
+-- Web Development:
+-- =============================================================================
+set_keymap('n', '<Leader>ww', ':! __ build file %<CR>', {noremap=false, silent=true})
+
+-- =============================================================================
 -- Comments:
 -- =============================================================================
 set_keymap('n', '<Leader>div', 'A<CR>=<ESC>v"9y76pgcco<ESC>gcc', {noremap=false, silent=true})
