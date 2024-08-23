@@ -112,8 +112,16 @@ case "$*" in
 
     case "$@" in
       'build css '*)
-        build_css "$3"
-        exit 0
+        name_of_file="$3"
+        case "$name_of_file" in
+          *section/base/*)
+            true # continue as if compile everything
+            ;;
+          *)
+            build_css "$3"
+            exit 0
+            ;;
+        esac
         ;;
     esac
 

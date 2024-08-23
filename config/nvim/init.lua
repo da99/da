@@ -143,7 +143,7 @@ set_keymap('n', 'ga', '<Plug>(EasyAlign)', {noremap = true})
 -- =============================================================================
 -- Web Development:
 -- =============================================================================
-set_keymap('n', '<Leader>ww', ':! __ build file %<CR>', {noremap=false, silent=true})
+set_keymap('n', '<Leader>ww', ':! __ dev build file %<CR>', {noremap=false, silent=true})
 
 -- =============================================================================
 -- Comments:
