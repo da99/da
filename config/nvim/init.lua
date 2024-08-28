@@ -226,6 +226,8 @@ end
 --   bs.paq_packages()
 --   return require('paq')
 -- end -- function
+local bootstrap = require('bootstrap')
+bootstrap.paq_packages()
 
 for i = 1, 3 do
   set_keymap('n', '<Leader>' .. i .. i, ":Topen<CR>:T da.sh run tmp/run " .. i .. "<CR>", {noremap=true})
@@ -455,6 +457,7 @@ require('gitsigns').setup()
 -- =============================================================================
 require('mason').setup()
 require("mason-lspconfig").setup{}
+require('mason-update-all').setup()
 
 require("inc_rename").setup()
 

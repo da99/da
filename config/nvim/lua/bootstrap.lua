@@ -11,6 +11,7 @@ end
 local function packages()
   return {
     "savq/paq-nvim", -- let paq manage itself
+    'RubixDev/mason-update-all',
     'gfanto/fzf-lsp.nvim',
     'nvim-lua/plenary.nvim',
     "lukas-reineke/indent-blankline.nvim",
@@ -116,12 +117,13 @@ local function headless_mason()
     callback = function(e)
       vim.schedule(function()
         print(vim.inspect(e.data)) -- print the table that lists the programs that were installed
-        vim.cmd("qall")
+      vim.cmd("qall")
       end)
     end,
   })
   mti.check_install(true)
 end -- function
+
 
 local function headless_treesitter()
   vim.cmd("TSUpdateSync")
