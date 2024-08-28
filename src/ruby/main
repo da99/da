@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'English'
+
+cmd = ARGV.join(' ')
+prog = __FILE__.split('/').last
+
+case cmd
+when '-h', '--help', 'help'
+  puts "#{prog} -h|--help|help  --  Show this message."
+  puts "#{prog} syntax check (DIR)"
+when 'syntax check', /syntax check (.+)/
+  all_pass = 0
+  dir = Regexp.last_match(1) || '.'
+  `find "#{dir}" -type f -iname '*.rb' | sort -h`.split("\n").each do |file|
+    print "=== Checking: #{file}: "
+    system(%(ruby -c "#{file}"))
+    $stdout.flush
+    all_pass = $CHILD_STATUS.exitstatus unless $CHILD_STATUS.exitstatus.zero?
+  end
+  exit 1 unless all_pass.zero?
+else
+  warn "!!! Unknown command: #{cmd}"
+  exit 1
+end # case

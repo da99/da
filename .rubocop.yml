@@ -1,0 +1,4 @@
+Style/CommentedKeyword:
+  Exclude:
+    - '**/*.rb'
+    - '**/main'
