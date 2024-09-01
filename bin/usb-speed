@@ -8,7 +8,7 @@ case cmd
 when '-h', '--help', 'help'
   puts "#{prog} -h|--help|help  --  Show this message."
 when ''
-  storage_adapters = `lsusb`.strip.split("\n").filter { |x| x[/PNY|Flash Drive|NVME adapter|Dockcase|JMicron.+External|SanDisk.+Ultra|JMicron .+ Storage/i] }
+  storage_adapters = `lsusb`.strip.split("\n").filter { |x| x[/PNY|Flash Drive|NVME adapter|Dockcase|JMicron.+External|SanDisk.+Ultra|Pebble|JMicron .+ Storage/i] }
 
   exit 0 if storage_adapters.empty?
 
