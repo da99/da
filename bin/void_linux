@@ -189,6 +189,7 @@ case "$@" in
     ;;
 
   "cleanup /boot/efi")
+    "$0" cleanup linux kernels
     df_usage="$(df | grep --color=never "% /boot/efi" || : )"
     if test -z "$df_usage" ; then
       echo "--- Skipping cleaning /boot/efi. Not found." >&2
@@ -206,6 +207,18 @@ case "$@" in
       echo "--- Skipping vkpurge because /boot/efi is at ${efi_usage}% used."
     fi
     set +x
+    ;;
+
+  "cleanup linux kernels")
+    lcount="$(vkpurge list | wc -l)"
+    if test "$lcount" -lt 12 ; then
+      echo "--- Only $lcount kernels found. Skipping removal." >&2
+      exit 0
+    fi
+    while read -r x ; do
+      echo "--- Uninstalling $x"
+      # sudo vkpurge rm "$x"
+    done < <(vkpurge list | tail -n 6 | tac)
     ;;
 
   "hud available packages")
