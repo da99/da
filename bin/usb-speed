@@ -8,11 +8,12 @@ case cmd
 when '-h', '--help', 'help'
   puts "#{prog} -h|--help|help  --  Show this message."
 when ''
-  storage_adapters = `lsusb`.strip.split("\n").filter { |x| x[/PNY|Flash Drive|NVME adapter|Dockcase|JMicron.+External|SanDisk.+Ultra|Pebble|JMicron .+ Storage/i] }
+  storage_adapters = `lsusb`.strip.split("\n") # .filter { |x| x[/SATA Adapter|PNY|Flash Drive|NVME adapter|Dockcase|JMicron.+External|SanDisk.+Ultra|Pebble|JMicron .+ Storage/i] }
 
   exit 0 if storage_adapters.empty?
 
   id_vendors = `find /sys/devices/ -name idVendor -print -exec cat {} \\; `.strip.split
+  output = []
   storage_adapters.each do |line|
     pieces = line.split
     id = pieces[5]
@@ -23,10 +24,11 @@ when ''
       next unless raw_id1 == id1
 
       speed = File.read(file.sub('idVendor', 'speed')).strip
-      puts "#{speed} -> #{title}"
+      output << "#{speed} -> #{title}"
       break
-    end
-  end
+    end # each_slice
+  end # each line
+  output.sort.each { |x| puts x }
 else
   warn "!!! Unknown command: #{cmd}"
   exit 1
