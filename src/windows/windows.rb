@@ -89,8 +89,7 @@ class Window
   end
 
   def mouse_location
-    m = Mouse_Pointer.new
-    Pointer_Location.edge_name(self, m)
+    Pointer_Location.edge_name(self, Mouse_Pointer.new)
   end
 
 end # === class Window
@@ -346,6 +345,27 @@ when 'move_to bottom_half'
   Window.new.move_to(Bottom_Half)
   exit($?.exitstatus)
 
+when 'run_action'
+  win = Window.new
+  loc = win.mouse_location
+  case loc
+  when 'top_left_corner'
+    win.move_to(Left_Side)
+  when 'top_right_corner'
+    win.move_to(Right_Top)
+  when 'bottom_left_corner'
+    win.move_to(Right_Bottom)
+  when 'bottom_right_corner'
+    puts 'bottom_right_corner'
+  when 'top_edge'
+    win.move_to(Top_Half)
+  when 'bottom_edge'
+    win.move_to(Bottom_Half)
+  when 'center'
+    win.move_to(Fullscreen)
+  else
+    puts loc.inspect
+  end # case
 
 else
   warn "!!! Unknown command: #{cmd}"
