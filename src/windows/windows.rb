@@ -28,7 +28,7 @@ class Root_Window
   end
 
   def bottom_padding
-    50
+    30
   end
 
 end # class
@@ -198,6 +198,46 @@ module Fullscreen
   end
 end # module
 
+module Top_Half
+  extend self
+
+  def x
+    ROOT.left_padding
+  end
+
+  def y
+    ROOT.top_padding
+  end
+
+  def w
+    Fullscreen.w
+  end
+
+  def h
+    (Fullscreen.h / 2).to_i
+  end
+end # module
+
+module Bottom_Half
+  extend self
+
+  def x
+    ROOT.left_padding
+  end
+
+  def y
+    Top_Half.y + Top_Half.h
+  end
+
+  def w
+    Fullscreen.w
+  end
+
+  def h
+    ROOT.h - y - Window.border - ROOT.bottom_padding
+  end
+end # module
+
 module Window_Location
   extend self
 end # === module
@@ -296,6 +336,14 @@ when 'move_to right_bottom'
 
 when 'move_to fullscreen'
   Window.new.move_to(Fullscreen)
+  exit($?.exitstatus)
+
+when 'move_to top_half'
+  Window.new.move_to(Top_Half)
+  exit($?.exitstatus)
+
+when 'move_to bottom_half'
+  Window.new.move_to(Bottom_Half)
   exit($?.exitstatus)
 
 
