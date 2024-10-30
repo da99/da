@@ -1,10 +1,16 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require 'English'
+
 cmd = ARGV.join(' ')
 prog = __FILE__.split('/').last
 
 CORNER_AREA = 100
+
+def smplayer?
+  !!`xtitle`[' - SMPlayer']
+end
 
 class Root_Window
   attr_reader :w, :h
@@ -13,6 +19,22 @@ class Root_Window
     raw_w, raw_h = File.read('/tmp/monitor.resolution.txt').strip.split('x')
     @w = raw_w.to_i
     @h = raw_h.to_i
+  end
+
+  def four_k?
+    h == 2160
+  end
+
+  def qhd?
+    h == 2160
+  end
+
+  def two_k?
+    h == 1440
+  end
+
+  def hd?
+    h == 1080
   end
 
   def left_padding
@@ -55,7 +77,7 @@ class Window
     @w = @h = 0
     @border_x = @border_y = 0
 
-    @id = if raw_id === nil
+    @id = if raw_id.nil?
             `xdotool getactivewindow`.strip.to_i
           else
             raw_id.to_i
@@ -91,7 +113,6 @@ class Window
   def mouse_location
     Pointer_Location.edge_name(self, Mouse_Pointer.new)
   end
-
 end # === class Window
 
 module Left_Side
@@ -155,8 +176,32 @@ module Right_Bottom
   end
 end # module
 
+module Top_Stamp
+  extend self
+  FACTOR = 0.25
+
+  def x
+    ROOT.w - w - Window.border
+  end
+
+  def y
+    ROOT.top_padding
+  end
+
+  def w
+    return (1920 * FACTOR).to_i if ROOT.hd?
+
+    (ROOT.w * FACTOR).to_i
+  end
+
+  def h
+    (ROOT.h * FACTOR).to_i
+  end
+end # module
+
 module Bottom_Stamp
   extend self
+  FACTOR = 0.15
 
   def x
     ROOT.w - w - Window.border
@@ -167,9 +212,9 @@ module Bottom_Stamp
   end
 
   def w
-    return (1920 * 0.15).to_i if ROOT.h == 1080
+    return (1920 * FACTOR).to_i if ROOT.hd?
 
-    (ROOT.w * 0.15).to_i
+    (ROOT.w * FACTOR).to_i
   end
 
   def h
@@ -319,31 +364,31 @@ when 'mouse_location'
 
 when 'move_to left'
   Window.new.move_to(Left_Side)
-  exit($?.exitstatus)
+  exit($CHILD_STATUS.exitstatus)
 
 when 'move_to bottom_stamp'
   Window.new.move_to(Bottom_Stamp)
-  exit($?.exitstatus)
+  exit($CHILD_STATUS.exitstatus)
 
 when 'move_to right_top'
   Window.new.move_to(Right_Top)
-  exit($?.exitstatus)
+  exit($CHILD_STATUS.exitstatus)
 
 when 'move_to right_bottom'
   Window.new.move_to(Right_Bottom)
-  exit($?.exitstatus)
+  exit($CHILD_STATUS.exitstatus)
 
 when 'move_to fullscreen'
   Window.new.move_to(Fullscreen)
-  exit($?.exitstatus)
+  exit($CHILD_STATUS.exitstatus)
 
 when 'move_to top_half'
   Window.new.move_to(Top_Half)
-  exit($?.exitstatus)
+  exit($CHILD_STATUS.exitstatus)
 
 when 'move_to bottom_half'
   Window.new.move_to(Bottom_Half)
-  exit($?.exitstatus)
+  exit($CHILD_STATUS.exitstatus)
 
 when 'run_action'
   win = Window.new
@@ -358,9 +403,21 @@ when 'run_action'
   when 'bottom_right_corner'
     puts 'bottom_right_corner'
   when 'top_edge'
-    win.move_to(Top_Half)
+    if smplayer?
+      win.move_to(Top_Half)
+    else
+      win.move_to(Top_Stamp)
+    end
   when 'bottom_edge'
-    win.move_to(Bottom_Half)
+    if smplayer?
+      win.move_to(Bottom_Half)
+    else
+      win.move_to(Bottom_Stamp)
+    end
+  when 'left_edge'
+    system 'xdotool key --clearmodifiers Alt_L+Left'
+  when 'right_edge'
+    system 'xdotool key --clearmodifiers Alt_L+Right'
   when 'center'
     win.move_to(Fullscreen)
   else
