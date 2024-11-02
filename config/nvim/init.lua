@@ -495,7 +495,7 @@ vim.g.markdown_fenced_languages = { "ts=typescript" }
 --   capabilities = capabilities,
 --   root_dir = util.root_pattern('deno.json', 'deno.jsonc', '.git', '.'),
 -- }
-lspconfig.tsserver.setup{
+lspconfig.ts_ls.setup{
   capabilities = capabilities,
   root_dir = util.root_pattern('tsconfig.json', '.git', '.'),
 }
