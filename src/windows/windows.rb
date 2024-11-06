@@ -52,7 +52,6 @@ class Root_Window
   def bottom_padding
     30
   end
-
 end # class
 
 ROOT = Root_Window.new
@@ -71,7 +70,6 @@ class Window
   attr_reader :id, :x, :y, :w, :h, :border_x, :border_y
 
   def initialize(raw_id = nil)
-
     @id = 0
     @x = @y = 0
     @w = @h = 0
@@ -108,10 +106,6 @@ class Window
 
   def move_to(pos)
     system(%( wmctrl -i -r #{id} -e 0,#{pos.x},#{pos.y},#{pos.w},#{pos.h} ))
-  end
-
-  def mouse_location
-    Pointer_Location.edge_name(self, Mouse_Pointer.new)
   end
 end # === class Window
 
@@ -282,62 +276,11 @@ module Bottom_Half
   end
 end # module
 
-module Window_Location
-  extend self
-end # === module
-
-module Pointer_Location
-  extend self
-
-  def edge_name(window, mouse)
-    tb = if top_edge?(window, mouse)
-           'top'
-         else
-           (bottom_edge?(window, mouse) ? 'bottom' : nil)
-         end
-    lr = if left_edge?(window, mouse)
-           'left'
-         else
-           (right_edge?(window, mouse) ? 'right' : nil)
-         end
-
-    return "#{tb}_#{lr}_corner" if tb && lr
-    return "#{tb}_edge" if tb
-    return "#{lr}_edge" if lr
-
-    'center' if center?(window, mouse)
-  end
-
-  def top_edge?(window, mouse)
-    mouse.y >= window.y && mouse.y < (window.y + CORNER_AREA)
-  end
-
-  def bottom_edge?(window, mouse)
-    mouse.y <= (window.y + window.h) && mouse.y > (window.y + window.h - CORNER_AREA)
-  end
-
-  def left_edge?(window, mouse)
-    mouse.x >= window.x && mouse.x < (window.x + CORNER_AREA)
-  end
-
-  def right_edge?(window, mouse)
-    mouse.x < (window.x + window.w) && mouse.x >= (window.x + window.w - CORNER_AREA)
-  end
-
-  def center?(window, mouse)
-    center_x = window.x + (window.w / 2).to_i
-    center_y = window.y + (window.h / 2).to_i
-    padding = 20
-    half_corner = (CORNER_AREA + padding).to_i
-    mouse.x >= (center_x - half_corner) && mouse.x < (center_x + half_corner) &&
-      mouse.y >= (center_y - half_corner) && mouse.y < (center_y + half_corner)
-  end
-end # class
-
 class Mouse_Pointer
-  attr_reader :x, :y
+  attr_reader :x, :y, :window
 
-  def initialize
+  def initialize(raw_window = nil)
+    @window = raw_window || Window.new
     raw_x, raw_y, _raw_screen, _raw_window = `xdotool getmouselocation --shell`.strip.split("\n")
     @x = raw_x.split('=').last.to_i
     @y = raw_y.split('=').last.to_i
@@ -346,6 +289,56 @@ class Mouse_Pointer
   def inspect
     "Mouse: #{x} #{y}"
   end
+
+  def location_name
+    tb = if top_edge?
+           'top'
+         else
+           (bottom_edge? ? 'bottom' : nil)
+         end
+    lr = if left_edge?
+           'left'
+         else
+           (right_edge? ? 'right' : nil)
+         end
+
+    return "#{tb}_#{lr}_corner" if tb && lr
+    return "#{tb}_edge" if tb
+    return "#{lr}_edge" if lr
+
+    'center' if center?
+  end
+
+  def top_edge?
+    y >= window.y && y < (window.y + CORNER_AREA)
+  end
+
+  def bottom_edge?
+    y <= (window.y + window.h) && y > (window.y + window.h - CORNER_AREA)
+  end
+
+  def left_edge?
+    x >= window.x && x < (window.x + CORNER_AREA)
+  end
+
+  def right_edge?
+    x < (window.x + window.w) && x >= (window.x + window.w - CORNER_AREA)
+  end
+
+  def center?
+    center_x = window.x + (window.w / 2).to_i
+    center_y = window.y + (window.h / 2).to_i
+    padding = 20
+    half_corner = (CORNER_AREA + padding).to_i
+    x >= (center_x - half_corner) && x < (center_x + half_corner) &&
+      y >= (center_y - half_corner) && y < (center_y + half_corner)
+  end
+
+  class << self
+    def location_name
+      Mouse_Pointer.new.location_name
+    end
+  end # class
 end # === class Mouse
 
 case cmd
@@ -355,12 +348,8 @@ when '-h', '--help', 'help'
 when 'inspect'
   puts Window.new.inspect
 
-when 'current_position'
-  win_info = Window.new
-  puts win_info.location
-
 when 'mouse_location'
-  puts Window.new.mouse_location
+  puts Mouse_Pointer.location_name
 
 when 'move_to left'
   Window.new.move_to(Left_Side)
@@ -391,8 +380,9 @@ when 'move_to bottom_half'
   exit($CHILD_STATUS.exitstatus)
 
 when 'run_action'
-  win = Window.new
-  loc = win.mouse_location
+  loc = Mouse_Pointer.new
+  win = loc.window
+
   case loc
   when 'top_left_corner'
     win.move_to(Left_Side)
