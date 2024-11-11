@@ -4,9 +4,10 @@
 require 'English'
 
 class Root_Window
-  attr_reader :w, :h
+  attr_reader :w, :h, :x, :y
 
   def initialize
+    @x = @y = 0
     raw_w, raw_h = begin
                      File.read('/tmp/monitor.resolution.txt').strip.split('x')
                    rescue Object => _e

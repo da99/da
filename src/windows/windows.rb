@@ -6,11 +6,11 @@ $LOAD_PATH << File.dirname(File.expand_path(__FILE__))
 require 'English'
 require_relative 'Root_Window'
 require_relative 'Mouse_Pointer'
+require_relative 'Location_Name'
 
 cmd = ARGV.join(' ')
 prog = __FILE__.split('/').last
 
-CORNER_AREA = 100
 
 def smplayer?
   !!`xtitle`[' - SMPlayer']
@@ -245,7 +245,10 @@ when 'inspect'
   puts Window.new.inspect
 
 when 'mouse_location'
-  puts Mouse_Pointer.location_name
+  puts Location_Name.new(Window.new, Mouse_Pointer.new).name
+
+when 'root_mouse_location'
+  puts Location_Name.new(ROOT, Mouse_Pointer.new).name
 
 when 'move_to left'
   Window.new.move_to(Left_Side)
