@@ -1,7 +1,11 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+$LOAD_PATH << File.dirname(File.expand_path(__FILE__))
+
 require 'English'
+require_relative './Root_Window.rb'
+require_relative 'Mouse_Pointer'
 
 cmd = ARGV.join(' ')
 prog = __FILE__.split('/').last
@@ -11,48 +15,6 @@ CORNER_AREA = 100
 def smplayer?
   !!`xtitle`[' - SMPlayer']
 end
-
-class Root_Window
-  attr_reader :w, :h
-
-  def initialize
-    raw_w, raw_h = File.read('/tmp/monitor.resolution.txt').strip.split('x')
-    @w = raw_w.to_i
-    @h = raw_h.to_i
-  end
-
-  def four_k?
-    h == 2160
-  end
-
-  def qhd?
-    h == 2160
-  end
-
-  def two_k?
-    h == 1440
-  end
-
-  def hd?
-    h == 1080
-  end
-
-  def left_padding
-    50
-  end
-
-  def right_padding
-    20
-  end
-
-  def top_padding
-    40
-  end
-
-  def bottom_padding
-    30
-  end
-end # class
 
 ROOT = Root_Window.new
 
@@ -276,71 +238,6 @@ module Bottom_Half
   end
 end # module
 
-class Mouse_Pointer
-  attr_reader :x, :y, :window
-
-  def initialize(raw_window = nil)
-    @window = raw_window || Window.new
-    raw_x, raw_y, _raw_screen, _raw_window = `xdotool getmouselocation --shell`.strip.split("\n")
-    @x = raw_x.split('=').last.to_i
-    @y = raw_y.split('=').last.to_i
-  end
-
-  def inspect
-    "Mouse: #{x} #{y}"
-  end
-
-  def location_name
-    tb = if top_edge?
-           'top'
-         else
-           (bottom_edge? ? 'bottom' : nil)
-         end
-    lr = if left_edge?
-           'left'
-         else
-           (right_edge? ? 'right' : nil)
-         end
-
-    return "#{tb}_#{lr}_corner" if tb && lr
-    return "#{tb}_edge" if tb
-    return "#{lr}_edge" if lr
-
-    'center' if center?
-  end
-
-  def top_edge?
-    y >= window.y && y < (window.y + CORNER_AREA)
-  end
-
-  def bottom_edge?
-    y <= (window.y + window.h) && y > (window.y + window.h - CORNER_AREA)
-  end
-
-  def left_edge?
-    x >= window.x && x < (window.x + CORNER_AREA)
-  end
-
-  def right_edge?
-    x < (window.x + window.w) && x >= (window.x + window.w - CORNER_AREA)
-  end
-
-  def center?
-    center_x = window.x + (window.w / 2).to_i
-    center_y = window.y + (window.h / 2).to_i
-    padding = 20
-    half_corner = (CORNER_AREA + padding).to_i
-    x >= (center_x - half_corner) && x < (center_x + half_corner) &&
-      y >= (center_y - half_corner) && y < (center_y + half_corner)
-  end
-
-  class << self
-    def location_name
-      Mouse_Pointer.new.location_name
-    end
-  end # class
-end # === class Mouse
-
 case cmd
 when '-h', '--help', 'help'
   puts "#{prog} -h|--help|help  --  Show this message."
@@ -380,7 +277,7 @@ when 'move_to bottom_half'
   exit($CHILD_STATUS.exitstatus)
 
 when 'run_action'
-  loc = Mouse_Pointer.new
+  loc = Mouse_Pointer.new(ROOT, Window.new)
   win = loc.window
 
   case loc
