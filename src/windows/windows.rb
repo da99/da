@@ -11,7 +11,6 @@ require_relative 'Location_Name'
 cmd = ARGV.join(' ')
 prog = __FILE__.split('/').last
 
-
 def smplayer?
   !!`xtitle`[' - SMPlayer']
 end
@@ -279,10 +278,10 @@ when 'move_to bottom_half'
   exit($CHILD_STATUS.exitstatus)
 
 when 'run_action'
-  loc = Mouse_Pointer.new(ROOT, Window.new)
-  win = loc.window
+  loc = Location_Name.new(ROOT, Mouse_Pointer.new)
+  win = Window.new
 
-  case loc
+  case loc.name
   when 'top_left_corner'
     win.move_to(Left_Side)
   when 'top_right_corner'
@@ -310,7 +309,7 @@ when 'run_action'
   when 'center'
     win.move_to(Fullscreen)
   else
-    puts loc.inspect
+    puts loc.name.inspect
   end # case
 
 else
