@@ -4,7 +4,7 @@
 $LOAD_PATH << File.dirname(File.expand_path(__FILE__))
 
 require 'English'
-require_relative './Root_Window.rb'
+require_relative 'Root_Window'
 require_relative 'Mouse_Pointer'
 
 cmd = ARGV.join(' ')
@@ -89,7 +89,6 @@ module Left_Side
   def h
     ROOT.h - ROOT.bottom_padding - y
   end
-
 end # module
 
 module Right_Top
