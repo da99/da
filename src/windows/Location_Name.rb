@@ -38,11 +38,24 @@ class Location_Name
   end
 
   def left_edge?
-    point.x >= area.x && point.x < (area.x + CORNER_AREA)
+    inside? && point.x < (area.x + CORNER_AREA)
   end
 
   def right_edge?
-    point.x < (area.x + area.w) && point.x >= (area.x + area.w - CORNER_AREA)
+    inside? && point.x >= (area.x + area.w - CORNER_AREA)
+  end
+
+  def left_side?
+    inside? && point.x < (area.x + (area.w / 2).to_i)
+  end
+
+  def right_side?
+    inside? && !left_side?
+  end
+
+  def inside?
+    point.x < (area.x + area.w) && point.x >= area.x &&
+      point.y < (area.y + area.h) && point.y >= area.y
   end
 
   def center?
