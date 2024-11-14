@@ -1,0 +1,82 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+$LOAD_PATH << File.dirname(File.expand_path(__FILE__))
+
+require 'English'
+require_relative 'Root_Window'
+require_relative 'Window'
+require_relative 'Mouse_Pointer'
+require_relative 'Location_Name'
+
+require_relative 'Fullscreen'
+require_relative 'Left_Side'
+require_relative 'Right_Bottom'
+require_relative 'Right_Side'
+require_relative 'Top_Half'
+require_relative 'Top_Stamp'
+require_relative 'Bottom_Half'
+require_relative 'Bottom_Stamp'
+
+cmd = ARGV.join(' ')
+prog = __FILE__.split('/').last
+
+def smplayer?
+  !!`xtitle`[' - SMPlayer']
+end
+
+case cmd
+when '-h', '--help', 'help'
+  puts "#{prog} -h|--help|help  --  Show this message."
+  puts "#{prog}                 -- Run root window action."
+  puts "#{prog} mouse_location"
+  puts "#{prog} root_mouse_location"
+when ''
+  true
+when 'window'
+  puts 'window action'
+  exit 2
+when 'mouse_location'
+  puts Location_Name.new(Window.new, Mouse_Pointer.new).name
+
+when 'root_mouse_location'
+  puts Location_Name.new(ROOT, Mouse_Pointer.new).name
+else
+  warn "!!! Unknown action:  #{cmd.inspect}"
+  exit 2
+end # case
+
+ROOT = Root_Window.new
+loc = Location_Name.new(ROOT, Mouse_Pointer.new)
+win = Window.new
+
+case loc.name
+when 'top_left_corner'
+  win.move_to(Left_Side)
+when 'top_right_corner'
+  win.move_to(Right_Top)
+when 'bottom_left_corner'
+  win.move_to(Right_Bottom)
+when 'bottom_right_corner'
+  puts 'bottom_right_corner'
+when 'top_edge'
+  if smplayer?
+    win.move_to(Top_Half)
+  else
+    win.move_to(Top_Stamp)
+  end
+when 'bottom_edge'
+  if smplayer?
+    win.move_to(Bottom_Half)
+  else
+    win.move_to(Bottom_Stamp)
+  end
+when 'left_edge'
+  system 'xdotool key --clearmodifiers Alt_L+Left'
+when 'right_edge'
+  system 'xdotool key --clearmodifiers Alt_L+Right'
+when 'center'
+  win.move_to(Fullscreen)
+else
+  puts loc.name.inspect
+end # case

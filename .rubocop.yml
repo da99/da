@@ -1,16 +1,16 @@
 Style/CommentedKeyword:
   Exclude:
     - '**/*.rb'
-    - '**/main'
+    - 'bin/*'
 Style/Documentation:
   Exclude:
     - '**/*.rb'
-    - '**/main'
+    - 'bin/*'
 Naming/ClassAndModuleCamelCase:
   Exclude:
     - '**/*.rb'
-    - '**/main'
+    - 'bin/*'
 Style/MethodLength:
   Exclude:
     - '**/*.rb'
-    - '**/main'
+    - 'bin/*'
