@@ -13,6 +13,7 @@ require_relative '../src/windows/Fullscreen'
 require_relative '../src/windows/Left_Side'
 require_relative '../src/windows/Right_Bottom'
 require_relative '../src/windows/Right_Side'
+require_relative '../src/windows/Right_Top'
 require_relative '../src/windows/Top_Half'
 require_relative '../src/windows/Top_Stamp'
 require_relative '../src/windows/Bottom_Half'
@@ -81,10 +82,10 @@ when 'left_edge'
   win.move_to(Left_Side)
 when 'right_edge'
   win.move_to(Right_Side)
-# when 'left_side'
-#   system 'xdotool key --clearmodifiers Alt_L+Left'
-# when 'right_side'
-#   system 'xdotool key --clearmodifiers Alt_L+Right'
+when 'left_side'
+  system 'xdotool key --clearmodifiers Alt_L+Left'
+when 'right_side'
+  system 'xdotool key --clearmodifiers Alt_L+Right'
 when 'center'
   win.move_to(Fullscreen)
 else
