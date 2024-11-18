@@ -1,0 +1,42 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+FILE = '/tmp/repo.list.updated'
+MAX_MINUTES = 5
+
+def results
+  `/apps/da.sh/bin/da.sh repo hud`.strip
+end
+
+def update_results
+  File.write(FILE, "#{Time.now.to_i},#{results}")
+end
+
+def out_of_date?
+  raw_last_time, _last_results = File.read(FILE).split(',')
+  timestamp = raw_last_time.to_i
+  (Time.now.to_i - timestamp) > (60 * MAX_MINUTES)
+end
+
+def print_results
+  _ts, repos = File.read(FILE).split(',')
+  puts repos || ''
+end
+
+update_results unless File.exist?(FILE)
+
+cmd = ARGV.join(' ')
+case cmd
+
+when ''
+  update_results if out_of_date?
+  print_results
+
+when 'refresh'
+  update_results
+
+else
+  warn "!!! Unknown arguments: #{cmd}"
+  File.write('/tmp/repo.hud.errors.txt', "!!! Unknown arguments: #{cmd}")
+  exit 1
+end # case
