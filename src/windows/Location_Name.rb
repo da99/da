@@ -11,11 +11,14 @@ class Location_Name
   end # def
 
   def name
+    return nil unless inside?
+
     tb = if top_edge?
            'top'
          else
            (bottom_edge? ? 'bottom' : nil)
          end
+
     lr = if left_edge?
            'left'
          else
@@ -25,8 +28,11 @@ class Location_Name
     return "#{tb}_#{lr}_corner" if tb && lr
     return "#{tb}_edge" if tb
     return "#{lr}_edge" if lr
+    return 'center' if center?
 
-    'center' if center?
+    return 'left_side' if left_side?
+
+    'right_side' if right_side?
   end
 
   def top_edge?
@@ -38,11 +44,31 @@ class Location_Name
   end
 
   def left_edge?
-    point.x >= area.x && point.x < (area.x + CORNER_AREA)
+    point.x < (area.x + CORNER_AREA)
   end
 
   def right_edge?
-    point.x < (area.x + area.w) && point.x >= (area.x + area.w - CORNER_AREA)
+    point.x >= (area.x + area.w - CORNER_AREA)
+  end
+
+  def left_side?
+    point.x < (area.x + (area.w / 2).to_i)
+  end
+
+  def right_side?
+    inside? && !left_side?
+  end
+
+  def x_inside?
+    point.x < (area.x + area.w) && point.x >= area.x
+  end
+
+  def y_inside?
+    point.y < (area.y + area.h) && point.y >= area.y
+  end
+
+  def inside?
+    x_inside? && y_inside?
   end
 
   def center?
