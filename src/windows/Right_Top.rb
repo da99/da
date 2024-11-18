@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Right_Side
+module Right_Top
   extend self
 
   def x
@@ -16,6 +16,6 @@ module Right_Side
   end
 
   def h
-    ROOT.h - ROOT.bottom_padding - y
+    (ROOT.h / 2).to_i - ROOT.top_padding - Window.margin
   end
 end # module

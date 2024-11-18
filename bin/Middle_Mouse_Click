@@ -31,19 +31,27 @@ when '-h', '--help', 'help'
   puts "#{prog}                 -- Run root window action."
   puts "#{prog} mouse_location"
   puts "#{prog} root_mouse_location"
+  exit 0
+
 when ''
   true
+
 when 'window'
   puts 'window action'
   exit 2
+
 when 'mouse_location'
   puts Location_Name.new(Window.new, Mouse_Pointer.new).name
+  exit 0
 
 when 'root_mouse_location'
-  puts Location_Name.new(ROOT, Mouse_Pointer.new).name
+  puts Location_Name.new(Root_Window.new, Mouse_Pointer.new).name
+  exit 0
+
 else
   warn "!!! Unknown action:  #{cmd.inspect}"
   exit 2
+
 end # case
 
 ROOT = Root_Window.new
@@ -51,14 +59,12 @@ loc = Location_Name.new(ROOT, Mouse_Pointer.new)
 win = Window.new
 
 case loc.name
-when 'top_left_corner'
-  win.move_to(Left_Side)
 when 'top_right_corner'
   win.move_to(Right_Top)
-when 'bottom_left_corner'
-  win.move_to(Right_Bottom)
+# when 'bottom_left_corner'
+#   win.move_to(Right_Bottom)
 when 'bottom_right_corner'
-  puts 'bottom_right_corner'
+  win.move_to(Right_Bottom)
 when 'top_edge'
   if smplayer?
     win.move_to(Top_Half)
@@ -72,9 +78,13 @@ when 'bottom_edge'
     win.move_to(Bottom_Stamp)
   end
 when 'left_edge'
-  system 'xdotool key --clearmodifiers Alt_L+Left'
+  win.move_to(Left_Side)
 when 'right_edge'
-  system 'xdotool key --clearmodifiers Alt_L+Right'
+  win.move_to(Right_Side)
+# when 'left_side'
+#   system 'xdotool key --clearmodifiers Alt_L+Left'
+# when 'right_side'
+#   system 'xdotool key --clearmodifiers Alt_L+Right'
 when 'center'
   win.move_to(Fullscreen)
 else
