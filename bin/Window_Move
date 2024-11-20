@@ -1,0 +1,54 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+cmd = ARGV.join(' ')
+prog = __FILE__.split('/').last
+
+$LOAD_PATH << File.dirname(File.expand_path(__FILE__))
+require 'English'
+require_relative '../src/windows/Root_Window'
+require_relative '../src/windows/Window'
+require_relative '../src/windows/Mouse_Pointer'
+require_relative '../src/windows/Location_Name'
+
+require_relative '../src/windows/Fullscreen'
+require_relative '../src/windows/Left_Side'
+require_relative '../src/windows/Right_Bottom'
+require_relative '../src/windows/Right_Side'
+require_relative '../src/windows/Right_Top'
+require_relative '../src/windows/Top_Half'
+require_relative '../src/windows/Top_Stamp'
+require_relative '../src/windows/Bottom_Half'
+require_relative '../src/windows/Bottom_Stamp'
+require_relative '../src/windows/State'
+
+case cmd
+when '-h', '--help', 'help'
+  puts "#{prog} -h|--help|help  --  Show this message."
+  puts "#{prog} [DIRECTION]"
+  puts '           Fullscreen'
+  puts '           Left_Side'
+  puts '           Right_Bottom'
+  puts '           Right_Side'
+  puts '           Right_Top'
+  puts '           Top_Half'
+  puts '           Top_Stamp'
+  puts '           Bottom_Half'
+  puts '           Bottom_Stamp'
+
+when   'Fullscreen',
+  'Left_Side',
+  'Right_Bottom', 'Right_Side', 'Right_Top',
+  'Top_Half', 'Top_Stamp',
+  'Bottom_Half', 'Bottom_Stamp'
+
+  pos = Object.const_get(cmd)
+
+  win = Window.new
+  win.move_to pos
+  STATE.write_position(win, pos)
+
+else
+  warn "!!! Unknown command: #{cmd}"
+  exit 1
+end # case

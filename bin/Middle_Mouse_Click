@@ -55,7 +55,6 @@ else
 
 end # case
 
-ROOT = Root_Window.new
 loc = Location_Name.new(ROOT, Mouse_Pointer.new)
 win = Window.new
 

@@ -52,3 +52,4 @@ class Root_Window
   end
 end # class
 
+ROOT = Root_Window.new
