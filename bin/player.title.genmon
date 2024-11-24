@@ -1,0 +1,72 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+cmd = ARGV.join(' ').strip
+prog = __FILE__.split('/').last
+
+require "open3"
+require "English"
+
+case cmd
+when '-h', '--help', 'help'
+  puts "#{prog} -h|--help|help  --  Show this message."
+  puts "#{prof} [Generic Monitor ID]"
+  exit 0
+when /^[0-9]+$/
+  puts 'following'
+else
+  warn "!!! Unknown command: #{cmd}"
+  exit 1
+end # case
+
+gen_mon_id = cmd.strip
+
+PIDS = []
+
+def close_everything
+  PIDS.each do |stat|
+    next unless stat.alive?
+    warn "--- INT: #{stat.pid}"
+    `kill -INT #{stat.pid}`.strip
+    warn "--- result: #{$CHILD_STATUS.inspect}"
+  end
+end
+
+Signal.trap('INT') { close_everything }
+Signal.trap('TERM') { close_everything }
+
+
+Open3.popen2('xprop', '-spy', '-root', '_NET_CLIENT_LIST') do |i, o, stat|
+  i.close
+  PIDS << stat
+  puts "#{cmd} PID: #{stat.pid}"
+
+  alive_players = []
+  current = []
+  o.each_line do |_new_list|
+    `wmctrl -lxG`.strip.each_line do |line|
+      next unless line['  smplayer.smplayer ']
+
+      win_id, *_rest = line.split
+      current << win_id
+    end # each_line
+
+    if current.empty? # No players exist.
+      warn "--- Player list empty. ---"
+      alive_players = []
+      next
+    end
+
+    to_add = current.reject { |win_id| alive_players.include?(win_id) }
+    to_remove = current.select { |win_id| current.include?(win_id) }
+    puts "---- WMCTRL: #{current.inspect}"
+    current.clear
+    to_add.each do |new_player|
+      new_cmd = "gen.mon.proc #{cmd} xprop -spy -id #{new_player} _NET_WM_NAME"
+      warn new_cmd
+      Process.spawn new_cmd
+    end
+    alive_players = to_add + alive_players.reject { |id| to_remove.include?(id) }
+    warn "--- Current players are: #{alive_players.inspect}"
+  end # each_line
+end # Open3
