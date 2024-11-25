@@ -57,16 +57,16 @@ Open3.popen2('xprop', '-spy', '-root', '_NET_CLIENT_LIST') do |i, o, stat|
       next
     end
 
-    to_add = current.reject { |win_id| alive_players.include?(win_id) }
-    to_remove = current.select { |win_id| current.include?(win_id) }
-    puts "---- WMCTRL: #{current.inspect}"
+    to_add = current - alive_players
+    to_remove = alive_players - current
+    puts "---- WMCTRL: #{current.inspect}, ADD: #{to_add.inspect}, REMOVE: #{to_remove}"
     current.clear
     to_add.each do |new_player|
       new_cmd = "gen.mon.proc #{cmd} xprop -spy -id #{new_player} _NET_WM_NAME"
-      warn new_cmd
+      warn "--- Running: (NEW) #{new_cmd}"
       Process.spawn new_cmd
     end
-    alive_players = to_add + alive_players.reject { |id| to_remove.include?(id) }
+    alive_players = (alive_players - to_remove) + to_add
     warn "--- Current players are: #{alive_players.inspect}"
   end # each_line
 end # Open3
