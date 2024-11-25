@@ -18,4 +18,8 @@ module Left_Side
   def h
     ROOT.h - ROOT.bottom_padding - y
   end
+
+  def inspect
+    "#{name} x:#{x} y:#{y} w:#{w} h:#{h}"
+  end
 end # module
