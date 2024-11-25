@@ -10,8 +10,19 @@ class Window
       @window = win
     end
 
+    def smplayer?
+      !!`xtitle`[' - SMPlayer']
+    end
+
     def move_to(pos)
       old_pos = read('current_position')
+      if pos == Bottom_Half && smplayer?
+        return nil if old_pos == Bottom_Stamp.name.to_s
+
+        pos = Bottom_Stamp
+        `xdotool sleep 0.1 key --clearmodifiers ctrl+c`
+      end
+
       system(%( wmctrl -i -r #{window.id} -e 0,#{pos.x},#{pos.y},#{pos.w},#{pos.h} ))
       write('old_position', old_pos) if old_pos
       write('current_position', pos.name.to_s)

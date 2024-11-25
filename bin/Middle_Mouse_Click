@@ -6,6 +6,7 @@ $LOAD_PATH << File.dirname(File.expand_path(__FILE__))
 require 'English'
 require_relative '../src/windows/Root_Window'
 require_relative '../src/windows/Window'
+require_relative '../src/windows/Move'
 require_relative '../src/windows/Mouse_Pointer'
 require_relative '../src/windows/Location_Name'
 
@@ -70,11 +71,7 @@ when 'top_edge'
     win.move_to(Top_Stamp)
   end
 when 'bottom_edge'
-  if smplayer?
-    win.move_to(Bottom_Half)
-  else
-    win.move_to(Bottom_Stamp)
-  end
+  Move.new(win).move_to(Bottom_Half)
 when 'left_edge'
   win.move_to(Left_Side)
 when 'right_edge'
