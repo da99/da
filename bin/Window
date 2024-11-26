@@ -23,6 +23,8 @@ require_relative '../src/windows/Bottom_Stamp'
 cmd = ARGV.join(' ')
 prog = __FILE__.split('/').last
 
+target_area = nil
+
 case cmd
 when '-h', '--help', 'help'
   puts "#{prog} -h|--help|help  --  Show this message."
@@ -38,7 +40,35 @@ when 'mouse_location'
   exit 0
 
 when 'middle_click'
-  true # continue below
+  loc = Location_Name.new(ROOT, Mouse_Pointer.new)
+  target_area = case loc.name
+                when 'top_right_corner'
+                  Right_Top
+                when 'bottom_right_corner'
+                  Right_Bottom
+                when 'top_edge'
+                  if smplayer?
+                    Top_Half
+                  else
+                    Top_Stamp
+                  end
+                when 'bottom_edge'
+                  Bottom_Half
+                when 'left_edge'
+                  Left_Side
+                when 'right_edge'
+                  Right_Side
+                when 'left_side'
+                  system 'xdotool key --clearmodifiers Left'
+                  loc.name
+                when 'right_side'
+                  system 'xdotool key --clearmodifiers Right'
+                  loc.name
+                when 'center'
+                  Fullscreen
+                else
+                  loc.name
+                end # case
 
 else
   warn "!!! Unknown action:  #{cmd.inspect}"
@@ -46,32 +76,6 @@ else
 
 end # case
 
-loc = Location_Name.new(ROOT, Mouse_Pointer.new)
 win = Window.new
-
-case loc.name
-when 'top_right_corner'
-  win.move_to(Right_Top)
-when 'bottom_right_corner'
-  win.move_to(Right_Bottom)
-when 'top_edge'
-  if smplayer?
-    win.move_to(Top_Half)
-  else
-    win.move_to(Top_Stamp)
-  end
-when 'bottom_edge'
-  Move.new(win).move_to(Bottom_Half)
-when 'left_edge'
-  win.move_to(Left_Side)
-when 'right_edge'
-  win.move_to(Right_Side)
-when 'left_side'
-  system 'xdotool key --clearmodifiers Left'
-when 'right_side'
-  system 'xdotool key --clearmodifiers Right'
-when 'center'
-  win.move_to(Fullscreen)
-else
-  puts loc.name.inspect
-end # case
+win.move_to(target_area) if target_area && !target_area.is_a?(String)
+puts target_area.inspect
