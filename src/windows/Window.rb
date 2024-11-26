@@ -18,6 +18,8 @@ class Window
     @x = @y = 0
     @w = @h = 0
     @border_x = @border_y = 0
+    @wm_class = nil
+    @title = nil
 
     @id = if raw_id.nil?
             `xdotool getactivewindow`.strip.to_i
@@ -45,7 +47,19 @@ class Window
   end # def initialize
 
   def inspect
-    "Window id #{id}: w:#{w} h:#{h} x:#{x} y:#{y}"
+    "Window id #{id}: w:#{w} h:#{h} x:#{x} y:#{y} wm_class:#{wm_class} title: #{title}"
+  end
+
+  def wm_class
+    @wm_class ||= `xprop  -id #{id} '=$0.$1' WM_CLASS`.split('=').last.gsub('"', '')
+  end
+
+  def smplayer?
+    wm_class == 'smplayer.smplayer'
+  end
+
+  def title
+    @title ||= `xtitle #{id}`
   end
 
   def move_to(pos)

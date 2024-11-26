@@ -1,8 +1,0 @@
----
-name: da
-version: 0.0.0
-crystal: ">= 1.0.0"
-
-targets:
-  da_bin:
-    main: bin/__.cr
