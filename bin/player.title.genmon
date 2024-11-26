@@ -44,8 +44,8 @@ Open3.popen2('xprop', '-spy', '-root', '_NET_CLIENT_LIST') do |i, o, stat|
   alive_players = []
   current = []
   o.each_line do |_new_list|
-    `wmctrl -lxG`.strip.each_line do |line|
-      next unless line['  smplayer.smplayer ']
+    `wmctrl -lxG`.each_line do |line|
+      next unless line[' smplayer.smplayer ']
 
       win_id, *_rest = line.split
       current << win_id
