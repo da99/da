@@ -23,32 +23,22 @@ require_relative '../src/windows/Bottom_Stamp'
 cmd = ARGV.join(' ')
 prog = __FILE__.split('/').last
 
-def smplayer?
-  !!`xtitle`[' - SMPlayer']
-end
-
 case cmd
 when '-h', '--help', 'help'
   puts "#{prog} -h|--help|help  --  Show this message."
   puts "#{prog}                 -- Run root window action."
   puts "#{prog} mouse_location"
-  puts "#{prog} root_mouse_location"
   exit 0
 
 when ''
   true
 
-when 'window'
-  puts 'window action'
-  exit 2
-
 when 'mouse_location'
-  puts Location_Name.new(Window.new, Mouse_Pointer.new).name
+  puts Location_Name.new(ROOT, Mouse_Pointer.new).name
   exit 0
 
-when 'root_mouse_location'
-  puts Location_Name.new(Root_Window.new, Mouse_Pointer.new).name
-  exit 0
+when 'middle_click'
+  true # continue below
 
 else
   warn "!!! Unknown action:  #{cmd.inspect}"
