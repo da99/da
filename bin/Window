@@ -19,6 +19,7 @@ require_relative '../src/windows/Top_Half'
 require_relative '../src/windows/Top_Stamp'
 require_relative '../src/windows/Bottom_Half'
 require_relative '../src/windows/Bottom_Stamp'
+require_relative '../src/windows/State'
 
 cmd = ARGV.join(' ')
 prog = __FILE__.split('/').last
@@ -29,11 +30,20 @@ case cmd
 when '-h', '--help', 'help'
   puts "#{prog} -h|--help|help  --  Show this message."
   puts "#{prog}                 -- Run root window action."
+  puts "#{prog} inspect current|Left_Side"
+  puts "#{prog} move [DIRECTION]"
+  puts "#{prog} list directions"
   puts "#{prog} mouse_location"
   exit 0
 
 when ''
   true
+
+when 'inspect current'
+  puts Window.new_current.inspect
+
+when 'inspect Left_Side'
+  puts Left_Side.inspect
 
 when 'mouse_location'
   puts Location_Name.new(ROOT, Mouse_Pointer.new).name
@@ -70,12 +80,43 @@ when 'middle_click'
                   loc.name
                 end # case
 
+when 'move Fullscreen'
+  target_area = Fullscreen
+when 'move Left_Side'
+  target_area = Left_Side
+when 'move Right_Bottom'
+  target_area = Right_Bottom
+when 'move Right_Side'
+  target_area = Right_Side
+when 'move Right_Top'
+  target_area = Right_Top
+when 'move Top_Half'
+  target_area = Top_Half
+when 'move Top_Stamp'
+  target_area = Top_Stamp
+when 'move Bottom_Half'
+  target_area = Bottom_Half
+when 'move Bottom_Stamp'
+  target_area = Bottom_Stamp
+
+when 'list directions'
+  File.read(__FILE__).each_line do |l|
+    next unless l[/^when 'move ([^']+)/]
+
+    puts Regexp.last_match(1)
+  end
+  exit 0
 else
   warn "!!! Unknown action:  #{cmd.inspect}"
   exit 2
 
 end # case
 
-win = Window.new
-win.move_to(target_area) if target_area && !target_area.is_a?(String)
-puts target_area.inspect
+if target_area && !target_area.is_a?(String)
+  win = Window.new_current
+  win.move_to(target_area)
+  STATE.write_position(win, target_area)
+else
+  puts target_area.inspect
+  exit 2
+end

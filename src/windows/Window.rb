@@ -9,11 +9,17 @@ class Window
     def margin
       10
     end
+
+    def new_current
+      raw_id = `xdotool getactivewindow`.strip
+      raise 'No current window found.' if raw_id.empty?
+      Window.new raw_id
+    end # def
   end # class
 
   attr_reader :id, :x, :y, :w, :h, :border_x, :border_y
 
-  def initialize(raw_id = nil)
+  def initialize(raw_id)
     @id = 0
     @x = @y = 0
     @w = @h = 0
@@ -21,11 +27,7 @@ class Window
     @wm_class = nil
     @title = nil
 
-    @id = if raw_id.nil?
-            `xdotool getactivewindow`.strip.to_i
-          else
-            raw_id.to_i
-          end
+    @id = raw_id.to_i
 
     `xwininfo -id #{@id}`.strip.each_line do |line|
       last_piece = line.split.last
