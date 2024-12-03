@@ -54,6 +54,8 @@ when 'middle_click'
   target_area = case loc.name
                 when 'top_right_corner'
                   Right_Top
+                when 'top_left_corner'
+                  Left_Side
                 when 'bottom_right_corner'
                   Right_Bottom
                 when 'top_edge'
