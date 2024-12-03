@@ -9,6 +9,7 @@ case "$@" in
     echo "  $cmd hud available packages"
     echo "  $cmd [list|install] packages [devel]"
     echo "  $cmd setup"
+    echo "  $cmd backup"
     echo "  $cmd upgrade"
     echo "  $cmd upgrade packages"
     echo "  $cmd upgrade void-packages"
@@ -54,7 +55,20 @@ case "$@" in
     void_linux sv enable  elogind
     void_linux sv enable  NetworkManager
     void_linux sv enable  polkitd
+    void_linux sv enable  udevd
     "$0" install time
+    ;;
+
+  "backup")
+    cd "$HOME"
+    bu_dir="backups/$(hostname).$(date +%Y.%m.%d-%H.%M.%S)"
+    mkdir -p "$bu_dir"
+    cp -i /etc/fstab "$bu_dir"/
+    cp -ir .config/xfce4 "$bu_dir"/
+    ls -1 /var/service > "$bu_dir"/services.txt
+    cp -i /etc/rc.* /etc/group "$bu_dir"/
+    xbps-query -m > "$bu_dir"/packages.txt
+    ls -1 backups
     ;;
 
   "setup bluetooth")
