@@ -71,9 +71,11 @@ when 'middle_click'
                 when 'left_side'
                   system 'xdotool key --clearmodifiers Left'
                   loc.name
+                  exit 0
                 when 'right_side'
                   system 'xdotool key --clearmodifiers Right'
                   loc.name
+                  exit 0
                 when 'center'
                   Fullscreen
                 else
