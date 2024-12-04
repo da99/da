@@ -3,6 +3,10 @@
 module Top_Half
   extend self
 
+  def stamp?
+    false
+  end
+
   def x
     ROOT.left_padding
   end

@@ -113,7 +113,6 @@ when 'list directions'
 else
   warn "!!! Unknown action:  #{cmd.inspect}"
   exit 2
-
 end # case
 
 if target_area && !target_area.is_a?(String)

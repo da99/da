@@ -4,6 +4,10 @@ module Top_Stamp
   extend self
   FACTOR = 0.25
 
+  def stamp?
+    true
+  end
+
   def x
     ROOT.w - w - Window.border
   end
