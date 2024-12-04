@@ -9,18 +9,47 @@ class State
   end # def
 
   def stamp?
-    !!State.read(window, 'location')[/Stamp/]
+    !!location[/Stamp/]
   end # def
 
   def previous_stamp?
-    !!State.read(window, 'previous_location')[/Stamp/]
+    !!previous_location[/Stamp/]
+  end
+
+  def previous_fullscreen?
+    previous_location == Fullscreen.name.to_s
+  end
+
+  def fullscreen?
+    location == Fullscreen.name.to_s
   end
 
   def move_to(location)
-    previous = State.read(window, 'location')
-    State.write(window, 'previous_location', previous)
+    State.write(window, 'previous_location', location)
     State.write(window, 'location', location.name)
   end # def
+
+  def previous_location
+    State.read(window, 'previous_location')
+  end
+
+  def location
+    State.read(window, 'location')
+  end
+
+  def previous_location!
+    prev = previous_location
+    return Left_Side if prev.empty?
+
+    Object.const_get(prev)
+  end
+
+  def location!
+    curr = location
+    return Left_Side if curr.empty?
+
+    Object.const_get(curr)
+  end
 
   class << self
     def ctrl_c
@@ -30,14 +59,17 @@ class State
     def move_window(window, location)
       state = State.new(window)
 
-      case window.wm_class
-      when 'smplayer.smplayer'
+      if window.wm_class == 'smplayer.smplayer'
         if location.stamp? && !state.previous_stamp? # going into stamp
           ctrl_c
         elsif state.previous_stamp? && !location.stamp? # coming out of stamp
           ctrl_c
         end # if
       end # case
+
+      if location == Fullscreen && state.previous_fullscreen?
+        location = state.previous_location!
+      end # if Fullscreen
 
       state.move_to(location)
     end # def

@@ -117,8 +117,12 @@ end # case
 
 if target_area && !target_area.is_a?(String)
   win = Window.new_current
-  win.move_to(target_area)
-  STATE.write_position(win, target_area)
+  begin
+    State.move_window(win, target_area)
+  rescue Object => e
+    puts e.inspect
+    win.move_to(target_area)
+  end
 else
   puts target_area.inspect
   exit 2
