@@ -64,7 +64,7 @@ case "$@" in
     bu_dir="backups/$(hostname).$(date +%Y.%m.%d-%H.%M.%S)"
     mkdir -p "$bu_dir"
     cp -i /etc/fstab "$bu_dir"/
-    cp -ir .config/xfce4 "$bu_dir"/
+    cp -ir .config/xfce4 .config/smplayer "$bu_dir"/
     ls -1 /var/service > "$bu_dir"/services.txt
     cp -i /etc/rc.* /etc/group "$bu_dir"/
     xbps-query -m > "$bu_dir"/packages.txt

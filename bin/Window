@@ -122,6 +122,7 @@ if target_area && !target_area.is_a?(String)
   rescue Object => e
     puts e.inspect
     win.move_to(target_area)
+    raise e
   end
 else
   puts target_area.inspect

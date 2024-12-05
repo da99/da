@@ -92,7 +92,7 @@ class State
     end # def
 
     def read(window, title)
-      File.write "#{LOCAL_DATA}/#{window.id}.#{title}.txt"
+      File.read "#{LOCAL_DATA}/#{window.id}.#{title}.txt"
     rescue Errno::ENOENT => _e
       ''
     end # def
