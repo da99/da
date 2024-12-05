@@ -13,6 +13,7 @@ class Window
     def new_current
       raw_id = `xdotool getactivewindow`.strip
       raise 'No current window found.' if raw_id.empty?
+
       Window.new raw_id
     end # def
   end # class

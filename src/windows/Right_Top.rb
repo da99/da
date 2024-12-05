@@ -3,6 +3,10 @@
 module Right_Top
   extend self
 
+  def stamp?
+    false
+  end
+
   def x
     (ROOT.w * 0.70).to_i + Window.margin
   end

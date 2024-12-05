@@ -3,6 +3,10 @@
 module Left_Side
   extend self
 
+  def stamp?
+    false
+  end
+
   def x
     ROOT.left_padding
   end

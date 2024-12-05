@@ -3,6 +3,10 @@
 module Right_Side
   extend self
 
+  def stamp?
+    false
+  end
+
   def x
     (ROOT.w * 0.70).to_i + Window.margin
   end
