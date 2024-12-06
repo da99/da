@@ -12,6 +12,10 @@ class State
     @window = win
   end # def
 
+  def inspect
+    "#{window.id}: #{location} #{previous_location}"
+  end
+
   def write_previous_location(location)
     State.write(window, 'previous_location', location.name.to_s)
   end # def
@@ -76,9 +80,11 @@ class State
       state = State.new(window)
 
       if window.wm_class == 'smplayer.smplayer'
-        if location.stamp? && !state.previous_stamp? # going into stamp
+        location = Bottom_Stamp if location == Bottom_Half
+        location = Top_Stamp if location == Top_Half
+        if location.stamp? && !state.stamp? # going into stamp
           ctrl_c
-        elsif state.previous_stamp? && !location.stamp? # coming out of stamp
+        elsif state.stamp? && !location.stamp? # coming out of stamp
           ctrl_c
         end # if
       end # case

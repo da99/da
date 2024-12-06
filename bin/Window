@@ -40,7 +40,11 @@ when ''
   true
 
 when 'inspect current'
-  puts Window.new_current.inspect
+  w = Window.new_current
+  puts w.inspect
+  s = State.new(w)
+  puts s.inspect
+  exit 0
 
 when 'inspect Left_Side'
   puts Left_Side.inspect
@@ -116,14 +120,7 @@ else
 end # case
 
 if target_area && !target_area.is_a?(String)
-  win = Window.new_current
-  begin
-    State.move_window(win, target_area)
-  rescue Object => e
-    puts e.inspect
-    win.move_to(target_area)
-    raise e
-  end
+  State.move_window(Window.new_current, target_area)
 else
   puts target_area.inspect
   exit 2
