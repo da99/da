@@ -22,8 +22,8 @@ target_area = nil
 
 case cmd
 when '-h', '--help', 'help'
-  puts "#{prog} -h|--help|help  --  Show this message."
-  puts "#{prog}                 -- Run root window action."
+  puts "#{prog} -h|--help|help  -- Show this message."
+  puts "#{prog} middle_click    -- Run root window action."
   puts "#{prog} inspect current|Left_Side"
   puts "#{prog} move [DIRECTION]"
   puts "#{prog} list directions"

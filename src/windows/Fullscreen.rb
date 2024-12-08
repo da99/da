@@ -3,6 +3,10 @@
 module Fullscreen
   extend self
 
+  def stamp?
+    false
+  end
+
   def x
     Window.root.left_padding
   end
