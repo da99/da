@@ -8,19 +8,19 @@ module Left_Side
   end
 
   def x
-    ROOT.left_padding
+    Window.root.left_padding
   end
 
   def y
-    ROOT.top_padding
+    Window.root.top_padding
   end
 
   def w
-    (ROOT.w * 0.70).to_i - ROOT.left_padding - Window.margin
+    (Window.root.w * 0.70).to_i - Window.root.left_padding - Window.margin
   end
 
   def h
-    ROOT.h - ROOT.bottom_padding - y
+    Window.root.h - Window.root.bottom_padding - y
   end
 
   def inspect

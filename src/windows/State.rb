@@ -17,28 +17,23 @@ class State
   end
 
   def write_previous_location(location)
-    State.write(window, 'previous_location', location.name.to_s)
+    State.write(window, 'previous_location', new_location.name.to_s)
   end # def
 
   def write_location(location)
-    State.write(window, 'location', location.name)
+    State.write(window, 'location', new_location.name)
   end # def
 
-  def location?(location)
-    State.read(window, 'location') == location.name.to_s
+  def location?(q_location)
+    case q_location
+    when String
+      !!location.downcase[q_location.downcase]
+    when Regexp
+      !!location[q_location]
+    else
+      location == q_location.name.to_s
+    end
   end # def
-
-  def stamp?
-    !!location[/Stamp/]
-  end # def
-
-  def previous_stamp?
-    !!previous_location[/Stamp/]
-  end
-
-  def previous_fullscreen?
-    previous_location == Fullscreen.name.to_s
-  end
 
   def fullscreen?
     location == Fullscreen.name.to_s
@@ -76,25 +71,26 @@ class State
       `xdotool sleep 0.1 key --clearmodifiers ctrl+c`.strip
     end # def
 
-    def move_window(window, location)
+    def move_window(window, new_location)
       state = State.new(window)
+      current_location = state.location
 
       if window.wm_class == 'smplayer.smplayer'
-        location = Bottom_Stamp if location == Bottom_Half
-        location = Top_Stamp if location == Top_Half
-        if location.stamp? && !state.stamp? # going into stamp
+        new_location = Bottom_Stamp if new_location == Bottom_Half
+        new_location = Top_Stamp if new_location == Top_Half
+        if new_location.stamp? && !current_location['Stamp'] # going into stamp
           ctrl_c
-        elsif state.stamp? && !location.stamp? # coming out of stamp
+        elsif !new_location.stamp? && current_location['Stamp'] # coming out of stamp
           ctrl_c
         end # if
       end # case
 
-      if location == Fullscreen && state.previous_fullscreen?
-        location = state.previous_location!
+      if new_location == Fullscreen && current_location['Fullscreen']
+        new_location = state.previous_location!
       end # if Fullscreen
 
-      state.move_to(location) unless state.location?(location)
-      window.move_to location
+      state.move_to(new_location) unless current_location[new_location.name.to_s]
+      window.move_to new_location
     end # def
 
     def read(window, title)

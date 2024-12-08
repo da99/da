@@ -4,18 +4,18 @@ module Fullscreen
   extend self
 
   def x
-    ROOT.left_padding
+    Window.root.left_padding
   end
 
   def y
-    ROOT.top_padding
+    Window.root.top_padding
   end
 
   def w
-    ROOT.w - x - Window.border - Window.margin
+    Window.root.w - x - Window.border - Window.margin
   end
 
   def h
-    ROOT.h - ROOT.top_padding - ROOT.bottom_padding
+    Window.root.h - Window.root.top_padding - Window.root.bottom_padding
   end
 end # module

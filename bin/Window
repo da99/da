@@ -4,21 +4,15 @@
 $LOAD_PATH << File.dirname(File.expand_path(__FILE__))
 
 require 'English'
-require_relative '../src/windows/Root_Window'
 require_relative '../src/windows/Window'
-require_relative '../src/windows/Move'
 require_relative '../src/windows/Mouse_Pointer'
 require_relative '../src/windows/Location_Name'
 
 require_relative '../src/windows/Fullscreen'
 require_relative '../src/windows/Left_Side'
-require_relative '../src/windows/Right_Bottom'
-require_relative '../src/windows/Right_Side'
-require_relative '../src/windows/Right_Top'
-require_relative '../src/windows/Top_Half'
-require_relative '../src/windows/Top_Stamp'
-require_relative '../src/windows/Bottom_Half'
-require_relative '../src/windows/Bottom_Stamp'
+require_relative '../src/windows/Rights'
+require_relative '../src/windows/Halfs'
+require_relative '../src/windows/Stamps'
 require_relative '../src/windows/State'
 
 cmd = ARGV.join(' ')
@@ -50,11 +44,11 @@ when 'inspect Left_Side'
   puts Left_Side.inspect
 
 when 'mouse_location'
-  puts Location_Name.new(ROOT, Mouse_Pointer.new).name
+  puts Location_Name.new(Window.root, Mouse_Pointer.new).name
   exit 0
 
 when 'middle_click'
-  loc = Location_Name.new(ROOT, Mouse_Pointer.new)
+  loc = Location_Name.new(Window.root, Mouse_Pointer.new)
   target_area = case loc.name
                 when 'top_right_corner'
                   Right_Top
@@ -63,27 +57,21 @@ when 'middle_click'
                 when 'bottom_right_corner'
                   Right_Bottom
                 when 'top_edge'
-                  if smplayer?
-                    Top_Half
-                  else
-                    Top_Stamp
-                  end
+                  Top_Half
                 when 'bottom_edge'
                   Bottom_Half
                 when 'left_edge'
                   Left_Side
                 when 'right_edge'
                   Right_Side
+                when 'center'
+                  Fullscreen
                 when 'left_side'
                   system 'xdotool key --clearmodifiers Left'
-                  loc.name
                   exit 0
                 when 'right_side'
                   system 'xdotool key --clearmodifiers Right'
-                  loc.name
                   exit 0
-                when 'center'
-                  Fullscreen
                 else
                   loc.name
                 end # case
