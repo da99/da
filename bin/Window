@@ -26,6 +26,7 @@ when '-h', '--help', 'help'
   puts "#{prog} middle_click    -- Run root window action."
   puts "#{prog} inspect current|Left_Side"
   puts "#{prog} move [DIRECTION]"
+  puts "#{prog} re_move"
   puts "#{prog} list directions"
   puts "#{prog} mouse_location"
   exit 0
@@ -94,6 +95,17 @@ when 'move Bottom_Half'
   target_area = Bottom_Half
 when 'move Bottom_Stamp'
   target_area = Bottom_Stamp
+
+when 're_move'
+  State.re_move.each do |state|
+    puts "#{state.window.id} #{state.window.wm_class} => #{state.location!}"
+  end
+  State.prune.each { |x| puts "Removed: #{x}" }
+  exit 0
+
+when 'inspect old_state'
+  State.old.each { |x| puts x }
+  exit 0
 
 when 'list directions'
   File.read(__FILE__).each_line do |l|

@@ -51,6 +51,15 @@ class Window
   end # class
 
   class << self
+    def list_ids
+      `wmctrl -l`.strip.split("\n").map do |l|
+        raw_id, wtype, *_ignore = l.split
+        next if wtype.to_i.negative?
+
+        raw_id.to_i(16)
+      end.compact
+    end
+
     def root
       @root ||= Root.new
     end

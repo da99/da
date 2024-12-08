@@ -67,6 +67,26 @@ class State
   end
 
   class << self
+    def old
+      ids = Window.list_ids
+      `ls -1 #{State::LOCAL_DATA}`.strip.split("\n").reject do |x|
+        ids.include?(x.split('.').first.to_i)
+      end
+    end # def
+
+    def prune
+      old.each { |x| File.unlink(File.join(State::LOCAL_DATA, x)) }
+    end
+
+    def re_move
+      Window.list_ids.map do |wid|
+        w = Window.new(wid)
+        s = State.new w
+        w.move_to s.location!
+        s
+      end # Window
+    end # def
+
     def ctrl_c
       `xdotool sleep 0.1 key --clearmodifiers ctrl+c`.strip
     end # def
