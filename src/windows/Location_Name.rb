@@ -74,9 +74,9 @@ class Location_Name
   def center?
     center_x = area.x + (area.w / 2).to_i
     center_y = area.y + (area.h / 2).to_i
-    padding = 20
-    half_corner = (CORNER_AREA + padding).to_i
-    point.x >= (center_x - half_corner) && point.x < (center_x + half_corner) &&
-      point.y >= (center_y - half_corner) && point.y < (center_y + half_corner)
+    half_w = (area.w * 0.15).to_i
+    half_h = (area.h * 0.20).to_i
+    point.x >= (center_x - half_w) && point.x < (center_x + half_w) &&
+      point.y >= (center_y - half_h) && point.y < (center_y + half_h)
   end
 end # class
