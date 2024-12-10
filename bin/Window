@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require 'English'
+
 $LOAD_PATH << File.dirname(File.expand_path(__FILE__))
 
 require 'English'
@@ -31,9 +33,6 @@ when '-h', '--help', 'help'
   puts "#{prog} mouse_location"
   exit 0
 
-when ''
-  true
-
 when 'inspect current'
   w = Window.new_current
   puts w.inspect
@@ -53,8 +52,9 @@ when 'middle_click'
   target_area = case loc.name
                 when 'top_right_corner'
                   Right_Top
-                when 'top_left_corner'
-                  Left_Side
+                when 'top_left_corner', 'bottom_left_corner'
+                  system `hostname`.strip, loc.name
+                  exit $CHILD_STATUS.exitstatus
                 when 'bottom_right_corner'
                   Right_Bottom
                 when 'top_edge'
