@@ -225,14 +225,14 @@ case "$@" in
 
   "cleanup linux kernels")
     lcount="$(vkpurge list | wc -l)"
-    if test "$lcount" -lt 12 ; then
+    if test "$lcount" -lt 10 ; then
       echo "--- Only $lcount kernels found. Skipping removal." >&2
       exit 0
     fi
     while read -r x ; do
       echo "--- Uninstalling $x"
-      # sudo vkpurge rm "$x"
-    done < <(vkpurge list | tail -n 6 | tac)
+      sudo vkpurge rm "$x"
+    done < <(vkpurge list | sort -h | head -n 3)
     ;;
 
   "hud available packages")
