@@ -42,7 +42,7 @@ class Window
     end
 
     def top_padding
-      40
+      35
     end
 
     def bottom_padding

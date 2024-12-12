@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-
 module Top_Half
   extend self
 
@@ -9,11 +8,11 @@ module Top_Half
   end
 
   def x
-    Window.root.left_padding
+    Fullscreen.x
   end
 
   def y
-    Window.root.top_padding
+    Fullscreen.y
   end
 
   def w
@@ -21,7 +20,7 @@ module Top_Half
   end
 
   def h
-    (Fullscreen.h / 2).to_i
+    (Fullscreen.h / 2).to_i - Window.margin
   end
 end # module
 
@@ -37,7 +36,7 @@ module Bottom_Half
   end
 
   def y
-    Top_Half.y + Top_Half.h
+    Top_Half.y + Top_Half.h + Window.margin + Window.border
   end
 
   def w
@@ -45,7 +44,7 @@ module Bottom_Half
   end
 
   def h
-    Window.root.h - y - Window.border - Window.root.bottom_padding
+    Window.root.h - y - Window.root.bottom_padding
   end
 end # module
 
