@@ -81,6 +81,8 @@ when 'move Fullscreen'
   target_area = Fullscreen
 when 'move Left_Side'
   target_area = Left_Side
+when 'move Right_Half'
+  target_area = Right_Half
 when 'move Right_Bottom'
   target_area = Right_Bottom
 when 'move Right_Side'

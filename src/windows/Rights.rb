@@ -24,6 +24,30 @@ module Right_Top
   end
 end # module
 
+module Right_Half
+  extend self
+
+  def stamp?
+    false
+  end
+
+  def x
+    (Window.root.w * 0.50).to_i + Window.margin
+  end
+
+  def y
+    Window.root.top_padding
+  end
+
+  def w
+    Window.root.w - x - Window.border
+  end
+
+  def h
+    Window.root.h - Window.root.bottom_padding - y
+  end
+end # module
+
 module Right_Side
   extend self
 
