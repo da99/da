@@ -95,7 +95,8 @@ class State
       state = State.new(window)
       current_location = state.location
 
-      if window.wm_class == 'smplayer.smplayer'
+      case window.wm_class
+      when 'smplayer.smplayer'
         new_location = Bottom_Stamp if new_location == Bottom_Half
         new_location = Top_Stamp if new_location == Top_Half
         if new_location.stamp? && !current_location['Stamp'] # going into stamp
@@ -103,7 +104,7 @@ class State
         elsif !new_location.stamp? && current_location['Stamp'] # coming out of stamp
           ctrl_c
         end # if
-      end # case
+      end # case .wm_class
 
       if new_location == Fullscreen && current_location['Fullscreen']
         new_location = state.previous_location!
@@ -111,6 +112,11 @@ class State
 
       state.move_to(new_location) unless current_location[new_location.name.to_s]
       window.move_to new_location
+
+      case window.wm_class
+      when 'Alacritty.Alacritty', 'caja.Caja', 'Navigator.Firefox'
+        system(%( wmctrl -i -r #{window.id} -e 0,#{new_location.x},#{new_location.y},#{new_location.w - Window.border},#{new_location.h - Window.border} ))
+      end # .wm_class
     end # def
 
     def read(window, title)
