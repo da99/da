@@ -1,9 +1,5 @@
 # frozen_string_literal: true
 
-def ctrl_c
-  `xdotool sleep 0.1 key --clearmodifiers ctrl+c`
-end
-
 class State
   LOCAL_DATA = '/tmp/window_rb'
   attr_reader :window
@@ -16,11 +12,11 @@ class State
     "#{window.id}: #{location} #{previous_location}"
   end
 
-  def write_previous_location(location)
+  def write_previous_location(new_location)
     State.write(window, 'previous_location', new_location.name.to_s)
   end # def
 
-  def write_location(location)
+  def write_location(new_location)
     State.write(window, 'location', new_location.name)
   end # def
 
@@ -91,32 +87,25 @@ class State
       `xdotool sleep 0.1 key --clearmodifiers ctrl+c`.strip
     end # def
 
-    def move_window(window, new_location)
+    def move_window(window, custom_area)
       state = State.new(window)
       current_location = state.location
 
       case window.wm_class
       when 'smplayer.smplayer'
-        new_location = Bottom_Stamp if new_location == Bottom_Half
-        new_location = Top_Stamp if new_location == Top_Half
-        if new_location.stamp? && !current_location['Stamp'] # going into stamp
+        if custom_area.stamp? && !current_location['Stamp'] # going into stamp
           ctrl_c
-        elsif !new_location.stamp? && current_location['Stamp'] # coming out of stamp
+        elsif !custom_area.stamp? && current_location['Stamp'] # coming out of stamp
           ctrl_c
         end # if
       end # case .wm_class
 
-      if new_location == Fullscreen && current_location['Fullscreen']
-        new_location = state.previous_location!
+      if custom_area.area == Fullscreen && current_location['Fullscreen']
+        custom_area.area = state.previous_location!
       end # if Fullscreen
 
-      state.move_to(new_location) unless current_location[new_location.name.to_s]
-      window.move_to new_location
-
-      case window.wm_class
-      when 'Alacritty.Alacritty', 'caja.Caja', 'Navigator.Firefox'
-        system(%( wmctrl -i -r #{window.id} -e 0,#{new_location.x},#{new_location.y},#{new_location.w - Window.border},#{new_location.h - Window.border} ))
-      end # .wm_class
+      state.move_to(custom_area) unless current_location[custom_area.name]
+      window.move_to custom_area
     end # def
 
     def read(window, title)
