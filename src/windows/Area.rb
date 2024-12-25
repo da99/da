@@ -28,12 +28,10 @@ class Custom_Area
   attr_reader :window
 
   def initialize(raw_area, raw_window)
-    @area = case raw_window.wm_class
-            when 'smplayer.smplayer'
-              case raw_area
-              when Bottom_Half
+    @area = if raw_window.wm_class == 'smplayer.smplayer'
+              if raw_area == Bottom_Half
                 Bottom_Stamp
-              when Top_Half
+              elsif raw_area == Top_Half
                 Top_Stamp
               else
                 raw_area
