@@ -6,6 +6,7 @@ require 'English'
 $LOAD_PATH << File.dirname(File.expand_path(__FILE__))
 
 require 'English'
+require_relative '../src/windows/Area'
 require_relative '../src/windows/Window'
 require_relative '../src/windows/Mouse_Pointer'
 require_relative '../src/windows/Location_Name'
@@ -16,7 +17,6 @@ require_relative '../src/windows/Rights'
 require_relative '../src/windows/Halfs'
 require_relative '../src/windows/Stamps'
 require_relative '../src/windows/State'
-require_relative '../src/windows/Custom_Area'
 
 cmd = ARGV.join(' ')
 prog = __FILE__.split('/').last

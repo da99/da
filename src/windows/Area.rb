@@ -1,9 +1,31 @@
 # frozen_string_literal: true
 
+module Area
+  def x
+    raise 'x not implemented.'
+  end
+
+  def y
+    raise 'y not implemented.'
+  end
+
+  def w
+    raise 'w not implement'
+  end
+
+  def h
+    raise 'h not implement'
+  end
+
+  def stamp?
+    false
+  end
+end # module
+
 class Custom_Area
+  include Area
   attr_accessor :area
   attr_reader :window
-  attr_writer :x, :y, :w, :h
 
   def initialize(raw_area, raw_window)
     @area = case raw_window.wm_class
