@@ -85,9 +85,6 @@ class PublicFile
       local_files = JSON.parse(File.read('tmp/public_files.json'))
       local_keys = local_files.values.map { |x| "#{ENV['BUILD_TARGET']}#{x['Key']}" }
       need_to_upload = local_keys - up_keys
-      # each_with_object([]) do |lf, arr|
-      #   arr.push(lf) unless up_keys.include?(lf)
-      # end
 
       local_files.values.select { |x| need_to_upload.include?("#{ENV['BUILD_TARGET']}#{x['Key']}") }
     end
@@ -158,7 +155,7 @@ if $PROGRAM_NAME == __FILE__
 
   when /upload dir (.+)/
     build_target = ENV['BUILD_TARGET'] or raise("BUILD_TARGET not specified")
-    settings = JSON.parse(File.read('settings.json'))
+    settings = JSON.parse(File.read('tmp/settings.json'))
     bucket_name = settings['BUCKET_NAME']
     dir = Regexp.last_match(1)
     `find '#{dir}' -type f`.strip.split("\n").each do |file|
@@ -167,8 +164,8 @@ if $PROGRAM_NAME == __FILE__
       exit($?.exitstatus) unless system(cmd)
     end
 
-  when "upload"
-    build_target = ENV['BUILD_TARGET'] or raise("BUILD_TARGET not specified")
+  when 'upload'
+    build_target = ENV['BUILD_TARGET'] or raise('BUILD_TARGET not specified')
     settings = JSON.parse(File.read('settings.json'))
     bucket_name = settings['BUCKET_NAME']
     PublicFile.upload_list.each { |lf|
@@ -178,11 +175,11 @@ if $PROGRAM_NAME == __FILE__
     }
 
   when 'update raw file manifest'
-    j = JSON.parse(File.read('settings.json'))
+    j = JSON.parse(File.read('tmp/settings.json'))
     PublicFile.write_raw_manifest(j)
 
   when 'update file manifest'
-    j = JSON.parse(File.read('settings.json'))
+    j = JSON.parse(File.read('tmp/settings.json'))
     PublicFile.write_manifest(j)
 
   when /^set src to (.+)$/i

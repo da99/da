@@ -59,13 +59,14 @@ case "$*" in
     "$THIS_DIR"/src/PublicFile.rb "$@"
   ;;
 
-  # doc: CMD update (raw) file manifest - Writes public_files.json
+  # doc: CMD update file manifest - Writes public_files.json
   "update file manifest")
     test -n "$BUILD_TARGET"
     "$THIS_DIR"/src/PublicFile.rb "$@"
   ;;
 
-  "update raw file manifest") # doc: CMD update raw file manifet - Writes tmp/raw_files.json
+  # doc: CMD update raw file manifest - Writes tmp/raw_files.json
+  "update raw file manifest")
     test -n "$BUILD_TARGET"
     "$THIS_DIR"/src/PublicFile.rb "$@"
   ;;

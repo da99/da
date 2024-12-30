@@ -7,8 +7,6 @@
 
 import lodash from 'lodash';
 import type { Attributes } from './base.mts';
-import SETTINGS from '/apps/jaki.club/settings.json';
-import PUBLIC_FILES from '/apps/jaki.club/tmp/raw_files.json';
 // import sanitizeHtml from 'sanitize-html';
 
 import {
@@ -169,30 +167,20 @@ export function to_html(x: BChild) {
 //   return ele;
 // }
 
-export class Static {
-  name: string;
-  constructor(raw_name: string) {
-    this.name = raw_name;
-  }
+// export class Static {
+//   name: string;
+//   constructor(raw_name: string) {
+//     this.name = raw_name;
+//   }
+//
+//   get index_mjs() { return  static_url(`/section/${this.name}/index.mjs`) ; }
+//   get index_html() { return  static_url(`/section/${this.name}/index.html`) ; }
+//   get index_css() { return  static_url(`/section/${this.name}/index.css`); }
+//
+//   // static fetch(sPath: string) {
+//   //   const fin = static_url(c, sPath);
+//   //   console.log(`-- Fetching: ${fin}`)
+//   //   return fetch( fin );
+//   // }
+// } // class
 
-  get index_mjs() { return  static_url(`/section/${this.name}/index.mjs`) ; }
-  get index_html() { return  static_url(`/section/${this.name}/index.html`) ; }
-  get index_css() { return  static_url(`/section/${this.name}/index.css`); }
-
-  // static fetch(sPath: string) {
-  //   const fin = static_url(c, sPath);
-  //   console.log(`-- Fetching: ${fin}`)
-  //   return fetch( fin );
-  // }
-} // class
-
-export function static_url(sPath: string) {
-  const public_file = PUBLIC_FILES[sPath as keyof typeof PUBLIC_FILES];
-  if (!public_file)
-    throw new Error(`!!! File not found: ${sPath}`);
-
-  if (public_file == '')
-    return `${SETTINGS.static_url}${sPath}`;
-
-  return sPath;
-}
