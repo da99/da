@@ -62,7 +62,8 @@ case "$@" in
   "backup")
     cd "$HOME"
     bu_dir="backups/$(hostname).$(date +%Y.%m.%d-%H.%M.%S)"
-    mkdir -p "$bu_dir"
+    mkdir -p "$bu_dir"/bin
+    chmod go-rwX "$bu_dir"
 
     if test -e "bin/$(hostname)" ; then
       cp -i "bin/$(hostname)" "$bu_dir"/bin/
