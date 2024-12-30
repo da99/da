@@ -9,7 +9,7 @@ case "$@" in
     echo "  $cmd hud available packages"
     echo "  $cmd [list|install] packages [devel]"
     echo "  $cmd setup"
-    echo "  $cmd backup"
+    echo "  $cmd backup  # -> backups/"
     echo "  $cmd upgrade"
     echo "  $cmd upgrade packages"
     echo "  $cmd upgrade void-packages"
@@ -63,6 +63,14 @@ case "$@" in
     cd "$HOME"
     bu_dir="backups/$(hostname).$(date +%Y.%m.%d-%H.%M.%S)"
     mkdir -p "$bu_dir"
+
+    if test -e "bin/$(hostname)" ; then
+      cp -i "bin/$(hostname)" "$bu_dir"/bin/
+    fi
+    if test -e "bin/secrets" ; then
+      cp -i "bin/secrets" "$bu_dir"/bin/
+    fi
+
     cp -i /etc/fstab "$bu_dir"/
     cp -ir .config/xfce4 .config/smplayer "$bu_dir"/
     ls -1 /var/service > "$bu_dir"/services.txt
