@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require 'json'
+require 'English'
 
 def run_cmd(s_cmd)
   warn "--- Running: #{s_cmd}"
@@ -13,6 +14,7 @@ class PublicFile
   class << self
     def add_etag_to_file_name(etag, path)
       return path if path[%r|/lib.index.[^\.]{8,16}.mjs|]
+
       pieces = path.split('/')
       last = pieces.pop
       pieces.push("#{etag[0..ETAG_SIZE]}.#{last}")
@@ -22,7 +24,7 @@ class PublicFile
     def all(raw_dir)
       dir = normalize_dir(raw_dir)
       PublicFile.dir_exist!(dir)
-      `find #{dir} -type f`
+      `find #{dir} -type f -not -iname '.*'`
         .strip
         .split("\n")
         .map { |l| PublicFile.new(dir, l.strip) }
@@ -83,10 +85,10 @@ class PublicFile
       uploaded = JSON.parse(File.read('tmp/public_files_uploaded.json'))['Contents']
       up_keys = uploaded.map { |x| x['Key'] }
       local_files = JSON.parse(File.read('tmp/public_files.json'))
-      local_keys = local_files.values.map { |x| "#{ENV['BUILD_TARGET']}#{x['Key']}" }
+      local_keys = local_files.values.map { |x| x['Key'] }
       need_to_upload = local_keys - up_keys
 
-      local_files.values.select { |x| need_to_upload.include?("#{ENV['BUILD_TARGET']}#{x['Key']}") }
+      local_files.values.select { |x| need_to_upload.include? x['Key'] }
     end
 
   end
@@ -151,27 +153,25 @@ if $PROGRAM_NAME == __FILE__
     end
 
   when 'upload list'
-    PublicFile.upload_list.each { |lf| puts "#{lf['Origin']} => #{ENV['BUILD_TARGET']}#{lf['Key']}" }
+    PublicFile.upload_list.each { |lf| puts "#{lf['Origin']} => #{lf['Key']}" }
 
   when /upload dir (.+)/
-    build_target = ENV['BUILD_TARGET'] or raise("BUILD_TARGET not specified")
     settings = JSON.parse(File.read('tmp/settings.json'))
     bucket_name = settings['BUCKET_NAME']
     dir = Regexp.last_match(1)
     `find '#{dir}' -type f`.strip.split("\n").each do |file|
-      cmd = %Q(bun x wrangler r2 object put "#{bucket_name}/#{build_target}#{file.sub(/^build\//, '/')}" --file "#{file}" --content-type "#{`da www mime '#{file}'`.strip}")
+      cmd = %Q(bun x wrangler r2 object put "#{bucket_name}/#{file.sub(/^build\//, '/')}" --file "#{file}" --content-type "#{`da www mime '#{file}'`.strip}")
       puts "--- #{cmd}"
-      exit($?.exitstatus) unless system(cmd)
+      exit($CHILD_STATUS.exitstatus) unless system(cmd)
     end
 
   when 'upload'
-    build_target = ENV['BUILD_TARGET'] or raise('BUILD_TARGET not specified')
     settings = JSON.parse(File.read('settings.json'))
     bucket_name = settings['BUCKET_NAME']
     PublicFile.upload_list.each { |lf|
-      cmd = %Q(bun x wrangler r2 object put "#{bucket_name}/#{build_target}#{lf['Key']}" --file "build#{lf['Origin']}" --content-type "#{lf['mime']}")
+      cmd = %Q(bun x wrangler r2 object put "#{bucket_name}/#{lf['Key']}" --file "build#{lf['Origin']}" --content-type "#{lf['mime']}")
       puts "--- #{cmd}"
-      exit($?.exitstatus) unless system(cmd)
+      exit($CHILD_STATUS.exitstatus) unless system(cmd)
     }
 
   when 'update raw file manifest'

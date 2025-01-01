@@ -15,9 +15,8 @@ THIS_DIR="$(dirname "$0")"
 # BOrange='\e[1;33m'
 
 ensure_build_dir() {
-  test -n "$BUILD_TARGET"
-  public_dir="$(jq --raw-output .STATIC_DIR < settings.json)"
-  build_dir="$(jq --raw-output .BUILD_DIR < settings.json)"
+  public_dir="$(jq --raw-output .STATIC_DIR < tmp/settings.json)"
+  build_dir="$(jq --raw-output .BUILD_DIR < tmp/settings.json)"
   if ! test -e "$public_dir" ; then
     echo "!!! $public_dir directory not found." >&2
     exit 1
@@ -32,22 +31,19 @@ ensure_build_dir() {
 
 case "$*" in
   "public prune") # doc: CMD public prune (list)
-    test -n "$BUILD_TARGET"
     bun run "$THIS_DIR"/src/Public_File.mts "$@"
   ;;
 
   "public prune list")
-    test -n "$BUILD_TARGET"
+    true
   ;;
 
   "public upload") # doc: CMD public upload (list)
     shift
-    test -n "$BUILD_TARGET"
     "$THIS_DIR"/src/PublicFile.rb "$@"
   ;;
 
   "public upload list")
-    test -n "$BUILD_TARGET"
     shift
     "$THIS_DIR"/src/PublicFile.rb "$@"
   ;;
@@ -55,28 +51,25 @@ case "$*" in
   # doc: CMD public upload dir [DIR]
   "public upload dir "*)
     shift
-    test -n "$BUILD_TARGET"
     "$THIS_DIR"/src/PublicFile.rb "$@"
   ;;
 
   # doc: CMD update file manifest - Writes public_files.json
   "update file manifest")
-    test -n "$BUILD_TARGET"
     "$THIS_DIR"/src/PublicFile.rb "$@"
   ;;
 
   # doc: CMD update raw file manifest - Writes tmp/raw_files.json
   "update raw file manifest")
-    test -n "$BUILD_TARGET"
     "$THIS_DIR"/src/PublicFile.rb "$@"
   ;;
 
-  'build dir reset') # doc: BUILD_TARGET=... CMD build dir reset
+  'build dir reset') # doc: CMD build dir reset
     rm -rf build
     ensure_build_dir
     ;;
 
-  'build file '*) # doc: BUILD_TARGET=... CMD build file [FILE]
+  'build file '*) # doc: CMD build file [FILE]
     file_name="$3"
     test -e build || { echo "!!! build dir does not exist."; exit 2; }
 
@@ -97,7 +90,7 @@ case "$*" in
     esac
   ;;
 
-  'build css'|'build css '*) # doc: BUILD_TARGET=... CMD build css (FILE)
+  'build css'|'build css '*) # doc: CMD build css (FILE)
     ensure_build_dir
     build_css() {
       case "$1" in
@@ -154,7 +147,7 @@ case "$*" in
     done < <( find public/section -maxdepth 2 -mindepth 2 -type f -iname '*.html.rb')
     ;;
 
-  'build mjs') # doc: CMD build mjs - BUILD_TARGET required.
+  'build mjs') # doc: CMD build mjs
     ensure_build_dir;
     # "$THIS_DIR"/src/PublicFile.rb build mjs
     set -x
@@ -180,7 +173,7 @@ case "$*" in
     bun run "$THIS_DIR"/src/Public_File.mts "$@"
   ;;
 
-  'serve') # doc: CMD serve - Run CMD and serve static file using settings.json
+  'serve') # doc: CMD serve - Run CMD and serve static file using tmp/settings.json
     set -x
     bun run "$THIS_DIR"/src/Bun.Serve.ts "$@"
   ;;
