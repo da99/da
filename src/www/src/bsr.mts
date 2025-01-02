@@ -73,6 +73,10 @@ class BElement {
   }
 } // BElement
 
+interface HTMLDataSet {
+  data: {[key: string]: string | number}
+}
+
 /*
   * e('input', {name: "_something"}, "My Text")
   * e('a.red#ID', {href: "https://some.url"}, "My Text")
@@ -83,7 +87,7 @@ class BElement {
   *   e('div', "My Text")
   * )
 */
-export function element<T extends keyof HTMLElementTagNameMap>(tag_name: T, ...pieces : (BChild | Partial<HTMLElementTagNameMap[T]>)[]) {
+export function element<T extends keyof HTMLElementTagNameMap>(tag_name: T, ...pieces : (BChild | HTMLDataSet | Partial<HTMLElementTagNameMap[T]>)[]) {
   const eles: BChild[] = [];
   let attrs = undefined;
   let id_class: string = '';
