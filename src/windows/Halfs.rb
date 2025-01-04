@@ -15,7 +15,7 @@ module Top_Half
     end
 
     def w
-      Fullscreen.w
+      Left_Side.w + 100
     end
 
     def h
@@ -37,7 +37,7 @@ module Bottom_Half
     end
 
     def w
-      Fullscreen.w
+      Top_Half.w
     end
 
     def h

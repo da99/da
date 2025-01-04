@@ -168,11 +168,11 @@ if $PROGRAM_NAME == __FILE__
   when 'upload'
     settings = JSON.parse(File.read('settings.json'))
     bucket_name = settings['BUCKET_NAME']
-    PublicFile.upload_list.each { |lf|
+    PublicFile.upload_list.each do |lf|
       cmd = %Q(bun x wrangler r2 object put "#{bucket_name}/#{lf['Key']}" --file "build#{lf['Origin']}" --content-type "#{lf['mime']}")
       puts "--- #{cmd}"
       exit($CHILD_STATUS.exitstatus) unless system(cmd)
-    }
+    end
 
   when 'update raw file manifest'
     j = JSON.parse(File.read('tmp/settings.json'))
