@@ -3,16 +3,22 @@
 class Window
   class Root
     attr_reader :w, :h, :x, :y
+    RESOLUTION_TXT = '/tmp/monitor.resolution.txt'
+
+    def self.resolution
+      raw = begin
+              File.read(RESOLUTION_TXT)
+            rescue Object => _e
+              resolution = `xrandr -q | grep "*" | awk '{ print $1 }'`
+              File.write(RESOLUTION_TXT, resolution)
+              resolution
+            end
+      raw.strip.split('x')
+    end # def
 
     def initialize
       @x = @y = 0
-      raw_w, raw_h = begin
-                       File.read('/tmp/monitor.resolution.txt').strip.split('x')
-                     rescue Object => _e
-                       resolution = `xrandr -q | grep "*" | awk '{ print $1 }'`.strip
-                       File.write('/tmp/monitor.resolution.txt', resolution)
-                       resolution
-                     end
+      raw_w, raw_h = Root.resolution
       @w = raw_w.to_i
       @h = raw_h.to_i
     end
