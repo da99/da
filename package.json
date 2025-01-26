@@ -12,10 +12,10 @@
   "dependencies": {
     "@cloudflare/workers-types": "*",
     "@cloudflare/wrangler": "*",
-    "@types/bun": "^1.2.0"
+    "@types/bun": "*"
   },
   "devDependencies": {
-    "@types/node": "^22.10.10",
+    "@types/node": "*",
     "jsdom": "*"
   },
   "author": "da99",
