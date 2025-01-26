@@ -11,10 +11,11 @@
   },
   "dependencies": {
     "@cloudflare/workers-types": "*",
-    "@cloudflare/wrangler": "*"
+    "@cloudflare/wrangler": "*",
+    "@types/bun": "^1.2.0"
   },
   "devDependencies": {
-    "@types/node": "*",
+    "@types/node": "^22.10.10",
     "jsdom": "*"
   },
   "author": "da99",
