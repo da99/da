@@ -9,8 +9,8 @@ case "$@" in
     echo "Create new files."
     ;;
 
-  # doc: CMD .zsh|.rb|.bash|tmp/run [FILE]
-  ".zsh "*|".rb "*|".bash "*|"tmp/run "*)
+  # doc: CMD .mts|.zsh|.rb|.bash|tmp/run [FILE]
+  ".mts "*|".zsh "*|".rb "*|".bash "*|"tmp/run "*)
     file_type="$1"
     new_file="$2"
 
@@ -20,6 +20,9 @@ case "$@" in
     fi
 
     case "$file_type" in
+      ".mts")
+        cp -i "${DA_DIR}/templates/script.mts" "$new_file"
+        ;;
       ".zsh")
         cp -i "${DA_DIR}/templates/script.zsh" "$new_file"
         ;;
