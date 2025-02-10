@@ -1,29 +1,28 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-
-CMD = ENV['CMD'] || ENV['DA_CMD']
-BOLD = `tput bold`
-NORMAL = `tput sgr0`
+CMD = ENV['CMD'] || ENV['DA_CMD'] || raise('No ENV variable set for CMD')
+BOLD = `tput bold`.freeze
+NORMAL = `tput sgr0`.freeze
 
 def replace_cmd(str)
   str.sub('CMD', FORMATED_CMD).strip
 end
 
 def replace_options(str)
-  str.gsub %r{\[([^\]]+)\]} do |x|
+  str.gsub(/\[([^\]]+)\]/) do |x|
     "\e[33m#{x}\e[0m"
-   end
+  end
 end
 
-def format_cmd(x)
-  main, *cmd = x.split(/\s+/)
+def format_cmd(raw)
+  main, *cmd = raw.split(/\s+/)
   return "#{BOLD}#{main}#{NORMAL}" if cmd.empty?
 
   "#{BOLD}#{main}#{NORMAL} #{cmd.join ' '}"
 end
 
-PREFIX_DOC = %r{\s*(#|//)\s+doc:\s+}
+PREFIX_DOC = %r{\s*(#|//)\s+doc:\s+}.freeze
 FORMATED_CMD = format_cmd(CMD)
 
 ARGV.each do |file_path|
@@ -33,6 +32,7 @@ ARGV.each do |file_path|
   contents = File.read(file_path)
   contents.each_line do |raw_line|
     next unless raw_line.strip[PREFIX_DOC]
+
     line = raw_line.split(PREFIX_DOC).last
     puts replace_cmd(replace_options(line))
   end

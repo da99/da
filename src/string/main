@@ -53,10 +53,10 @@ case "$1" in
     ;;
   # ==============================================
 
-  # doc: CMD doc [...file paths]
+  # doc: CMD=bin_cmd doc [...file paths]
   doc)
     shift
-    "$DA_SRC"/string/doc_format.rb "$@"
+    da_doc "$@"
     ;;
 
   *)
