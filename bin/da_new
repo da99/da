@@ -1,0 +1,55 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'English'
+require 'fileutils'
+
+cmd = ARGV.join(' ')
+prog = __FILE__.split('/').last
+da_src = File.dirname File.dirname(__FILE__)
+
+def compile_template(tmpl)
+end # def compile_template
+
+case cmd
+when '-h', '--help', 'help'
+  puts "#{prog} -h|--help|help                --  Show this message."
+  puts "#{prog} .rb|.zsh|.mts|.bash [NEW FILE]"
+  puts "#{prog} [TEMPLATE] [DIR|NEW FILE]     --  Create new file."
+
+when /(.+) (.+)/
+  tfile = Regexp.last_match(1)
+  dest = Regexp.last_match(2)
+  tmpl_file = case tfile
+              when /\.(rb|zsh|bash|mts)/
+                File.join da_src, 'templates', "script.#{Regexp.last_match(1)}"
+              else
+                tfile
+              end # case
+
+  new_file = if File.directory?(dest)
+               File.join(dest, File.basename(tmpl_file))
+             else
+               dest
+             end
+
+  if File.exist?(new_file)
+    warn "--- Already exists: #{new_file}"
+    exit 0
+  end
+
+  tmpl = File.read(tmpl_file)
+  FileUtils.mkdir_p(File.dirname(new_file))
+
+  new_content = tmpl.gsub(/\{\{([a-zA-Z0-9_]+)\}\}/) do |_match|
+    k = Regexp.last_match(1)
+    raise "ENV variable not found: #{k}" unless ENV[k]
+
+    ENV[k]
+  end
+  File.write(new_file, new_content)
+  warn "--- Wrote: #{new_file}"
+else
+  warn "!!! Unknown command: #{cmd}"
+  exit 1
+end # case
