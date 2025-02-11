@@ -4,14 +4,12 @@
 set -u -e -o pipefail
 
 
-case "$*" in
-  'help intro line')
-    echo "Format strings: bold|red|... content string ..."
-    exit 0
-    ;;
-esac
-
+# doc: Format strings: bold|red|... content string ...
 case "$1" in
+  -h|--help)
+    CMD='da string' da_doc "$0"
+    ;;
+
   # doc: CMD bold|italics [string]
   bold)
     shift
@@ -47,17 +45,11 @@ case "$1" in
     echo -e "\e[34m$*\e[0m"
     ;;
 
-  white) # doc: [content ...]
+  white)
     shift
     echo -e "\e[37m$*\e[0m"
     ;;
   # ==============================================
-
-  # doc: CMD=bin_cmd doc [...file paths]
-  doc)
-    shift
-    da_doc "$@"
-    ;;
 
   *)
     echo "!!! Unknown command: $*" >&2

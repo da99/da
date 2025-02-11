@@ -4,11 +4,8 @@
 set -u -e -o pipefail
 
 
+# doc: Create new files.
 case "$@" in
-  'help intro line')
-    echo "Create new files."
-    ;;
-
   # doc: CMD .mts|.zsh|.rb|.bash|tmp/run [FILE]
   ".mts "*|".zsh "*|".rb "*|".bash "*|"tmp/run "*)
     file_type="$1"

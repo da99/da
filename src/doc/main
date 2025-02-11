@@ -7,14 +7,11 @@ cmd = ARGV.join(' ')
 main_cmd = ARGV.first
 prog = __FILE__.split('/')[-2]
 
+# doc: Extract documentation from a file.
 case cmd
 when '-h', '--help', 'help'
   puts "da #{Shell::String.bold prog} -h|--help|help  --  Show this message."
   puts "da #{Shell::String.bold prog} path/to/file    --  Extract documentation from file."
-  exit 0
-
-when 'help intro line'
-  puts 'Extract documentation from a file.'
   exit 0
 end
 

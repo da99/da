@@ -68,10 +68,6 @@ route_cmd () {
 } # function
 
 case "$*" in
-  "help intro line")
-    :
-    ;;
-
   -h|--help|help) # doc: CMD -h|--help|help - Show this message.
     cd "$DA_DIR"
 
@@ -82,7 +78,7 @@ case "$*" in
     export MAIN_CMD;
     source "src/string/colors.sh"
 
-    CMD="$DA_NAME" "$DA_SRC"/string/main doc "$0"
+    CMD="$DA_NAME" da_doc "$0"
 
     while read -r main_dir ; do
       CMD="$DA_NAME $(basename "$main_dir") " "$DA_SRC"/string/main doc "$main_dir"/main
@@ -104,7 +100,7 @@ case "$*" in
 
     case "${2:-}" in
       -h|help|--help)
-        CMD="$DA_NAME $1" exec "$0" string doc "$DA_SRC/$1/main"
+        CMD="$DA_NAME $1" exec da_doc "$DA_SRC/$1/main"
         ;;
       README)
         if test -e "$DA_SRC/$1/README.md" ; then

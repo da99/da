@@ -5,11 +5,8 @@ set -u -e -o pipefail
 cd "$( dirname "$(realpath "$0")" )/.."
 THIS_DIR="$PWD"
 
+# doc: Use mise instead of this script.
 case "$@" in
-  "help intro line")
-    echo "Use mise instead of this script."
-    ;;
-
   # doc: CMD latest
   "latest")
     url="https://github.com/crystal-lang/crystal/releases"

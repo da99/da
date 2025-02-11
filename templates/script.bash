@@ -9,9 +9,6 @@ case "$*" in
     echo "$0 -h|--help|help -- Show this message."
     echo
     ;;
-  "help intro line")
-    :
-    ;;
   *)
     echo "!!! Unknown command: $*" >&2
     exit 1

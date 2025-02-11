@@ -32,9 +32,7 @@ if $PROGRAM_NAME == __FILE__
     PREFIX_DOC = %r{\s*(#|//)\s+doc:\s+}.freeze
     FORMATED_CMD = format_cmd(CMD || File.basename(ARGV.first))
     ARGV.each do |file_path|
-      intro = `"#{file_path}" help intro line 2>/dev/null`.strip
       puts('-' * `tput cols`.strip.to_i)
-      puts intro unless intro.empty?
       contents = File.read(file_path)
       contents.each_line do |raw_line|
         next unless raw_line.strip[PREFIX_DOC]
