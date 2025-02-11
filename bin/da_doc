@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-CMD = ENV['CMD'] || ENV['DA_CMD'] || raise('No ENV variable set for CMD')
+CMD = ENV['CMD'] || ENV['DA_CMD']
 BOLD = `tput bold`.freeze
 NORMAL = `tput sgr0`.freeze
 
@@ -22,18 +22,28 @@ def format_cmd(raw)
   "#{BOLD}#{main}#{NORMAL} #{cmd.join ' '}"
 end
 
-PREFIX_DOC = %r{\s*(#|//)\s+doc:\s+}.freeze
-FORMATED_CMD = format_cmd(CMD)
+if $PROGRAM_NAME == __FILE__
+  case ARGV.join(' ')
+  when '-h', '--help'
+    this_file = File.basename $PROGRAM_NAME
+    puts "#{this_file} -h|--help    - Show this help message."
+    puts "CMD=... #{this_file} FILE - Extract documentation."
+  when /.+/
+    PREFIX_DOC = %r{\s*(#|//)\s+doc:\s+}.freeze
+    FORMATED_CMD = format_cmd(CMD || File.basename(ARGV.first))
+    ARGV.each do |file_path|
+      intro = `"#{file_path}" help intro line 2>/dev/null`.strip
+      puts('-' * `tput cols`.strip.to_i)
+      puts intro unless intro.empty?
+      contents = File.read(file_path)
+      contents.each_line do |raw_line|
+        next unless raw_line.strip[PREFIX_DOC]
 
-ARGV.each do |file_path|
-  intro = `"#{file_path}" help intro line 2>/dev/null`.strip
-  puts('-' * 70)
-  puts intro unless intro.empty?
-  contents = File.read(file_path)
-  contents.each_line do |raw_line|
-    next unless raw_line.strip[PREFIX_DOC]
-
-    line = raw_line.split(PREFIX_DOC).last
-    puts replace_cmd(replace_options(line))
-  end
-end
+        line = raw_line.split(PREFIX_DOC).last
+        puts replace_cmd(replace_options(line))
+      end
+    end
+  else
+    raise "Unknown arguments: #{ARGV.inspect}"
+  end # case
+end # if $PROGRAM_NAME
