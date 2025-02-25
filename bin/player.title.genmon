@@ -9,8 +9,8 @@ require "English"
 
 case cmd
 when '-h', '--help', 'help'
-  puts "#{prog} -h|--help|help  --  Show this message."
-  puts "#{prof} [Generic Monitor ID]"
+  puts "#{prog} -h|--help|help       -- Show this message."
+  puts "#{prog} [Generic Monitor ID] -- Update panel when a SMPLAYER window changes title."
   exit 0
 when /^[0-9]+$/
   puts 'following'
@@ -52,7 +52,7 @@ Open3.popen2('xprop', '-spy', '-root', '_NET_CLIENT_LIST') do |i, o, stat|
     end # each_line
 
     if current.empty? # No players exist.
-      warn "--- Player list empty. ---"
+      warn '--- Player list empty. ---'
       alive_players = []
       next
     end
