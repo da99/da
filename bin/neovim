@@ -13,28 +13,27 @@ case "$*" in
     ;;
 
   "setup"|"upgrade")
-    void_linux install packages devel
+    if which xbps-install ; then
+      void_linux install packages devel
+    fi
 
     if which gem && ! { gem list | grep neovim ; } ; then
       gem install --user-install neovim
     fi
 
-    if which npm && ! { npm list --global | grep neovim ; } ; then
-      if ! { npm list --global | grep neovim ; } ; then
-        npm install -g neovim
-      fi
-      if ! which vscode-html-language-server ; then
-        npm install -g vscode-langservers-extracted
-      fi
+    if which bun && ! { bun pm ls --global | grep neovim ; } ; then
+      bun install -g neovim
+      bun install -g vscode-langservers-extracted
     else
-      echo "!!! Install npm and re-run this script" >&2
+      echo "!!! Install bun and re-run this script" >&2
+      echo 1
     fi
 
 
-    if ! command -v mise ; then
-      echo "!!! mise command not found."
-      exit 1
-    fi
+    # if ! command -v mise ; then
+    #   echo "!!! mise command not found."
+    #   exit 1
+    # fi
 
     mkdir -p /progs/tmp/nvim
 
