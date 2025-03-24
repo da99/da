@@ -32,6 +32,7 @@ when '-h', '--help', 'help'
   puts "#{prog} re_move"
   puts "#{prog} list directions"
   puts "#{prog} mouse_location"
+  puts "#{prog} reset monitor"
   exit 0
 
 when 'inspect current'
@@ -116,6 +117,9 @@ when 'list directions'
 
     puts Regexp.last_match(1)
   end
+  exit 0
+when 'reset monitor'
+  `rm #{Window::Root::RESOLUTION_TXT}` if File.exist?(Window::Root::RESOLUTION_TXT)
   exit 0
 else
   warn "!!! Unknown action:  #{cmd.inspect}"
