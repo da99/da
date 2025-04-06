@@ -239,13 +239,10 @@ case "$@" in
       exit 0
     fi
 
-    echo "!!! Clean with vkpurge"
-    exit 0
-
     while read -r x ; do
       echo "--- Uninstalling $x"
       sudo vkpurge rm "$x"
-    done < <(vkpurge list | sort -h | head -n 3)
+    done < <(vkpurge list | sort --version-sort | head -n 3)
     ;;
 
   "hud available packages")
