@@ -238,6 +238,10 @@ case "$@" in
       echo "--- Only $lcount kernels found. Skipping removal." >&2
       exit 0
     fi
+
+    echo "!!! Clean with vkpurge"
+    exit 0
+
     while read -r x ; do
       echo "--- Uninstalling $x"
       sudo vkpurge rm "$x"
