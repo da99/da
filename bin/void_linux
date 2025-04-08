@@ -206,7 +206,7 @@ case "$@" in
         :
       else
         if test "$(battery.monitor current)" -lt 40 ; then
-          echo "!!! Plug laptop has low battery and discharging." >&2
+          echo "!!! Laptop has low battery and discharging." >&2
           exit 1
         fi
       fi
