@@ -1,0 +1,28 @@
+#!/usr/bin/env zsh
+#
+#
+set -u -e -o pipefail
+
+case "$*" in
+  "-h"|"--help"|"help")
+    echo "$0 up|down nickname"
+    ;;
+  "up "*|"down "*)
+    direction="$1"
+    target="$2"
+    if ! test -e "$target"; then
+      target="$HOME/config/${target}.conf"
+    fi
+    if ! test -e "$target"; then
+      echo "!!! Not found: $target" >&2
+      exit 1
+    fi
+    set -x
+    sudo wg-quick "$direction" "$target"
+    ;;
+  *)
+    echo "!!! Unknown command: $*" >&2
+    exit 1
+    ;;
+esac
+

@@ -48,6 +48,7 @@ when /(.+) (.+)/
     ENV[k]
   end
   File.write(new_file, new_content)
+  `chmod u+x "#{new_file}"`
   warn "--- Wrote: #{new_file}"
 else
   warn "!!! Unknown command: #{cmd}"
