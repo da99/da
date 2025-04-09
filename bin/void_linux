@@ -202,7 +202,7 @@ case "$@" in
     fi
 
     if battery.monitor has battery ; then
-      if test "$(battery.monitor status)" = "charging" ; then
+      if battery.monitor is charging ; then
         :
       else
         if test "$(battery.monitor current)" -lt 40 ; then
