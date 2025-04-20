@@ -76,6 +76,7 @@ case "$@" in
     cp -ir .config/xfce4 .config/smplayer "$bu_dir"/
     ls -1 /var/service > "$bu_dir"/services.txt
     cp -i /etc/rc.* /etc/group "$bu_dir"/
+    groups >> "$bu_dir"/groups.txt
     xbps-query -m > "$bu_dir"/packages.txt
     ls -1 backups
     ;;
