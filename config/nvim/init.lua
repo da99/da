@@ -195,6 +195,7 @@ set_keymap('n', '<Leader>L', 'O<ESC>', {})
 -- " LSP:
 -- " ===============================================
 set_keymap('n', '<Leader>qa', '<CMD>lua vim.diagnostic.open_float()<CR>', { noremap=true, silent=true })
+set_keymap('n', '<Leader>qe', '<CMD>lua vim.diagnostic.goto_next()<CR>', { noremap=true, silent=true })
 set_keymap('n', '<Leader>qq', '<CMD>lua vim.lsp.buf.hover()<CR>', {})
 set_keymap('n', '<Leader>qw', '<CMD>lua vim.lsp.buf.definition()<CR>', {noremap = true})
 -- set_keymap('n', '<Leader>qr', '<CMD>lua vim.lsp.buf.rename()<CR>', {noremap = true})
