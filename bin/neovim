@@ -21,12 +21,16 @@ case "$*" in
       gem install --user-install neovim
     fi
 
-    if which bun && ! { bun pm ls --global | grep neovim ; } ; then
-      bun install -g neovim
-      bun install -g vscode-langservers-extracted
+    if which bun ;  then
+      if ! which neovim-node-host ; then
+        bun install -g neovim
+      fi
+      if ! which vscode-html-language-server ; then
+        bun install -g vscode-langservers-extracted
+      fi
     else
       echo "!!! Install bun and re-run this script" >&2
-      echo 1
+      exit 1
     fi
 
 

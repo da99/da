@@ -11,6 +11,7 @@ end
 local function packages()
   return {
     "savq/paq-nvim", -- let paq manage itself
+    'isobit/vim-caddyfile',
     'RubixDev/mason-update-all',
     'gfanto/fzf-lsp.nvim',
     'nvim-lua/plenary.nvim',
