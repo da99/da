@@ -13,9 +13,13 @@ case "$*" in
   # doc: CMD caddy install
   "caddy install")
     set -x
-    mkdir -p /progs/caddy
-    cd /progs/caddy
-    wget --continue "https://caddyserver.com/api/download?os=linux&arch=amd64&idempotency=26530707146755"
+    mkdir -p /progs/caddy/bin
+    cd /progs/caddy/bin
+    if ! test -e caddy ; then
+      wget -4 --continue -O caddy_linux_amd64 "https://caddyserver.com/api/download?os=linux&arch=amd64&idempotency=26530707146755"
+      mv -f caddy_linux_amd64 caddy
+      chmod u+x caddy
+    fi
   ;;
   *)
     echo "!!! Unknown command: $*" >&2
