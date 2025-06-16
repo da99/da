@@ -488,6 +488,28 @@ lspconfig.lua_ls.setup{
   capabilities = capabilities,
 }
 
+local ra_on_attach = function(client)
+    require'completion'.on_attach(client)
+end
+lspconfig.rust_analyzer.setup{
+    settings = {
+            imports = {
+                granularity = {
+                    group = "module",
+                },
+                prefix = "self",
+            },
+            cargo = {
+                buildScripts = {
+                    enable = true,
+                },
+            },
+            procMacro = {
+                enable = true
+            },
+    }
+}
+
 -- =============================================================================
 -- From: https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md#denols
 -- NOTE: To appropriately highlight codefences returned from denols:
