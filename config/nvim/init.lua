@@ -491,24 +491,26 @@ lspconfig.lua_ls.setup{
 local ra_on_attach = function(client)
     require'completion'.on_attach(client)
 end
-lspconfig.rust_analyzer.setup{
-    settings = {
-            imports = {
-                granularity = {
-                    group = "module",
-                },
-                prefix = "self",
-            },
-            cargo = {
-                buildScripts = {
-                    enable = true,
-                },
-            },
-            procMacro = {
-                enable = true
-            },
-    }
-}
+-- lspconfig.rust_analyzer.setup{
+--     settings = {
+--       ["rust-analyzer"] = {
+--             imports = {
+--                 granularity = {
+--                     group = "module",
+--                 },
+--                 prefix = "self",
+--             },
+--             cargo = {
+--                 buildScripts = {
+--                     enable = true,
+--                 },
+--             },
+--             procMacro = {
+--                 enable = true
+--             },
+--           }
+--     }
+-- }
 
 -- =============================================================================
 -- From: https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md#denols
