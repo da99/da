@@ -480,9 +480,9 @@ lspconfig.cssls.setup{
   capabilities = capabilities,
 }
 
-lspconfig.solargraph.setup{
-  capabilities = capabilities,
-}
+-- lspconfig.solargraph.setup{
+--   capabilities = capabilities,
+-- }
 
 lspconfig.lua_ls.setup{
   capabilities = capabilities,
