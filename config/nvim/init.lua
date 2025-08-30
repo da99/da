@@ -479,9 +479,14 @@ vim.lsp.config('luals', {
 
 vim.lsp.enable('luals')
 
-
--- lspconfig.jsonls.setup{}
--- lspconfig.jsonls.setup{ cmd = { "vscode-json-languageserver", "--stdio" } } -- https://github.com/pwntester/nvim-lsp
+-- =============================================================================
+vim.lsp.config('jsonls', {
+  cmd = {"vscode-json-language-server", "--stdio"},
+  filetypes = {'json'},
+  root_markers = {'.git'},
+})
+vim.lsp.enable('jsonls')
+-- lspconfig.jsonls.setup{ cmd = {  } } -- https://github.com/pwntester/nvim-lsp
 -- lspconfig.sumneko_lua.setup({ })
 -- lspconfig.bashls.setup{
 --   capabilities = capabilities,
