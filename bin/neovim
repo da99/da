@@ -17,13 +17,26 @@ case "$*" in
       void_linux install packages devel
     fi
 
-    if which gem && ! { gem list | grep neovim ; } ; then
-      gem install --user-install neovim
+    if which gem ; then
+      if ! { gem list | grep neovim ; } ; then
+        gem install --user-install neovim
+      fi
+      if ! { gem list | grep solargraph ; } ; then
+        gem install --user-install solargraph
+      fi
     fi
 
     if ! which lua-language-server ; then
       sudo xbps-install -S lua-language-server
     fi
+
+    if ! which emmet-language-server ; then
+      bun install -g emmet-language-server
+    fi
+
+    # if ! which shellcheck ; then
+    #   sudo xbps-install -S shellcheck
+    # fi
 
     if which bun ;  then
       if ! which neovim-node-host ; then

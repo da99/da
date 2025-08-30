@@ -515,23 +515,49 @@ vim.lsp.config('html-ls', {
 })
 vim.lsp.enable('html-ls')
 
+-- =============================================================================
+vim.lsp.config('emmet-language-server', {
+  cmd = { 'emmet-language-server', '--stdio' },
+  filetypes = {
+    'astro',
+    'css',
+    'eruby',
+    'html',
+    'htmlangular',
+    'htmldjango',
+    'javascriptreact',
+    'less',
+    'pug',
+    'sass',
+    'scss',
+    'svelte',
+    'templ',
+    'typescriptreact',
+    'vue',
+  },
+  root_markers = { '.git' },
+})
+vim.lsp.enable('emmet-language-server')
+
 -- lspconfig.jsonls.setup{ cmd = {  } } -- https://github.com/pwntester/nvim-lsp
 -- lspconfig.sumneko_lua.setup({ })
 -- lspconfig.bashls.setup{
 --   capabilities = capabilities,
 -- }
--- lspconfig.crystalline.setup{}
--- lspconfig.cssls.setup{
---   capabilities = capabilities,
--- }
 
--- lspconfig.solargraph.setup{
---   capabilities = capabilities,
--- }
 
--- lspconfig.lua_ls.setup{
---   capabilities = capabilities,
--- }
+vim.lsp.config('solargraph', {
+  cmd = { 'solargraph', 'stdio' },
+  settings = {
+    solargraph = {
+      diagnostics = true,
+    },
+  },
+  init_options = { formatting = true },
+  filetypes = { 'ruby' },
+  root_markers = { 'Gemfile', '.git' },
+})
+vim.lsp.enable('solargraph')
 
 local ra_on_attach = function(client)
     require'completion'.on_attach(client)
