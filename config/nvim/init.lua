@@ -448,45 +448,46 @@ require('gitsigns').setup()
 -- require("symbols-outline").setup()
 
 -- =============================================================================
--- Neodev
--- =============================================================================
--- IMPORTANT: make sure to setup neodev BEFORE lspconfig
--- require("neodev").setup({})
--- =============================================================================
-
--- =============================================================================
 -- Mason.nvim
 -- =============================================================================
 require('mason').setup()
-require("mason-lspconfig").setup{}
 require('mason-update-all').setup()
 
 require("inc_rename").setup()
 
--- require('lspconfig')
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 
-local util = require 'lspconfig.util'
-local lspconfig = require 'lspconfig'
-lspconfig.jsonls.setup{}
+vim.lsp.config('bashls', {
+  cmd = {'bash-language-server', 'start'},
+  settings = {
+    bashIde = {
+      globPattern = vim.env.GLOB_PATTERN or '*@(.sh|.bash)',
+    },
+  },
+  filetypes = { 'bash', 'sh' },
+  root_markers = { '.git' },
+})
+
+vim.lsp.enable('bashls')
+-- lspconfig.jsonls.setup{}
 -- lspconfig.jsonls.setup{ cmd = { "vscode-json-languageserver", "--stdio" } } -- https://github.com/pwntester/nvim-lsp
 -- lspconfig.sumneko_lua.setup({ })
-lspconfig.bashls.setup{
-  capabilities = capabilities,
-}
-lspconfig.crystalline.setup{}
-lspconfig.cssls.setup{
-  capabilities = capabilities,
-}
+-- lspconfig.bashls.setup{
+--   capabilities = capabilities,
+-- }
+-- lspconfig.crystalline.setup{}
+-- lspconfig.cssls.setup{
+--   capabilities = capabilities,
+-- }
 
 -- lspconfig.solargraph.setup{
 --   capabilities = capabilities,
 -- }
 
-lspconfig.lua_ls.setup{
-  capabilities = capabilities,
-}
+-- lspconfig.lua_ls.setup{
+--   capabilities = capabilities,
+-- }
 
 local ra_on_attach = function(client)
     require'completion'.on_attach(client)
@@ -530,27 +531,27 @@ vim.g.markdown_fenced_languages = { "ts=typescript" }
 --   }
 -- }
 
-lspconfig.html.setup{
-  filetypes = { "html" },
-  capabilities = capabilities,
-}
+-- lspconfig.html.setup{
+--   filetypes = { "html" },
+--   capabilities = capabilities,
+-- }
 
 -- Emmet HTML completion:
 -- From: https://github.com/aca/emmet-ls
 
-lspconfig.emmet_ls.setup({
-    -- on_attach = on_attach,
-    capabilities = capabilities,
-    filetypes = { "eruby", "html", "javascriptreact", "svelte", "pug", "typescriptreact", "vue" },
-    init_options = {
-      html = {
-        options = {
-          -- For possible options, see: https://github.com/emmetio/emmet/blob/master/src/config.ts#L79-L267
-          ["bem.enabled"] = true,
-        },
-      },
-    }
-})
+-- lspconfig.emmet_ls.setup({
+--     -- on_attach = on_attach,
+--     capabilities = capabilities,
+--     filetypes = { "eruby", "html", "javascriptreact", "svelte", "pug", "typescriptreact", "vue" },
+--     init_options = {
+--       html = {
+--         options = {
+--           -- For possible options, see: https://github.com/emmetio/emmet/blob/master/src/config.ts#L79-L267
+--           ["bem.enabled"] = true,
+--         },
+--       },
+--     }
+-- })
 
 -- require "lspconfig".efm.setup {
 --     init_options = {documentFormatting = true},

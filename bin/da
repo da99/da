@@ -18,7 +18,7 @@ set -u -e -o pipefail
 #   da --help|help www
 DA_BIN="$(dirname "$0")"
 DA_DIR="$(dirname "$DA_BIN")"
-DA_APPS="$(dirname "$DA_DIR")"
+# DA_APPS="$(dirname "$DA_DIR")"
 DA_SRC="$DA_DIR/src"
 DA_NAME="$(basename "$0")"
 MAIN_CMD="$1"

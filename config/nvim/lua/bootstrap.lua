@@ -32,20 +32,17 @@ local function packages()
     "MunifTanjim/nui.nvim",
     "rcarriga/nvim-notify",
 
-    -- Completion:
-    'folke/neodev.nvim',
-
     -- Terminal-related:
     'kassio/neoterm',
 
     -- Common:
     'nvim-lua/plenary.nvim',
     'nvim-tree/nvim-web-devicons',
-    'neovim/nvim-lspconfig',
+    -- 'neovim/nvim-lspconfig',
 
     -- Mason.nvim
     'williamboman/mason.nvim',
-    'williamboman/mason-lspconfig.nvim',
+    -- 'williamboman/mason-lspconfig.nvim',
     'WhoIsSethDaniel/mason-tool-installer.nvim',
     "smjonas/inc-rename.nvim",
 
@@ -65,7 +62,6 @@ local function packages()
     { 'nvim-treesitter/nvim-treesitter', build = function() vim.cmd 'TSUpdate' end },
 
     -- Neo-tree
-    "nvim-lua/plenary.nvim",
     { "nvim-neo-tree/neo-tree.nvim", branch = "v3.x", },
 
     -- Nvim-cmp
