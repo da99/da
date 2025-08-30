@@ -455,10 +455,88 @@ require('mason-update-all').setup()
 
 require("inc_rename").setup()
 
+-- =============================================================================
+-- NVIM-CMP
+-- =============================================================================
+local lspkind = require'lspkind'
+lspkind.init({ mode = 'symbol_text' })
+
+local cmp = require'cmp'
+local function has_words_before()
+  local line, col = (unpack or table.unpack)(vim.api.nvim_win_get_cursor(0))
+  return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match "%s" == nil
+end
+cmp.setup({
+  preselect = cmp.PreselectMode.None,
+  snippet = {
+    -- REQUIRED - you must specify a snippet engine
+    expand = function(args)
+      require('snippy').expand_snippet(args.body) -- For `snippy` users.
+    end,
+  },
+  mapping = cmp.mapping.preset.insert({
+    ['<C-c>'] = cmp.mapping.complete(),
+    -- Disable preselect: https://www.reddit.com/r/neovim/comments/119tqnm/comment/j9pyndx/
+    ['<CR>'] = cmp.mapping.confirm({ select = false }),
+    ['<C-e>'] = cmp.mapping { i = cmp.mapping.abort(), c = cmp.mapping.close() },
+    ['<Tab>'] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_next_item()
+      elseif snippy.can_expand_or_advance() then
+        snippy.expand_or_advance()
+      elseif has_words_before() then
+        cmp.complete()
+      else
+        fallback()
+      end
+    end, { "i", "s" }),
+    ["<S-Tab>"] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_prev_item()
+      elseif snippy.can_jump(-1) then
+        snippy.previous()
+      else
+        fallback()
+      end
+    end, { "i", "s" }),
+
+  }),
+  formatting = {
+    fields = { "kind", "abbr", "menu" },
+    format = lspkind.cmp_format({
+      mode = 'symbol', -- show only symbol annotations
+      maxwidth = 50, -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
+      ellipsis_char = '...', -- when popup menu exceed maxwidth, the truncated part would show ellipsis_char instead (must define maxwidth first)
+    })
+  },
+  sources = cmp.config.sources({
+    { name = 'nvim_lsp', priority = 1000 },
+    { name = 'buffer', priority = 500 },
+    { name = 'path', priority = 250 },
+    { name = 'snippy', priority = 150 },
+  })
+})
+
+cmp.setup.cmdline({ '/', '?' }, {
+  mapping = cmp.mapping.preset.cmdline(),
+  sources = {
+    { name = 'buffer' }
+  }
+})
+
+cmp.setup.cmdline(':', {
+  mapping = cmp.mapping.preset.cmdline(),
+  sources = cmp.config.sources(
+  { { name = 'path' } },
+  { { name = 'cmdline' } }
+  )
+})
+
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 
 vim.lsp.config('bashls', {
+  -- capabilities = capabilities,
   cmd = {'bash-language-server', 'start'},
   settings = {
     bashIde = {
@@ -472,6 +550,7 @@ vim.lsp.enable('bashls')
 
 -- =============================================================================
 vim.lsp.config('luals', {
+  -- capabilities = capabilities,
   cmd = {'lua-language-server'},
   filetypes = {'lua'},
   root_markers = {'.git'},
@@ -481,6 +560,7 @@ vim.lsp.enable('luals')
 
 -- =============================================================================
 vim.lsp.config('jsonls', {
+  -- capabilities = capabilities,
   cmd = {"vscode-json-language-server", "--stdio"},
   filetypes = {'json'},
   root_markers = {'.git'},
@@ -489,6 +569,7 @@ vim.lsp.enable('jsonls')
 
 -- =============================================================================
 vim.lsp.config('cssls', {
+  -- capabilities = capabilities,
   cmd = { 'vscode-css-language-server', '--stdio' },
   filetypes = { 'css', 'scss', 'less' },
   init_options = { provideFormatter = true }, -- needed to enable formatting capabilities
@@ -503,6 +584,7 @@ vim.lsp.enable('cssls')
 
 -- =============================================================================
 vim.lsp.config('html-ls', {
+  -- capabilities = capabilities,
   cmd = { 'vscode-html-language-server', '--stdio' },
   filetypes = { 'html', 'templ' },
   root_markers = { 'package.json', '.git' },
@@ -547,6 +629,7 @@ vim.lsp.enable('emmet-language-server')
 
 
 vim.lsp.config('solargraph', {
+  -- capabilities = capabilities,
   cmd = { 'solargraph', 'stdio' },
   settings = {
     solargraph = {
@@ -702,86 +785,11 @@ require("ibl").setup()
 
 
 
-local lspkind = require'lspkind'
-lspkind.init({ mode = 'symbol_text' })
-
 
 local snippy = require('snippy')
 snippy.setup({})
 
--- =============================================================================
--- NVIM-CMP
--- =============================================================================
-local cmp = require'cmp'
-local function has_words_before()
-  local line, col = (unpack or table.unpack)(vim.api.nvim_win_get_cursor(0))
-  return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match "%s" == nil
-end
-cmp.setup({
-  preselect = cmp.PreselectMode.None,
-  snippet = {
-    -- REQUIRED - you must specify a snippet engine
-    expand = function(args)
-      require('snippy').expand_snippet(args.body) -- For `snippy` users.
-    end,
-  },
-  mapping = cmp.mapping.preset.insert({
-    ['<C-c>'] = cmp.mapping.complete(),
-    -- Disable preselect: https://www.reddit.com/r/neovim/comments/119tqnm/comment/j9pyndx/
-    ['<CR>'] = cmp.mapping.confirm({ select = false }),
-    ['<C-e>'] = cmp.mapping { i = cmp.mapping.abort(), c = cmp.mapping.close() },
-    ['<Tab>'] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_next_item()
-      elseif snippy.can_expand_or_advance() then
-        snippy.expand_or_advance()
-      elseif has_words_before() then
-        cmp.complete()
-      else
-        fallback()
-      end
-    end, { "i", "s" }),
-    ["<S-Tab>"] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_prev_item()
-      elseif snippy.can_jump(-1) then
-        snippy.previous()
-      else
-        fallback()
-      end
-    end, { "i", "s" }),
 
-  }),
-  formatting = {
-    fields = { "kind", "abbr", "menu" },
-    format = lspkind.cmp_format({
-      mode = 'symbol', -- show only symbol annotations
-      maxwidth = 50, -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
-      ellipsis_char = '...', -- when popup menu exceed maxwidth, the truncated part would show ellipsis_char instead (must define maxwidth first)
-    })
-  },
-  sources = cmp.config.sources({
-    { name = 'nvim_lsp', priority = 1000 },
-    { name = 'buffer', priority = 500 },
-    { name = 'path', priority = 250 },
-    { name = 'snippy', priority = 150 },
-  })
-})
-
-cmp.setup.cmdline({ '/', '?' }, {
-  mapping = cmp.mapping.preset.cmdline(),
-  sources = {
-    { name = 'buffer' }
-  }
-})
-
-cmp.setup.cmdline(':', {
-  mapping = cmp.mapping.preset.cmdline(),
-  sources = cmp.config.sources(
-  { { name = 'path' } },
-  { { name = 'cmdline' } }
-  )
-})
 
 require("neo-tree").setup({
   filesystem = {
