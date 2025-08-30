@@ -12,13 +12,17 @@ case "$*" in
     echo
     ;;
 
-  "setup"|"upgrade")
+  "setup base")
     if which xbps-install ; then
       void_linux install packages devel
     fi
 
     if which gem && ! { gem list | grep neovim ; } ; then
       gem install --user-install neovim
+    fi
+
+    if ! which lua-language-server ; then
+      sudo xbps-install -S lua-language-server
     fi
 
     if which bun ;  then
@@ -28,11 +32,17 @@ case "$*" in
       if ! which vscode-html-language-server || ! which vscode-json-language-server ; then
         bun install -g vscode-langservers-extracted
       fi
+      if ! which bash-language-server ; then
+        bun install -g bash-language-server
+      fi
     else
       echo "!!! Install bun and re-run this script" >&2
       exit 1
     fi
+    ;;
 
+  "setup"|"upgrade")
+    "$0" setup base
 
     # if ! command -v mise ; then
     #   echo "!!! mise command not found."

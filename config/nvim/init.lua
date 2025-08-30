@@ -486,6 +486,35 @@ vim.lsp.config('jsonls', {
   root_markers = {'.git'},
 })
 vim.lsp.enable('jsonls')
+
+-- =============================================================================
+vim.lsp.config('cssls', {
+  cmd = { 'vscode-css-language-server', '--stdio' },
+  filetypes = { 'css', 'scss', 'less' },
+  init_options = { provideFormatter = true }, -- needed to enable formatting capabilities
+  root_markers = { 'package.json', '.git' },
+  settings = {
+    css = { validate = true },
+    scss = { validate = true },
+    less = { validate = true },
+  },
+})
+vim.lsp.enable('cssls')
+
+-- =============================================================================
+vim.lsp.config('html-ls', {
+  cmd = { 'vscode-html-language-server', '--stdio' },
+  filetypes = { 'html', 'templ' },
+  root_markers = { 'package.json', '.git' },
+  settings = {},
+  init_options = {
+    provideFormatter = true,
+    embeddedLanguages = { css = true, javascript = true },
+    configurationSection = { 'html', 'css', 'javascript' },
+  },
+})
+vim.lsp.enable('html-ls')
+
 -- lspconfig.jsonls.setup{ cmd = {  } } -- https://github.com/pwntester/nvim-lsp
 -- lspconfig.sumneko_lua.setup({ })
 -- lspconfig.bashls.setup{
