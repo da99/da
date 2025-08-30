@@ -98,16 +98,6 @@ local function headless_mason()
     auto_update = true,
     run_on_start = false,
     start_delay = 0,
-    ensure_installed = {
-      "crystalline",
-      "bash-language-server", "shellcheck", "bashls",
-      "deno", "typescript-language-server",
-      "json-lsp", "html-lsp",
-      "css-lsp", "solargraph",
-      "emmet-ls", "prettierd",
-      "crystalline",
-      "lua-language-server",
-    }
   }
   vim.api.nvim_create_autocmd('User', {
     pattern = 'MasonToolsUpdateCompleted',
