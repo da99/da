@@ -7,7 +7,6 @@ local set_keymap = api.nvim_set_keymap
 local cmd        = vim.cmd
 local env        = vim.env
 local is_256     = env.TERM == "xterm-256color"
-local lsp        = vim.lsp
 
 g.indentLine_char      = '┊'
 g.indentLine_setColors = 0
@@ -198,6 +197,7 @@ set_keymap('n', '<Leader>qa', '<CMD>lua vim.diagnostic.open_float()<CR>', { nore
 set_keymap('n', '<Leader>qe', '<CMD>lua vim.diagnostic.goto_next()<CR>', { noremap=true, silent=true })
 set_keymap('n', '<Leader>qq', '<CMD>lua vim.lsp.buf.hover()<CR>', {})
 set_keymap('n', '<Leader>qw', '<CMD>lua vim.lsp.buf.definition()<CR>', {noremap = true})
+set_keymap('n', '<Leader>qi', '<CMD>checkhealth vim.lsp<CR>', {noremap = true})
 -- set_keymap('n', '<Leader>qr', '<CMD>lua vim.lsp.buf.rename()<CR>', {noremap = true})
 set_keymap('n', '<Leader>qr', ':IncRename ', {noremap = true})
 set_keymap('n', '<Leader>qo', '<CMD>Outline<CR>', {noremap = true, desc = "Toggle outline."})
@@ -468,8 +468,18 @@ vim.lsp.config('bashls', {
   filetypes = { 'bash', 'sh' },
   root_markers = { '.git' },
 })
-
 vim.lsp.enable('bashls')
+
+-- =============================================================================
+vim.lsp.config('luals', {
+  cmd = {'lua-language-server'},
+  filetypes = {'lua'},
+  root_markers = {'.git'},
+})
+
+vim.lsp.enable('luals')
+
+
 -- lspconfig.jsonls.setup{}
 -- lspconfig.jsonls.setup{ cmd = { "vscode-json-languageserver", "--stdio" } } -- https://github.com/pwntester/nvim-lsp
 -- lspconfig.sumneko_lua.setup({ })
