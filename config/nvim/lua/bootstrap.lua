@@ -10,6 +10,7 @@ end
 
 local function packages()
   return {
+    "navarasu/onedark.nvim",
     'lifepillar/pgsql.vim',
     "savq/paq-nvim", -- let paq manage itself
     'isobit/vim-caddyfile',
@@ -24,7 +25,6 @@ local function packages()
     "rcarriga/nvim-notify",
     "folke/noice.nvim",
     "rktjmp/lush.nvim",
-    "olimorris/onedarkpro.nvim",
     'tpope/vim-sensible',
     'tpope/vim-eunuch',
     'folke/which-key.nvim',

@@ -22,20 +22,20 @@ if is_256 then
   g.rg_highlight                   = true -- Highlight :Rg results
   g.rg_command                     = "rg --vimgrep --hidden -g '!.git/'"
 
-  cmd([[
-    set cursorlineopt=number
-    set cursorline
-    set background=light
-    hi Search ctermbg=2    ctermfg=232    guibg=#000000  guifg=NONE  cterm=bold      gui=bold,italic
-    hi Pmenu  ctermbg=233  ctermfg=137    guibg=#D5D5D5  guifg=#171717  cterm=none      gui=NONE
-    hi PmenuSel guifg=#E5C078 guibg=#000000
-    hi PmenuThumb guibg=#C3A56A
-    hi NormalFloat guibg=#000000
-    hi Conceal guifg=#1E1E1E
-    " hi PmenuThumb      ctermbg=235  ctermfg=137    guibg=NONE     guifg=#171717  cterm=none      gui=none
-    highlight Comment cterm=italic gui=italic
-    " set guicursor+=n-v-c-sm:blinkon1
-  ]])
+  -- cmd([[
+  --   set cursorlineopt=number
+  --   set cursorline
+  --   set background=light
+  --   hi Search ctermbg=2    ctermfg=232    guibg=#000000  guifg=NONE  cterm=bold      gui=bold,italic
+  --   hi Pmenu  ctermbg=233  ctermfg=137    guibg=#D5D5D5  guifg=#171717  cterm=none      gui=NONE
+  --   hi PmenuSel guifg=#E5C078 guibg=#000000
+  --   hi PmenuThumb guibg=#C3A56A
+  --   hi NormalFloat guibg=#000000
+  --   hi Conceal guifg=#1E1E1E
+  --   " hi PmenuThumb      ctermbg=235  ctermfg=137    guibg=NONE     guifg=#171717  cterm=none      gui=none
+  --   highlight Comment cterm=italic gui=italic
+  --   " set guicursor+=n-v-c-sm:blinkon1
+  -- ]])
 
   if (fn.filereadable('/tmp/light.editor') == 1) then
     cmd([[
@@ -47,10 +47,17 @@ if is_256 then
       hi InactiveWinAow guibg=#EAEAEA
     ]])
   else
+      -- " colorscheme onedark
+      -- " 
     vim.cmd([[
       set background=dark
-      colorscheme onedark
+      let g:oceanic_next_terminal_bold = 1
+      let g:oceanic_next_terminal_italic = 1
     ]])
+    require('onedark').setup {
+      style = 'darker'
+    }
+    require('onedark').load()
   end
   cmd([[
     hi Search guifg=#FFFFFF
@@ -405,13 +412,13 @@ require('mini.completion').setup({
 cmd(' autocmd! MiniCompletion InsertCharPre * ')
 -- =============================================================================
 
-cmd(' highlight MiniTablineCurrent guibg=#c678dd  guifg=#000000')
-cmd(' highlight MiniTablineVisible guibg=#000000  guifg=#545452')
-cmd(' highlight MiniStatuslineFilename guibg=#c678dd  guifg=#000000')
-cmd(' highlight MiniTablineHidden guibg=#282c34  guifg=#6F7171')
-cmd(' highlight MiniTablineModifiedCurrent guibg=#e8ad00 guifg=#000000 ')
-cmd(' highlight MiniTablineModifiedVisible guibg=#7f5e36 guifg=#000000 ')
-cmd(' highlight MiniTablineModifiedHidden guibg=#7f5e36 guifg=#000000 ')
+cmd(' highlight MiniTablineCurrent guibg=#8EBD6B  guifg=#1F2329')
+-- cmd(' highlight MiniTablineVisible guibg=#000000  guifg=#545452')
+-- cmd(' highlight MiniStatuslineFilename guibg=#c678dd  guifg=#000000')
+-- cmd(' highlight MiniTablineHidden guibg=#282c34  guifg=#6F7171')
+-- cmd(' highlight MiniTablineModifiedCurrent guibg=#e8ad00 guifg=#000000 ')
+-- cmd(' highlight MiniTablineModifiedVisible guibg=#7f5e36 guifg=#000000 ')
+-- cmd(' highlight MiniTablineModifiedHidden guibg=#7f5e36 guifg=#000000 ')
 
 local hipatterns = require('mini.hipatterns')
 hipatterns.setup({
