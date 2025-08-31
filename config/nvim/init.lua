@@ -405,8 +405,10 @@ require('mini.completion').setup({
 cmd(' autocmd! MiniCompletion InsertCharPre * ')
 -- =============================================================================
 
-cmd(' highlight MiniTablineCurrent guibg=#000000 ')
-cmd(' highlight MiniTablineHidden guibg=#282c34 ')
+cmd(' highlight MiniTablineCurrent guibg=#c678dd  guifg=#000000')
+cmd(' highlight MiniTablineVisible guibg=#000000  guifg=#545452')
+cmd(' highlight MiniStatuslineFilename guibg=#c678dd  guifg=#000000')
+cmd(' highlight MiniTablineHidden guibg=#282c34  guifg=#6F7171')
 cmd(' highlight MiniTablineModifiedCurrent guibg=#e8ad00 guifg=#000000 ')
 cmd(' highlight MiniTablineModifiedVisible guibg=#7f5e36 guifg=#000000 ')
 cmd(' highlight MiniTablineModifiedHidden guibg=#7f5e36 guifg=#000000 ')

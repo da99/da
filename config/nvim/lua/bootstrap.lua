@@ -13,7 +13,6 @@ local function packages()
     'lifepillar/pgsql.vim',
     "savq/paq-nvim", -- let paq manage itself
     'isobit/vim-caddyfile',
-    'RubixDev/mason-update-all',
     'gfanto/fzf-lsp.nvim',
     'nvim-lua/plenary.nvim',
     "lukas-reineke/indent-blankline.nvim",
@@ -27,6 +26,7 @@ local function packages()
     "rktjmp/lush.nvim",
     "olimorris/onedarkpro.nvim",
     'tpope/vim-sensible',
+    'tpope/vim-eunuch',
     'folke/which-key.nvim',
     "numToStr/FTerm.nvim",
     "vim-crystal/vim-crystal",
@@ -45,12 +45,14 @@ local function packages()
     'williamboman/mason.nvim',
     -- 'williamboman/mason-lspconfig.nvim',
     'WhoIsSethDaniel/mason-tool-installer.nvim',
+    'RubixDev/mason-update-all',
+
     "smjonas/inc-rename.nvim",
 
     -- mini statusline
     'lewis6991/gitsigns.nvim',
     'nvim-tree/nvim-web-devicons',
-    { 'echasnovski/mini.nvim', branch = 'main' },
+    { 'nvim-mini/mini.nvim', branch = 'stable' },
 
     'duane9/nvim-rg',
 
