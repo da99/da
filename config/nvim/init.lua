@@ -8,6 +8,7 @@ local cmd        = vim.cmd
 local env        = vim.env
 local is_256     = env.TERM == "xterm-256color"
 
+g.sql_type_default = 'pgsql'
 g.indentLine_char      = '┊'
 g.indentLine_setColors = 0
 g.mapleader            = ' '
@@ -532,8 +533,8 @@ cmp.setup.cmdline(':', {
   )
 })
 
--- local capabilities = require('cmp_nvim_lsp').default_capabilities()
--- capabilities.textDocument.completion.completionItem.snippetSupport = true
+local capabilities = require('cmp_nvim_lsp').default_capabilities()
+capabilities.textDocument.completion.completionItem.snippetSupport = true
 
 vim.lsp.config('bashls', {
   -- capabilities = capabilities,
@@ -642,6 +643,27 @@ vim.lsp.config('solargraph', {
 })
 vim.lsp.enable('solargraph')
 
+-- =============================================================================
+vim.lsp.config('gopls', {
+  capabilities = capabilities,
+  cmd = { 'gopls' },
+  filetypes = { 'go', 'gomod', 'gowork', 'gotmpl' },
+  root_markers = { '.git', 'go.mod' },
+})
+vim.lsp.enable('gopls')
+
+-- =============================================================================
+vim.lsp.config('sql-language-server', {
+  capabilities = capabilities,
+  cmd = { 'sql-language-server', 'up', '--method', 'stdio' },
+  filetypes = { 'sql' },
+  root_markers = { '.git' },
+})
+vim.lsp.enable('sql-language-server')
+
+
+
+-- =============================================================================
 local ra_on_attach = function(client)
     require'completion'.on_attach(client)
 end
@@ -801,3 +823,15 @@ require("neo-tree").setup({
 })
 -- if vim.fn.argc() == 1 and vim.fn.isdirectory(vim.v.argv[3]) ~= 0  then
 -- end
+
+vim.filetype.add({
+  extension = {
+    ['.pgsql'] = 'pgsql',
+  },
+})
+vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
+  pattern = { "*.pgsql" }, -- Replace with the actual path to your file
+  callback = function()
+    vim.bo.filetype = "pgsql" -- Set the filetype to 'log'
+  end,
+})

@@ -10,6 +10,7 @@ end
 
 local function packages()
   return {
+    'lifepillar/pgsql.vim',
     "savq/paq-nvim", -- let paq manage itself
     'isobit/vim-caddyfile',
     'RubixDev/mason-update-all',
@@ -62,7 +63,7 @@ local function packages()
     { 'nvim-treesitter/nvim-treesitter', build = function() vim.cmd 'TSUpdate' end },
 
     -- Neo-tree
-    { "nvim-neo-tree/neo-tree.nvim", branch = "v3.x", },
+    { "nvim-neo-tree/neo-tree.nvim", branch = "v3.x" },
 
     -- Nvim-cmp
     'hrsh7th/cmp-nvim-lsp',

@@ -38,6 +38,12 @@ case "$*" in
     #   sudo xbps-install -S shellcheck
     # fi
 
+    if which go ; then
+      if ! which gopls ; then
+        go install golang.org/x/tools/gopls@latest
+      fi
+    fi
+
     if which bun ;  then
       if ! which neovim-node-host ; then
         bun install -g neovim
@@ -47,6 +53,9 @@ case "$*" in
       fi
       if ! which bash-language-server ; then
         bun install -g bash-language-server
+      fi
+      if ! which sql-language-server ; then
+        bun install -g sql-language-server
       fi
     else
       echo "!!! Install bun and re-run this script" >&2
