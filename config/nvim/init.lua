@@ -219,6 +219,13 @@ set_keymap('n', '++', '<CMD>:cnext<CR>', {})
 set_keymap('n', '__', '<CMD>:cprevious<CR>', {})
 
 -- " ===============================================
+set_keymap('v', '<Leader>1', 'gAs%s+<CR>fn == 1<CR>', {})
+set_keymap('v', '<Leader>2', 'gAs%s+<CR>fn == 2<CR>', {})
+set_keymap('v', '<Leader>3', 'gAs%s+<CR>fn == 2 or n == 3<CR>', {})
+
+
+
+-- " ===============================================
 -- " Dev:
 -- " ===============================================
 function tmp_run_edit(i)
