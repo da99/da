@@ -26,7 +26,6 @@ if is_256 then
   --   set cursorlineopt=number
   --   set cursorline
   --   set background=light
-  --   hi Search ctermbg=2    ctermfg=232    guibg=#000000  guifg=NONE  cterm=bold      gui=bold,italic
   --   hi Pmenu  ctermbg=233  ctermfg=137    guibg=#D5D5D5  guifg=#171717  cterm=none      gui=NONE
   --   hi PmenuSel guifg=#E5C078 guibg=#000000
   --   hi PmenuThumb guibg=#C3A56A
@@ -59,9 +58,9 @@ if is_256 then
     }
     require('onedark').load()
   end
-  cmd([[
-    hi Search guifg=#FFFFFF
-  ]])
+  -- cmd([[
+  --   hi Search guifg=#FFFFFF
+  -- ]])
 end
 
 set.signcolumn  = "number"
