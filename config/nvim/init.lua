@@ -496,6 +496,7 @@ cmp.setup({
     ['<CR>'] = cmp.mapping.confirm({ select = false }),
     ['<C-e>'] = cmp.mapping { i = cmp.mapping.abort(), c = cmp.mapping.close() },
     ['<Tab>'] = cmp.mapping(function(fallback)
+      local snippy = require('snippy')
       if cmp.visible() then
         cmp.select_next_item()
       elseif snippy.can_expand_or_advance() then

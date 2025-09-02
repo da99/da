@@ -1,0 +1,33 @@
+
+
+snippet div
+  -- =============================================================================
+  ${0}
+
+snippet func
+  CREATE OR REPLACE FUNCTION ${1:name}(
+    ${2:vars}
+  ) RETURNS ${3:RETURN}
+  LANGUAGE plpgsql
+  SECURITY DEFINER
+  SET search_path = ${4:schema}
+  AS $$
+  BEGIN
+    ${0}
+  END;
+  $$;
+  GRANT EXECUTE ON FUNCTION ${1} to www_app;
+
+snippet proc
+  CREATE OR REPLACE PROCEDURE ${1:name}(
+    ${2:vars}
+  )
+  LANGUAGE plpgsql
+  SECURITY DEFINER
+  SET search_path = ${4:schema}
+  AS $$
+  BEGIN
+    ${0}
+  END;
+  $$;
+  GRANT EXECUTE ON FUNCTION ${1} to www_app;
