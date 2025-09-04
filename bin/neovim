@@ -81,12 +81,12 @@ case "$*" in
     echo
     echo "--- Paq Update:"
     nvim --headless -c 'autocmd User PaqDoneUpdate quitall' -c 'PaqUpdate'
-    echo
-    echo "--- Mason:"
-    nvim --headless -u NONE -c 'lua require("bootstrap").headless_mason()'
-    echo
-    echo "--- Mason Update All:"
-    nvim --headless -c 'autocmd User MasonUpdateAllComplete quitall' -c 'MasonUpdateAll'
+    # echo
+    # echo "--- Mason:"
+    # nvim --headless -u NONE -c 'lua require("bootstrap").headless_mason()'
+    # echo
+    # echo "--- Mason Update All:"
+    # nvim --headless -c 'autocmd User MasonUpdateAllComplete quitall' -c 'MasonUpdateAll'
     echo
     echo "--- Treesitter:"
     # nvim --headless +TSUpdateSync -c "echo 'done'" +q

@@ -42,10 +42,10 @@ local function packages()
     -- 'neovim/nvim-lspconfig',
 
     -- Mason.nvim
-    'williamboman/mason.nvim',
+    -- 'williamboman/mason.nvim',
     -- 'williamboman/mason-lspconfig.nvim',
-    'WhoIsSethDaniel/mason-tool-installer.nvim',
-    'RubixDev/mason-update-all',
+    -- 'WhoIsSethDaniel/mason-tool-installer.nvim',
+    -- 'RubixDev/mason-update-all',
 
     "smjonas/inc-rename.nvim",
 
@@ -125,7 +125,7 @@ end
 
 return {
   headless_paq = headless_paq,
-  headless_mason = headless_mason,
+  -- headless_mason = headless_mason,
   headless_treesitter = headless_treesitter,
   treesitters = treesitters,
   paq_packages = paq_packages

@@ -466,8 +466,8 @@ require('gitsigns').setup()
 -- =============================================================================
 -- Mason.nvim
 -- =============================================================================
-require('mason').setup()
-require('mason-update-all').setup()
+-- require('mason').setup()
+-- require('mason-update-all').setup()
 
 require("inc_rename").setup()
 
