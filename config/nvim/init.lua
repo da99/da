@@ -615,6 +615,20 @@ vim.lsp.config('html-ls', {
 vim.lsp.enable('html-ls')
 
 -- =============================================================================
+vim.lsp.config('css-ls', {
+  cmd = { 'vscode-css-language-server', '--stdio' },
+  filetypes = { 'css', 'scss', 'less' },
+  init_options = { provideFormatter = true }, -- needed to enable formatting capabilities
+  root_markers = { 'package.json', '.git' },
+  settings = {
+    css = { validate = true },
+    scss = { validate = true },
+    less = { validate = true },
+  },
+})
+vim.lsp.enable('css-ls')
+
+-- =============================================================================
 vim.lsp.config('emmet-language-server', {
   cmd = { 'emmet-language-server', '--stdio' },
   filetypes = {
