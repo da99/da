@@ -30,10 +30,6 @@ case "$*" in
       sudo xbps-install -S lua-language-server
     fi
 
-    if ! which emmet-language-server ; then
-      bun install -g emmet-language-server
-    fi
-
     # if ! which shellcheck ; then
     #   sudo xbps-install -S shellcheck
     # fi
@@ -56,6 +52,9 @@ case "$*" in
       fi
       if ! which sql-language-server ; then
         bun install -g sql-language-server
+      fi
+      if ! which emmet-language-server ; then
+        bun install -g emmet-language-server
       fi
     else
       echo "!!! Install bun and re-run this script" >&2
