@@ -1,0 +1,1 @@
+/home/da/.local/share/nvim/site/pack/paqs/start/pgsql.vim/pgsql.vim

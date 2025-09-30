@@ -863,5 +863,9 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
   pattern = { "*.pgsql" }, -- Replace with the actual path to your file
   callback = function()
     vim.bo.filetype = "pgsql" -- Set the filetype to 'log'
+
+    -- From: https://github.com/LazyVim/LazyVim/discussions/654#discussioncomment-10978917
+    vim.bo.commentstring = "-- %s" -- Set the filetype to 'log'
   end,
 })
+

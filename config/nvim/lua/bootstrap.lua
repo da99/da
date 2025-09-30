@@ -11,7 +11,7 @@ end
 local function packages()
   return {
     "navarasu/onedark.nvim",
-    'lifepillar/pgsql.vim',
+    'devrimgunduz/pgsql.vim',
     "savq/paq-nvim", -- let paq manage itself
     'isobit/vim-caddyfile',
     'gfanto/fzf-lsp.nvim',
