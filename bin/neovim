@@ -44,6 +44,9 @@ case "$*" in
       if ! which neovim-node-host ; then
         bun install -g neovim
       fi
+      if ! which typescript-language-server ; then
+        bun install -g typescript-language-server
+      fi
       if ! which vscode-html-language-server || ! which vscode-json-language-server ; then
         bun install -g vscode-langservers-extracted
       fi

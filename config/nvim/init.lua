@@ -615,6 +615,14 @@ vim.lsp.config('html-ls', {
 vim.lsp.enable('html-ls')
 
 -- =============================================================================
+vim.lsp.config('tsserver', {
+  -- capabilities = capabilities,
+  cmd = { 'typescript-language-server', '--stdio' },
+  filetypes = { 'javascript', 'typescript' },
+  root_markers = { 'package.json', '.git', 'tsconfig.json' },
+})
+vim.lsp.enable('tsserver')
+-- =============================================================================
 vim.lsp.config('css-ls', {
   cmd = { 'vscode-css-language-server', '--stdio' },
   filetypes = { 'css', 'scss', 'less' },
