@@ -1,7 +1,0 @@
-#!/bin/sh
-#exec logger -p daemon.info -t postgres
-
-mkdir -p       /var/log/postgresql
-chown da:da -R /var/log/postgresql
-
-exec chpst -u da svlogd -tt /var/log/postgresql
