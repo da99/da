@@ -8,6 +8,13 @@ local cmd        = vim.cmd
 local env        = vim.env
 local is_256     = env.TERM == "xterm-256color"
 
+vim.opt.tabstop = 2
+vim.opt.softtabstop = 2
+vim.opt.shiftwidth = 2
+vim.opt.expandtab = true
+vim.opt.smartindent = true
+vim.opt.wrap = false
+
 g.sql_type_default = 'pgsql'
 g.indentLine_char      = '┊'
 g.indentLine_setColors = 0
