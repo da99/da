@@ -14,24 +14,18 @@ end # def compile_template
 case cmd
 when '-h', '--help', 'help'
   puts "#{prog} -h|--help|help                --  Show this message."
-  puts "#{prog} .rb|.zsh|.mts|.bash [NEW FILE]"
-  puts "#{prog} [TEMPLATE] [DIR|NEW FILE]     --  Create new file."
+  puts "#{prog} .rb|.zsh|.mts|.bash|.ash [NEW FILE]"
 
 when /(.+) (.+)/
   tfile = Regexp.last_match(1)
-  dest = Regexp.last_match(2)
+  new_file = Regexp.last_match(2)
   tmpl_file = case tfile
-              when /^\.(rb|zsh|bash|mts)$/
+              when /^\.(rb|zsh|bash|mts|ash)$/
                 File.join da_src, 'templates', "script.#{Regexp.last_match(1)}"
               else
-                tfile
+                warn "--- Template not found for: #{tfile}"
+                exit 0
               end # case
-
-  new_file = if File.directory?(dest)
-               File.join(dest, File.basename(tmpl_file))
-             else
-               dest
-             end
 
   if File.exist?(new_file)
     warn "--- Already exists: #{new_file}"
