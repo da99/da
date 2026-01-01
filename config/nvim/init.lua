@@ -197,7 +197,7 @@ set_keymap('n', '<Leader>op', '<CMD>:call ToggleQuickfixList()<CR>', {})
 set_keymap('n', '<Leader>ee', '<CMD>Neotree filesystem reveal left<CR>', {})
 
 set_keymap('n', '<Leader>bb', '<CMD>bnext<CR>', {})
-set_keymap('n', '<Leader>bd', ':bdelete<CR>', {})
+-- set_keymap('n', '<Leader>bd', ':bdelete<CR>', {})
 set_keymap('n', '<Leader>bv', '<CMD>bprevious<CR>', {})
 -- set_keymap('n', '<Leader>a', ':Startify<CR>', {})
 set_keymap('n', '<Leader>000', ':qa<CR>', {})
