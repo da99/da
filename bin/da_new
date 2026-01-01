@@ -20,7 +20,7 @@ when /(.+) (.+)/
   tfile = Regexp.last_match(1)
   new_file = Regexp.last_match(2)
   tmpl_file = case tfile
-              when /^\.(rb|zsh|bash|mts|ash)$/
+              when /^\.(rb|zsh|bash|mts|ash|sh)$/
                 File.join da_src, 'templates', "script.#{Regexp.last_match(1)}"
               else
                 warn "--- Template not found for: #{tfile}"
