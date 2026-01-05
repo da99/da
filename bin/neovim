@@ -14,7 +14,7 @@ case "$*" in
 
   "setup base")
     if which xbps-install ; then
-      void_linux install packages devel
+      void_linux install packages devel shellcheck
     fi
 
     if which gem ; then
