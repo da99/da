@@ -10,13 +10,13 @@
     "build": "dev/build"
   },
   "dependencies": {
-    "@cloudflare/workers-types": "*",
-    "@cloudflare/wrangler": "*",
-    "@types/bun": "*"
+    "@cloudflare/workers-types": "latest",
+    "@cloudflare/wrangler": "latest",
+    "@types/bun": "latest"
   },
   "devDependencies": {
-    "@types/node": "*",
-    "jsdom": "*"
+    "@types/node": "latest",
+    "jsdom": "latest"
   },
   "author": "da99",
   "license": "MIT",
