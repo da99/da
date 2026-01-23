@@ -879,6 +879,7 @@ vim.filetype.add({
     ['.pgsql'] = 'pgsql',
   },
 })
+
 vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
   pattern = { "*.pgsql" }, -- Replace with the actual path to your file
   callback = function()
@@ -886,6 +887,13 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
 
     -- From: https://github.com/LazyVim/LazyVim/discussions/654#discussioncomment-10978917
     vim.bo.commentstring = "-- %s" -- Set the filetype to 'log'
+  end,
+})
+
+vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
+  pattern = { "*.conf" }, -- Replace with the actual path to your file
+  callback = function()
+    vim.opt.expandtab = false
   end,
 })
 
