@@ -891,6 +891,13 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
 })
 
 vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
+  pattern = { "*.openrc" }, -- Replace with the actual path to your file
+  callback = function()
+    vim.bo.filetype = "sh" -- Set the filetype to 'log'
+  end,
+})
+
+vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
   pattern = { "*.conf" }, -- Replace with the actual path to your file
   callback = function()
     vim.opt.expandtab = false
