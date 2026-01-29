@@ -890,6 +890,15 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
   end,
 })
 
+-- Postfix main.cd files:
+vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
+  pattern = { "main.cf" }, -- Replace with the actual path to your file
+  callback = function()
+    -- From: https://github.com/LazyVim/LazyVim/discussions/654#discussioncomment-10978917
+    vim.bo.commentstring = "# %s" -- Set the filetype to 'log'
+  end,
+})
+
 vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
   pattern = { "*.openrc" }, -- Replace with the actual path to your file
   callback = function()
