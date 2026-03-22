@@ -426,9 +426,16 @@ require('mini.completion').setup({
 cmd(' autocmd! MiniCompletion InsertCharPre * ')
 -- =============================================================================
 
-cmd(' highlight MiniStatuslineFilename                guifg=#8EBD6B')
-cmd(' highlight MiniTablineCurrent guifg=#8EBD6B               ')
-cmd(' highlight MiniTablineHidden                guifg=#545452')
+-- For dark themes:
+-- cmd(' highlight MiniStatuslineFilename                guifg=#8EBD6B')
+-- cmd(' highlight MiniTablineCurrent guifg=#8EBD6B               ')
+-- cmd(' highlight MiniTablineHidden                guifg=#545452')
+
+-- For Light themes:
+-- cmd(' highlight MiniStatuslineFilename                guifg=#8EBD6B')
+cmd(' highlight MiniTablineCurrent guifg=#000000               ')
+-- cmd(' highlight MiniTablineHidden                guifg=#545452')
+
 -- cmd(' highlight MiniTablineVisible                guifg=#545452')
 -- cmd(' highlight MiniTablineModifiedCurrent guibg=#e8ad00 guifg=#000000 ')
 -- cmd(' highlight MiniTablineModifiedVisible guibg=#7f5e36 guifg=#000000 ')
