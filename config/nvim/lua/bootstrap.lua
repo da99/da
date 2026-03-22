@@ -10,6 +10,7 @@ end
 
 local function packages()
   return {
+    "projekt0n/github-nvim-theme",
     "navarasu/onedark.nvim",
     'devrimgunduz/pgsql.vim',
     "savq/paq-nvim", -- let paq manage itself

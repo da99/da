@@ -56,14 +56,15 @@ if is_256 then
       -- " colorscheme onedark
       -- " 
     vim.cmd([[
-      set background=dark
+      set background=light
       let g:oceanic_next_terminal_bold = 1
       let g:oceanic_next_terminal_italic = 1
     ]])
-    require('onedark').setup {
-      style = 'darker'
-    }
-    require('onedark').load()
+    vim.cmd.colorscheme("github_light")
+    -- require('onedark').setup {
+    --   style = 'darker'
+    -- }
+    -- require('onedark').load()
   end
   -- cmd([[
   --   hi Search guifg=#FFFFFF
