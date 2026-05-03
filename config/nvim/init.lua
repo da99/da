@@ -56,11 +56,11 @@ if is_256 then
       -- " colorscheme onedark
       -- " 
     vim.cmd([[
-      set background=light
+      set background=dark
       let g:oceanic_next_terminal_bold = 1
       let g:oceanic_next_terminal_italic = 1
     ]])
-    vim.cmd.colorscheme("github_light")
+    vim.cmd.colorscheme("github_dark")
     -- require('onedark').setup {
     --   style = 'darker'
     -- }
